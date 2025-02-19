@@ -53,7 +53,7 @@ const Login = ({navigation}) => {
           onPress={() => {navigation.navigate('Forget_Password')}}
           style={{alignSelf: 'flex-end',marginTop: -15,marginBottom:40}}
         />
-        <CustomButton title="Login" onPress={() => {}} />
+        <CustomButton title="Login" onPress={() => {navigation.navigate('MainScreen')}} hoverable={true} />
       </View>
     </View>
   );

@@ -5,6 +5,7 @@ import SplashScreen_2 from '../screens/splashScreen/SplashScreen_2';
 import SplashScreen_3 from '../screens/splashScreen/SplashScreen_3';
 import Login from '../screens/LoginScreens/Login';
 import Forget_Password from '../screens/LoginScreens/Forget_Password';
+import MainScreen from '../screens/MainScreen';
 
 const Stack = createStackNavigator();
 
@@ -18,6 +19,7 @@ const StackNavigator = () => {
       <Stack.Screen name="SplashScreen_3" component={SplashScreen_3} />
       <Stack.Screen name="Login" component={Login} />
       <Stack.Screen name="Forget_Password" component={Forget_Password} />
+      <Stack.Screen name="MainScreen" component={MainScreen} />
     </Stack.Navigator>
   );
 };

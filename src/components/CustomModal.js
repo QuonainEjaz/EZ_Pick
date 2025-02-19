@@ -26,15 +26,17 @@ const CustomModal = ({ visible, onClose,label, message, buttonText }) => {
 const styles = StyleSheet.create({
   overlay: {
     flex: 1,
-    justifyContent: 'center',
+    justifyContent: 'flex-end',
     alignItems: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.5)'
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    width: '100%',
   },
   modalContainer: {
-    width: '80%',
+    width: '100%',
     backgroundColor: '#fff',
-    padding: 20,
-    borderRadius: 10,
+    paddingVertical: 40,
+    paddingHorizontal: 30,
+    borderRadius: 20,
     alignItems: 'center'
   },
   image: {
@@ -43,20 +45,20 @@ const styles = StyleSheet.create({
     marginBottom: 20
   },
   title: {
-    fontSize: 14,
+    fontSize: 16,
     fontWeight: 'bold',
     marginBottom: 5
   },
   message: {
-    fontSize: 12,
+    fontSize: 14,
     textAlign: 'center',
-    marginBottom: 15
+    marginBottom: 20
   },
   button: {
     backgroundColor: '#F8AC16',
-    paddingVertical: 10,
+    paddingVertical: 18,
     paddingHorizontal: 20,
-    borderRadius: 5,
+    borderRadius: 5, 
     alignItems: 'center',
     width:'100%',
     marginBottom: 10
