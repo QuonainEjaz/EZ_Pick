@@ -1,0 +1,19 @@
+0 verbose cli C:\nvm4w\nodejs\node.exe C:\nvm4w\nodejs\node_modules\npm\bin\npm-cli.js
+1 info using npm@11.1.0
+2 info using node@v20.17.0
+3 silly config load:file:C:\Users\Administrator\AppData\Local\nvm\v20.17.0\node_modules\npm\npmrc
+4 silly config load:file:E:\QuonainEjaz\React_Native\EZpick\.npmrc
+5 silly config load:file:C:\Users\Administrator\.npmrc
+6 silly config load:file:C:\nvm4w\nodejs\etc\npmrc
+7 verbose title npm start
+8 verbose argv "start" "-cache" "clean"
+9 verbose logfile logs-max:10 dir:E:\QuonainEjaz\React_Native\EZpick\android\clean\_logs\2025-02-18T12_09_09_863Z-
+10 verbose logfile E:\QuonainEjaz\React_Native\EZpick\android\clean\_logs\2025-02-18T12_09_09_863Z-debug-0.log
+11 silly logfile done cleaning log files
+12 http fetch GET 200 https://registry.npmjs.org/npm 238ms
+13 verbose cwd E:\QuonainEjaz\React_Native\EZpick\android
+14 verbose os Windows_NT 10.0.22621
+15 verbose node v20.17.0
+16 verbose npm  v11.1.0
+17 verbose exit 0
+18 info ok
