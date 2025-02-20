@@ -1,22 +1,19 @@
 import React from 'react';
-import { View, Text, Image, TouchableOpacity, StyleSheet } from 'react-native';
+import {View, Text, Image, StyleSheet} from 'react-native';
+import Heading from '../Heading';
+import CustomModal from '../CustomModal';
+import HoverableButton from '../HoverableButton';
 
-const StudentCard = ({ student = {
-  name: "Jabir bin Hayan Albarsi",
-  grade: "Grade 7th",
-  pickupTime: "12:30 PM",
-  image: "https://dashboard.codeparrot.ai/api/image/Z7W8qDO_YEiK217K/student-4.png",
-  outOfRange: true,
-  timer: {
-    hours: "01",
-    minutes: "00",
-    seconds: "00"
-  }
-}}) => {
+const StudentCard = ({student}) => {
+  const [modalVisible, setModalVisible] = React.useState(false);
   return (
     <View style={styles.card}>
       <View style={styles.header}>
-        <Text style={styles.headerText}>You are out of Range:</Text>
+        <Heading
+          title="You are out of Range:"
+          textstyle={styles.headerText}
+          boxStyle={styles.headerBox}
+        />
         <View style={styles.timerContainer}>
           <View style={styles.timeUnit}>
             <Text style={styles.timerText}>{student.timer.hours}</Text>
@@ -36,13 +33,17 @@ const StudentCard = ({ student = {
       </View>
 
       <View style={styles.infoContainer}>
-        <Image 
-          source={{ uri: student.image }} 
+        <Image
+          source={{uri: student.image}}
           style={styles.image}
           resizeMode="cover"
         />
         <View style={styles.detailsContainer}>
-          <Text style={styles.name}>{student.name}</Text>
+          <Heading
+            title={student.name}
+            textstyle={styles.name}
+            boxStyle={styles.nameBox}
+          />
           <Text style={styles.grade}>{student.grade}</Text>
           <View style={styles.pickupTimeContainer}>
             <Text style={styles.pickupTimeLabel}>Today's Pick up time:</Text>
@@ -51,14 +52,66 @@ const StudentCard = ({ student = {
         </View>
       </View>
 
-      <TouchableOpacity 
-        style={[styles.button, student.outOfRange && styles.buttonDisabled]}
-        disabled={student.outOfRange}
-      >
-        <Text style={[styles.buttonText, student.outOfRange && styles.buttonTextDisabled]}>
-          Pickup Request
-        </Text>
-      </TouchableOpacity>
+      <HoverableButton
+        title="Pickup Request"
+        onPress={() => {
+          setModalVisible(true);
+        }}
+        touchStyle={[
+          styles.button,
+          student.outOfRange && styles.buttonDisabled,
+        ]}
+        textStyle={[
+          styles.buttonText,
+          student.outOfRange && styles.buttonTextDisabled,
+        ]}
+        hoverable={true}
+      />
+      {/* <CustomModal
+        visible={modalVisible}
+        onClose={() => setModalVisible(false)}
+        title="Enable Location"
+        description="By turning on location, will allow us to accurately track your child's pickup location and notify you when they are on their way to be picked up or have been dropped off. This will help ensure a safe and efficient pickup process.  "
+        // imageSource={require('../assets/location-icon.png')}
+        primaryButtonText="Go to Settings"
+        primaryButtonAction={() => console.log('Settings Pressed')}
+      /> */}
+      {/* <CustomModal
+        visible={modalVisible}
+        onClose={() => setModalVisible(false)}
+        title="Jabir bin Hayan Albarsi"
+        description="Your request for pick-up of your child has been accepted. Please wait patiently. If they're late, feel free to submit another request."
+        imageSource={require('../assets/profile-image.png')}
+        primaryButtonText="Ok, Got it"
+        primaryButtonAction={() => console.log('Acknowledged')}
+      /> */}
+      <CustomModal
+        visible={modalVisible}
+        onClose={() => setModalVisible(false)}
+        title="Confirmation!"
+        description="Have you picked up your child from school?"
+        primaryButtonText="Yes, Confirm"
+        primaryButtonAction={() => console.log('Confirmed')}
+        secondaryButtonText="No, I Don’t"
+        secondaryButtonAction={() => console.log('Not Confirmed')}
+        style={{
+          title: {marginBottom: 5, },
+          description: {marginBottom: 20},
+          titleText: {fontWeight: '700'},
+          descriptionText: {fontSize: 14, marginBottom: 10},
+        }}
+      />
+      {/* <CustomModal
+        visible={modalVisible}
+        onClose={() => setModalVisible(false)}
+        title="Khalid al-Jameel"
+        description="Are you sure you want to remove authorized pick-up?"
+        // imageSource={require('../assets/profile-image.png')}
+        primaryButtonText="Yes, Sure"
+        primaryButtonAction={() => console.log('Removed Authorized Pick-Up')}
+        secondaryButtonText="No, I Don’t"
+        secondaryButtonAction={() => console.log('Cancelled Removal')}
+      /> */}
     </View>
   );
 };
@@ -71,7 +124,7 @@ const styles = StyleSheet.create({
     minWidth: 300,
     gap: 12,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
+    shadowOffset: {width: 0, height: 2},
     shadowOpacity: 0.1,
     shadowRadius: 8,
     elevation: 1,
@@ -85,6 +138,9 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     borderWidth: 1,
     borderColor: '#e3e3e3',
+  },
+  headerBox: {
+    flex: 1,
   },
   headerText: {
     fontWeight: '600',
@@ -130,6 +186,10 @@ const styles = StyleSheet.create({
   detailsContainer: {
     flex: 1,
     gap: 10,
+  },
+  nameBox: {
+    flex: 1,
+    alignItems: 'flex-start',
   },
   name: {
     fontWeight: '700',
@@ -178,4 +238,3 @@ const styles = StyleSheet.create({
 });
 
 export default StudentCard;
-

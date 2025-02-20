@@ -5,7 +5,7 @@ import Heading from '../../components/Heading';
 import SubHeading from '../../components/SubHeading';
 import InputField from '../../components/InputFeild';
 import CustomButton from '../../components/CustomButton';
-import CustomModal from '../../components/CustomModal';
+import CustomAlert from '../../components/CustomAlert';
 
 const Forget_Password = ({navigation}) => {
       const {width, height} = Dimensions.get('window');
@@ -36,7 +36,7 @@ const Forget_Password = ({navigation}) => {
         <View style={{height: height*0.4}}/>
         <CustomButton title="Send" onPress={() => {setModalVisible(true)}} />
       </View>
-      <CustomModal 
+      <CustomAlert 
         visible={modalVisible} 
         onClose={() => setModalVisible(false)} 
         label={'Email Send Successfully!'}

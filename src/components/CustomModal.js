@@ -1,22 +1,68 @@
-import React, { useState } from 'react';
-import { Modal, View, Text, TouchableOpacity, Image, StyleSheet } from 'react-native';
+import React from 'react';
+import {Modal, View, Text, Image, StyleSheet} from 'react-native';
+import CustomButton from './CustomButton'; // Importing CustomButton
+import Heading from './Heading';
+import SubHeading from './SubHeading';
 
-const CustomModal = ({ visible, onClose,label, message, buttonText }) => {
+const CustomModal = ({
+  visible,
+  onClose,
+  title,
+  description,
+  imageSource,
+  primaryButtonText,
+  primaryButtonAction,
+  secondaryButtonText,
+  secondaryButtonAction,
+  style,
+}) => {
   return (
-    <Modal
-      animationType="fade"
-      transparent={true}
-      visible={visible}
-      onRequestClose={onClose}
-    >
+    <Modal transparent visible={visible} animationType="slide">
       <View style={styles.overlay}>
         <View style={styles.modalContainer}>
-          <Image source={require('../assets/pics/EmailPic.png')} style={styles.image} />
-          <Text style={styles.title}>{label}</Text>
-          <Text style={styles.message}>{message}</Text>
-          <TouchableOpacity style={styles.button} onPress={onClose}>
-            <Text style={styles.buttonText}>{buttonText}</Text>
-          </TouchableOpacity>
+          {imageSource && <Image source={imageSource} style={styles.image} />}
+
+          {title && (
+            <Heading
+              title={title}
+              textstyle={[style.titleText, styles.title]}
+              boxStyle={[style.title, {alignItems: 'flex-start'}]}
+            />
+          )}
+
+          {description && (
+            <SubHeading
+              text={description}
+              style={[style.descriptionText, styles.description]}
+              boxStyle={[style.description]}
+            />
+          )}
+
+          <View style={styles.buttonContainer}>
+            {primaryButtonText && (
+              <CustomButton
+                title={primaryButtonText}
+                onPress={() => {
+                  primaryButtonAction && primaryButtonAction();
+                  onClose();
+                }}
+                touchStyle={styles.primaryButton}
+                textStyle={styles.primaryButtonText}
+              />
+            )}
+
+            {secondaryButtonText && (
+              <CustomButton
+                title={secondaryButtonText}
+                onPress={() => {
+                  secondaryButtonAction && secondaryButtonAction();
+                  onClose();
+                }}
+                touchStyle={styles.secondaryButton}
+                textStyle={styles.secondaryButtonText}
+              />
+            )}
+          </View>
         </View>
       </View>
     </Modal>
@@ -36,39 +82,60 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     paddingVertical: 40,
     paddingHorizontal: 30,
-    borderRadius: 20,
-    alignItems: 'center'
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
   },
   image: {
-    width: 70,
-    height: 70,
-    marginBottom: 20
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    marginBottom: 10,
   },
   title: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    marginBottom: 5
+    fontFamily: 'outfit',
+    // fontSize: 20,
+    color: '#212529',
+    lineHeight: 25.2,
   },
-  message: {
-    fontSize: 14,
-    textAlign: 'center',
-    marginBottom: 20
+  description: {
+    fontFamily: 'outfit',
+    // fontSize: 14,
+    fontWeight: '400',
+    color: '#6C757D',
+    lineHeight: 24,
   },
-  button: {
+  buttonContainer: {
+    width: '100%',
+    marginTop: 10,
+  },
+  primaryButton: {
+    width: '100%',
     backgroundColor: '#F8AC16',
-    paddingVertical: 18,
-    paddingHorizontal: 20,
-    borderRadius: 5, 
+    paddingVertical: 10,
+    borderRadius: 8,
     alignItems: 'center',
-    width:'100%',
-    marginBottom: 10
   },
-  buttonText: {
+  primaryButtonText: {
+    fontFamily: 'outfit',
     color: '#FFFFFF',
-    fontSize: 14,
+    fontSize: 16,
+    fontWeight: '500',
+    lineHeight: 24,
+  },
+  secondaryButton: {
+    width: '100%',
+    marginTop: 10,
+    borderWidth: 1,
+    borderColor: '#F8AC16',
+    paddingVertical: 10,
+    borderRadius: 8,
+    alignItems: 'center',
+    backgroundColor: '#FFFFFF',
+  },
+  secondaryButtonText: {
+    color: '#F8AC16',
     fontWeight: 'bold',
-    textAlign: 'center',
-  }
+  },
 });
 
 export default CustomModal;

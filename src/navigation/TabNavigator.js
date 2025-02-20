@@ -1,141 +1,115 @@
 import React from 'react';
-import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
-import {View, Image, Text, TouchableOpacity} from 'react-native';
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { View, Text } from 'react-native';
+import CustomHeader from '../components/Header';
 import HomeScreen from '../screens/Home/HomeScreen';
-import {HomeIcon, FocusedHomeIcon} from '../assets/Icons/svg/HomeIcons';
-import Login from '../screens/LoginScreens/Login';
-import Forget_Password from '../screens/LoginScreens/Forget_Password';
-// import NotificationScreen from '../screens/Notification/NotificationScreen';
-// import ProfileScreen from '../screens/Profile/ProfileScreen';
+import History from '../screens/History/History';
+import Notification from '../screens/Notifications/Notification';
+import Profile from '../screens/Profile/Profile';
+import AddAuthorization from '../screens/AddAuthorization/AddAuthorization';
+import { HomeIcon, FocusedHomeIcon } from '../assets/Icons/svg/HomeIcons';
+import { HistoryIcon, FocusedHistoryIcon } from '../assets/Icons/svg/HistoryIcons';
+import { AddIcon, FocusedAddIcon } from '../assets/Icons/svg/AddIcons';
+import { NotificationIcon, FocusedNotificationIcon } from '../assets/Icons/svg/NotificationIcons';
+import { ProfileIcon, FocusedProfileIcon } from '../assets/Icons/svg/ProfileIcons';
 
 const Tab = createBottomTabNavigator();
 
-const TabIcon = ({label, focused}) => {
+const TabIcon = ({ focused, FocusedIcon, Icon }) => {
   return (
-    <View
-      style={{
-        alignItems: 'center',
-        justifyContent: 'center',
-        backgroundColor: 'lightgrey',
-      }}>
-      <View
-        style={{
-          alignItems: 'center',
-          justifyContent: 'center',
-          backgroundColor: '#FEF6E6',
-          marginBottom: 5,
-          height: 30,
-          borderRadius: 15,
-        }}>
-        {focused ? (
-          <FocusedHomeIcon width={32} height={32} />
-        ) : (
-          <HomeIcon width={24} height={24} />
-        )}
-      </View>
-      <Text
-        style={{
-          color: focused ? '#FFA500' : '#808080',
-          fontSize: 12,
-          width: 30,
-        }}>
-        {label}
-      </Text>
-    </View>
-  );
-};
-
-const CustomHeader = () => {
-  return (
-    <View
-      style={{
-        flexDirection: 'row',
-        justifyContent: 'center',
-        width: '100%',
-        height: 70,
-        backgroundColor: '#FFFFFF',
-      }}>
-      <View
-        style={{
-          justifyContent: 'center',
-          width: '90%',
-        }}>
-        <TouchableOpacity
-          style={{
-            width: '38%',
-            height: '60%',
-            justifyContent: 'center',
-          }}>
-          <Image
-            resizeMode="contain"
-            source={require('../assets/Logo/whetstonezLogo.png')}
-            style={{width: '100%'}}
-          />
-        </TouchableOpacity>
-      </View>
+    <View style={{ marginTop: 15 }}>
+      {focused ? FocusedIcon : Icon}
     </View>
   );
 };
 
 const TabNavigator = () => {
-  const [headerShow, setHeaderShow] = React.useState(true);
   return (
     <Tab.Navigator
       initialRouteName="Home"
-      screenOptions={{
-        headerShown: headerShow,
-        header: () => <CustomHeader />,
-        tabBarShowLabel: false,
+      screenOptions={({ route }) => ({
+        header: () => {
+          return <CustomHeader screen={route.name} />;
+        },
+        tabBarShowLabel: true,
+        tabBarActiveTintColor: '#F8AC16',
+        tabBarInactiveTintColor: '#6C757D',
+        tabBarLabelStyle: { fontSize: 12, fontWeight: '500', marginTop: 10 },
+        tabBarIndicatorStyle: { backgroundColor: '#F8AC16' },
+        tabBarActiveIconStyle: { opacity: 1 },
+        tabBarUnselectedIconStyle: { opacity: 0.6 },
         tabBarStyle: {
-          height: 130,
-          backgroundColor: '#fff',
+          height: 80,
           borderTopLeftRadius: 20,
           borderTopRightRadius: 20,
         },
-      }}>
+      })}
+    >
       <Tab.Screen
         name="Home"
         component={HomeScreen}
         options={{
-          tabBarIcon: ({focused}) => <TabIcon label="Home" focused={focused} />,
-        }}
-      />
-      <Tab.Screen
-        name="Login"
-        component={Login}
-        options={{
-          tabBarIcon: ({focused}) => (
-            <TabIcon label="Login" focused={focused} />
-          ),
-        }}
-      />
-      {/* <Tab.Screen
-        name="Forget_Password"
-        component={Forget_Password}
-        options={{
-          tabBarIcon: ({focused}) => (
-            <TabIcon label="Forget_Password" focused={focused} />
-          ),
-        }}
-      /> */}
-      {/* <Tab.Screen
-        name="Forget_Password"
-        component={Forget_Password}
-        options={{
-          tabBarIcon: ({focused}) => (
-            <TabIcon label="Forget_Password" focused={focused} />
+          tabBarIcon: ({ focused }) => (
+            <TabIcon
+              focused={focused}
+              FocusedIcon={<FocusedHomeIcon />}
+              Icon={<HomeIcon />}
+            />
           ),
         }}
       />
       <Tab.Screen
-        name="Forget_Password"
-        component={Forget_Password}
+        name="History"
+        component={History}
         options={{
-          tabBarIcon: ({focused}) => (
-            <TabIcon label="Forget_Password" focused={focused} />
+          tabBarIcon: ({ focused }) => (
+            <TabIcon
+              focused={focused}
+              FocusedIcon={<FocusedHistoryIcon />}
+              Icon={<HistoryIcon />}
+            />
           ),
         }}
-      /> */}
+      />
+      <Tab.Screen
+        name="Add"
+        component={AddAuthorization}
+        options={{
+          tabBarIcon: ({ focused }) => (
+            <TabIcon
+              focused={focused}
+              FocusedIcon={<FocusedAddIcon />}
+              Icon={<AddIcon />}
+            />
+          ),
+        }}
+      />
+      <Tab.Screen
+        name="Notification"
+        component={Notification}
+        options={{
+          tabBarIcon: ({ focused }) => (
+            <TabIcon
+              focused={focused}
+              FocusedIcon={<FocusedNotificationIcon />}
+              Icon={<NotificationIcon />}
+            />
+          ),
+        }}
+      />
+      <Tab.Screen
+        name="Profile"
+        component={Profile}
+        options={{
+          tabBarIcon: ({ focused }) => (
+            <TabIcon
+              focused={focused}
+              FocusedIcon={<FocusedProfileIcon />}
+              Icon={<ProfileIcon />}
+            />
+          ),
+        }}
+      />
     </Tab.Navigator>
   );
 };

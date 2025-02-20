@@ -14,13 +14,11 @@ const Heading = ({ title, textstyle, boxStyle }) => {
 const styles = StyleSheet.create({
   container: {
     alignItems: 'center',
-    justifyContent: 'center',
   },
   heading: {
     fontSize: 24,
     fontWeight: 'bold',
     color: '#333',
-    textAlign: 'center',
   },
 });
 

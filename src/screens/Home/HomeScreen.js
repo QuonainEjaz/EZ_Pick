@@ -1,70 +1,76 @@
-import React from 'react';
+import React, {useEffect} from 'react';
 import {View, StyleSheet, FlatList} from 'react-native';
+import {useDispatch, useSelector} from 'react-redux'; 
+import { setStudents } from '../../store/App/action';
 import StudentCard from '../../components/HomeScreenComponents/StudentCard';
 
 const HomeScreen = () => {
-  const students = [
-    {
-      id: '1',
-      name: 'Jabir bin Hayan Albarsi',
-      grade: 'Grade 7th',
-      pickupTime: '12:30 PM',
-      image:
-        'https://dashboard.codeparrot.ai/api/image/Z7W8qDO_YEiK217K/student-4.png',
-      outOfRange: true,
-      timer: {
-        hours: '01',
-        minutes: '00',
-        seconds: '00',
+  const dispatch = useDispatch();
+  const students = useSelector(state => state.students.students);
+  useEffect(() => {
+    const staticStudents = [
+      {
+        id: '1',
+        name: 'Jabir bin Hayan Albarsi',
+        grade: 'Grade 7th',
+        pickupTime: '12:30 PM',
+        image:
+          'https://dashboard.codeparrot.ai/api/image/Z7W8qDO_YEiK217K/student-4.png',
+        outOfRange: true,
+        timer: {
+          hours: '01',
+          minutes: '00',
+          seconds: '00',
+        },
       },
-    },
-    {
-      id: '2',
-      name: 'Umar bin Alkufi',
-      grade: 'Grade 7th',
-      pickupTime: '12:30 PM',
-      image:
-        'https://dashboard.codeparrot.ai/api/image/Z7W8qDO_YEiK217K/student-5.png',
-      outOfRange: true,
-      timer: {
-        hours: '01',
-        minutes: '00',
-        seconds: '00',
+      {
+        id: '2',
+        name: 'Umar bin Alkufi',
+        grade: 'Grade 7th',
+        pickupTime: '12:30 PM',
+        image:
+          'https://dashboard.codeparrot.ai/api/image/Z7W8qDO_YEiK217K/student-5.png',
+        outOfRange: true,
+        timer: {
+          hours: '01',
+          minutes: '00',
+          seconds: '00',
+        },
       },
-    },
-    {
-      id: '3',
-      name: 'Ali bin Abi Talib Albarsi',
-      grade: 'Grade 7th',
-      pickupTime: '12:30 PM',
-      image:
-        'https://dashboard.codeparrot.ai/api/image/Z7W8qDO_YEiK217K/student-6.png',
-      outOfRange: true,
-      timer: {
-        hours: '01',
-        minutes: '00',
-        seconds: '00',
+      {
+        id: '3',
+        name: 'Ali bin Abi Talib Albarsi',
+        grade: 'Grade 7th',
+        pickupTime: '12:30 PM',
+        image:
+          'https://dashboard.codeparrot.ai/api/image/Z7W8qDO_YEiK217K/student-6.png',
+        outOfRange: true,
+        timer: {
+          hours: '01',
+          minutes: '00',
+          seconds: '00',
+        },
       },
-    },
-  ];
-
+    ];
+    dispatch(setStudents(staticStudents));
+  }, [dispatch]);
   return (
     <View style={styles.container}>
-    <View style={styles.cardsContainer}>
-      <FlatList
-      showsVerticalScrollIndicator={false}
-        data={students}
-        renderItem={({item}) => (
-          <StudentCard
-            key={item.id}
-            student={item}
-            style={styles.studentCard}
-          />
-        )}
-        keyExtractor={item => item.id}
-      />
+      <View style={styles.cardsContainer}>
+        <FlatList
+          showsVerticalScrollIndicator={false}
+          data={students}
+          renderItem={({item}) => (
+            <StudentCard
+              key={item.id}
+              student={item}
+              style={styles.studentCard}
+            />
+          )}
+          keyExtractor={item => item.id}
+        />
+      </View>
     </View>
-  </View>
   );
 };
 

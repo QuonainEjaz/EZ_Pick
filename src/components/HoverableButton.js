@@ -1,13 +1,8 @@
-import React, {useState} from 'react';
-import {
-  TouchableOpacity,
-  Text,
-  StyleSheet,
-  useWindowDimensions,
-} from 'react-native';
+import React, { useState } from 'react';
+import { TouchableOpacity, Text, StyleSheet, useWindowDimensions } from 'react-native';
 
-const CustomButton = ({title, onPress, touchStyle, textStyle, hoverable}) => {
-  const {width, height} = useWindowDimensions();
+const HoverableButton = ({ title, onPress, touchStyle, textStyle, hoverable }) => {
+  const { width } = useWindowDimensions();
   const buttonPadding = width * 0.045;
   const fontSize = width * 0.04;
   const [isHovered, setIsHovered] = useState(false);
@@ -16,20 +11,22 @@ const CustomButton = ({title, onPress, touchStyle, textStyle, hoverable}) => {
     <TouchableOpacity
       style={[
         styles.button,
-        {paddingVertical: buttonPadding},
+        { paddingVertical: buttonPadding },
         touchStyle,
         hoverable && isHovered && styles.hoveredButton,
       ]}
       onPress={onPress}
       onMouseEnter={() => hoverable && setIsHovered(true)}
-      onMouseLeave={() => hoverable && setIsHovered(false)}>
+      onMouseLeave={() => hoverable && setIsHovered(false)}
+    >
       <Text
         style={[
-          styles.btnText,
-          {fontSize},
+          styles.buttonText,
+          { fontSize },
           textStyle,
           hoverable && isHovered && styles.hoveredText,
-        ]}>
+        ]}
+      >
         {title}
       </Text>
     </TouchableOpacity>
@@ -38,7 +35,7 @@ const CustomButton = ({title, onPress, touchStyle, textStyle, hoverable}) => {
 
 const styles = StyleSheet.create({
   button: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: '#fff',
     borderColor: '#F8AC16',
     borderWidth: 2,
     paddingHorizontal: 10,
@@ -46,7 +43,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  btnText: {
+  buttonText: {
     fontWeight: '600',
     color: '#F8AC16',
   },
@@ -58,4 +55,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default CustomButton;
+export default HoverableButton;
