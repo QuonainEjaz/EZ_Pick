@@ -5,8 +5,9 @@ import CustomButton from '../../components/CustomButton';
 import UserInfoCard from '../../components/HistoryScreenComponents/UserInfoCard';
 import { useDispatch, useSelector } from 'react-redux';
 import { setStudents } from '../../store/App/action'; 
+import PickupDetails from './PickupDetails';
 
-const HistoryScreen = () => {
+const HistoryScreen = ({ navigation}) => {
   const dispatch = useDispatch();
   const students = useSelector((state) => state.students.students);  // Select students from state
   const [selectedFilter, setSelectedFilter] = useState('Last Week');
@@ -57,6 +58,7 @@ const HistoryScreen = () => {
             dateTime={item.dateTime}
             status={item.status}
             imageSource={require('../../assets/pics/EmailPic.png')} 
+            onPress={() => navigation.navigate('PickupDetails', { student: item })}
           />
         )}
         contentContainerStyle={styles.listContainer}

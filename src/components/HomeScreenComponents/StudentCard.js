@@ -81,11 +81,11 @@ const StudentCard = ({student}) => {
         onClose={() => setModalVisible(false)}
         title="Jabir bin Hayan Albarsi"
         description="Your request for pick-up of your child has been accepted. Please wait patiently. If they're late, feel free to submit another request."
-        imageSource={require('../assets/profile-image.png')}
+        // imageSource={require('../assets/profile-image.png')}
         primaryButtonText="Ok, Got it"
         primaryButtonAction={() => console.log('Acknowledged')}
       /> */}
-      <CustomModal
+      {/* <CustomModal
         visible={modalVisible}
         onClose={() => setModalVisible(false)}
         title="Confirmation!"
@@ -100,17 +100,6 @@ const StudentCard = ({student}) => {
           titleText: {fontWeight: '700'},
           descriptionText: {fontSize: 14, marginBottom: 10},
         }}
-      />
-      {/* <CustomModal
-        visible={modalVisible}
-        onClose={() => setModalVisible(false)}
-        title="Khalid al-Jameel"
-        description="Are you sure you want to remove authorized pick-up?"
-        // imageSource={require('../assets/profile-image.png')}
-        primaryButtonText="Yes, Sure"
-        primaryButtonAction={() => console.log('Removed Authorized Pick-Up')}
-        secondaryButtonText="No, I Don’t"
-        secondaryButtonAction={() => console.log('Cancelled Removal')}
       /> */}
     </View>
   );

@@ -1,13 +1,11 @@
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
-import TopBar from './TopBar';
 import UserInfoHeader from './UserInfoHeader';
 import DetailsContainer from './DetailsContainer';
 
 const PickupDetails = () => {
   return (
     <View style={styles.container}>
-      <TopBar />
       <View style={styles.contentContainer}>
         <UserInfoHeader />
         <DetailsContainer />

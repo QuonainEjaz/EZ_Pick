@@ -25,16 +25,16 @@ const CustomModal = ({
           {title && (
             <Heading
               title={title}
-              textstyle={[style.titleText, styles.title]}
-              boxStyle={[style.title, {alignItems: 'flex-start'}]}
+              textstyle={[style?.titleText, styles.title]}
+              boxStyle={[style?.title, {alignItems: 'flex-start'}]}
             />
           )}
 
           {description && (
             <SubHeading
               text={description}
-              style={[style.descriptionText, styles.description]}
-              boxStyle={[style.description]}
+              style={[style?.descriptionText, styles.description]}
+              boxStyle={[style?.description]}
             />
           )}
 
@@ -97,6 +97,7 @@ const styles = StyleSheet.create({
     color: '#212529',
     lineHeight: 25.2,
   },
+
   description: {
     fontFamily: 'outfit',
     // fontSize: 14,

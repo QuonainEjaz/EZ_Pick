@@ -1,24 +1,19 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import AuthorizedPickupList from './AuthorizedPickupList';
+import PickupDetails from './PickupDetails';
+import EditAuthorizedPickup from './EditAuthorizedPickup';
+import AddAuthorizedPickup from './AddAuthorizedPickup';
+import StudentPickupCard from './StudentPickupCard';
+import ShareOptions from './ShareOptions';
 
-const AddAuthorization = () => {
+const AuthorizedPickupLayout = () => {
   return (
-    <View style={styles.container}>
-      <Text style={styles.text}>AddAuthorization</Text>
-    </View>
-  );
+    <AuthorizedPickupList />
+    //  <PickupDetails  />
+    //  <EditAuthorizedPickup  />
+    //  <AddAuthorizedPickup  />
+    //  <StudentPickupCard /> 
+    //  <ShareOptions /> 
+  )
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  text: {
-    fontSize: 20,
-    color: '#333',
-  },
-});
-
-export default AddAuthorization;
+  export default AuthorizedPickupLayout;

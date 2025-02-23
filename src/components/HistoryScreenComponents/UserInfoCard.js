@@ -1,22 +1,22 @@
 import React from 'react';
-import { View, Image, StyleSheet, useWindowDimensions } from 'react-native';
+import { View, Image, StyleSheet, useWindowDimensions, TouchableOpacity } from 'react-native';
 import Heading from '../Heading';
 import SubHeading from '../SubHeading';
 import CustomButton from '../CustomButton';
 
-const UserInfoCard = ({ name, dateTime, status, imageSource }) => {
+const UserInfoCard = ({ name, dateTime, status, imageSource, onPress }) => {
   const { width } = useWindowDimensions();
   const imageSize = width * 0.12;
 
   return (
-    <View style={styles.container}>
+    <TouchableOpacity style={styles.container} onPress={onPress}>
       <Image source={imageSource} style={[styles.image, { width: imageSize, height: imageSize }]} />
       <View style={styles.textContainer}>
         <Heading title={name} textstyle={styles.heading} />
         <SubHeading text={dateTime} style={styles.subHeading} />
       </View>
       <CustomButton title={status} touchStyle={styles.button} textStyle={styles.buttonText} />
-    </View>
+    </TouchableOpacity>
   );
 };
 

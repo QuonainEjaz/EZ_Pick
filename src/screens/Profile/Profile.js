@@ -1,24 +1,21 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import ProfileList from './ProfileList';
+import ProfileDetail from './ProfileDetail';
+import UpdatePassword from './UpdatePassword';
+import LanguageSelection from './LanguageSelection';
+import LogoutConfirmation from './LogoutConfirmation';
+import PhotoOptions from './PhotoOptions';
 
-const Profile = () => {
+const ProfileLayout = () => {
   return (
-    <View style={styles.container}>
-      <Text style={styles.text}>Profile</Text>
-    </View>
+        <ProfileList />
+        // <ProfileDetail />
+        // <UpdatePassword />
+        // <LanguageSelection />
+        // <LogoutConfirmation />
+        // <PhotoOptions />
   );
 };
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  text: {
-    fontSize: 20,
-    color: '#333',
-  },
-});
+export default ProfileLayout;
 
-export default Profile;

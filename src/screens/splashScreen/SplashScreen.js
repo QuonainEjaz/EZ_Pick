@@ -5,7 +5,7 @@ import {View, StyleSheet, Image} from 'react-native';
 const SplashScreen = ({navigation}) => {
     useEffect(() => {
         setTimeout(() => {
-          navigation.replace('MainScreen');
+          navigation.replace('TabNavigator');
         }, 2000);
       }, [navigation]);
   return (

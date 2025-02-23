@@ -1,17 +1,17 @@
 import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { View, Text } from 'react-native';
-import CustomHeader from '../components/Header';
-import HomeScreen from '../screens/Home/HomeScreen';
-import History from '../screens/History/History';
-import Notification from '../screens/Notifications/Notification';
-import Profile from '../screens/Profile/Profile';
-import AddAuthorization from '../screens/AddAuthorization/AddAuthorization';
 import { HomeIcon, FocusedHomeIcon } from '../assets/Icons/svg/HomeIcons';
 import { HistoryIcon, FocusedHistoryIcon } from '../assets/Icons/svg/HistoryIcons';
 import { AddIcon, FocusedAddIcon } from '../assets/Icons/svg/AddIcons';
 import { NotificationIcon, FocusedNotificationIcon } from '../assets/Icons/svg/NotificationIcons';
 import { ProfileIcon, FocusedProfileIcon } from '../assets/Icons/svg/ProfileIcons';
+import HomeNavigator from './HomeNavigator';
+import HistoryNavigator from './HistoryNavigator';
+import NotificationsNavigator from './NotificationsNavigator';
+import ProfileNavigator from './ProfileNavigator';
+import AddAuthorizationNavigator from './AddAuthorizationNavigator';
+
 
 const Tab = createBottomTabNavigator();
 
@@ -28,9 +28,7 @@ const TabNavigator = () => {
     <Tab.Navigator
       initialRouteName="Home"
       screenOptions={({ route }) => ({
-        header: () => {
-          return <CustomHeader screen={route.name} />;
-        },
+        headerShown: false,
         tabBarShowLabel: true,
         tabBarActiveTintColor: '#F8AC16',
         tabBarInactiveTintColor: '#6C757D',
@@ -47,7 +45,7 @@ const TabNavigator = () => {
     >
       <Tab.Screen
         name="Home"
-        component={HomeScreen}
+        component={HomeNavigator}
         options={{
           tabBarIcon: ({ focused }) => (
             <TabIcon
@@ -60,7 +58,7 @@ const TabNavigator = () => {
       />
       <Tab.Screen
         name="History"
-        component={History}
+        component={HistoryNavigator}
         options={{
           tabBarIcon: ({ focused }) => (
             <TabIcon
@@ -73,7 +71,7 @@ const TabNavigator = () => {
       />
       <Tab.Screen
         name="Add"
-        component={AddAuthorization}
+        component={AddAuthorizationNavigator}
         options={{
           tabBarIcon: ({ focused }) => (
             <TabIcon
@@ -86,7 +84,7 @@ const TabNavigator = () => {
       />
       <Tab.Screen
         name="Notification"
-        component={Notification}
+        component={NotificationsNavigator}
         options={{
           tabBarIcon: ({ focused }) => (
             <TabIcon
@@ -99,7 +97,7 @@ const TabNavigator = () => {
       />
       <Tab.Screen
         name="Profile"
-        component={Profile}
+        component={ProfileNavigator}
         options={{
           tabBarIcon: ({ focused }) => (
             <TabIcon
