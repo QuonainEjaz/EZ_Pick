@@ -1,31 +1,17 @@
 import React, { useEffect, useState } from 'react';
-import { View, FlatList, StyleSheet, TouchableOpacity, Text } from 'react-native';
+import { View, FlatList, StyleSheet } from 'react-native';
 import Heading from '../../components/Heading';
 import CustomButton from '../../components/CustomButton';
 import UserInfoCard from '../../components/HistoryScreenComponents/UserInfoCard';
+import SubHeading from '../../components/SubHeading';
 import { useDispatch, useSelector } from 'react-redux';
-import { setStudents } from '../../store/App/action'; 
+import { setStudents } from '../../store/App/action';
 import PickupDetails from './PickupDetails';
 
-const HistoryScreen = ({ navigation}) => {
+const HistoryScreen = ({ navigation }) => {
   const dispatch = useDispatch();
   const students = useSelector((state) => state.students.students);  // Select students from state
   const [selectedFilter, setSelectedFilter] = useState('Last Week');
-
-  // Simulate fetching data on component mount
-  // useEffect(() => {
-  //   const data = [
-  //     { id: '1', name: 'Umar bin Alkufi', dateTime: '02 Jan 2024, 12:38PM', status: 'Picked' },
-  //     { id: '2', name: 'Umar bin Alkufi', dateTime: '03 Jan 2024, 01:20PM', status: 'Picked' },
-  //     { id: '3', name: 'Umar bin Alkufi', dateTime: '04 Jan 2024, 02:05PM', status: 'Picked' },
-  //     { id: '4', name: 'Umar bin Alkufi', dateTime: '05 Jan 2024, 12:55PM', status: 'Picked' },
-  //     { id: '5', name: 'Umar bin Alkufi', dateTime: '06 Jan 2024, 02:03PM', status: 'Picked' },
-  //     { id: '6', name: 'Umar bin Alkufi', dateTime: '09 Jan 2024, 02:03PM', status: 'Picked' },
-  //     { id: '7', name: 'Umar bin Alkufi', dateTime: '10 Jan 2024, 01:36PM', status: 'Picked' },
-  //   ];
-    
-  //   dispatch(setStudents(data));  // Dispatch the action to set students data
-  // }, [dispatch]);
 
   const handleAddStudent = () => {
     const newStudent = {
@@ -43,9 +29,14 @@ const HistoryScreen = ({ navigation}) => {
       {/* Header Section */}
       <View style={styles.header}>
         <Heading title="History" textstyle={styles.heading} />
-        <TouchableOpacity style={styles.filterButton}>
-          <Text style={styles.filterText}>{selectedFilter}</Text>
-        </TouchableOpacity>
+        
+        {/* Custom button for filter, replacing TouchableOpacity */}
+        <CustomButton
+          title={selectedFilter}
+          onPress={() => {}}
+          touchStyle={styles.filterButton}
+          textStyle={styles.filterText}
+        />
       </View>
 
       {/* List of History Items */}
@@ -57,12 +48,14 @@ const HistoryScreen = ({ navigation}) => {
             name={item.name}
             dateTime={item.dateTime}
             status={item.status}
-            imageSource={require('../../assets/pics/EmailPic.png')} 
+            imageSource={require('../../assets/pics/EmailPic.png')}
             onPress={() => navigation.navigate('PickupDetails', { student: item })}
           />
         )}
         contentContainerStyle={styles.listContainer}
       />
+      
+      {/* Custom Button for Add New Student */}
       <CustomButton
         title="Add New Student"
         onPress={handleAddStudent}

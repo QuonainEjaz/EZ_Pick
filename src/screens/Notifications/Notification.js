@@ -1,5 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, Image, SectionList } from 'react-native';
+import Heading from '../../components/Heading';
+import SubHeading from '../../components/SubHeading';
 
 const NotificationItem = ({ icon, title, description }) => (
   <View style={styles.notificationItem}>
@@ -7,8 +9,8 @@ const NotificationItem = ({ icon, title, description }) => (
       <Image source={{ uri: icon }} style={styles.icon} />
     </View>
     <View style={styles.textContainer}>
-      <Text style={styles.title}>{title}</Text>
-      <Text style={styles.description}>{description}</Text>
+      <Heading title={title} textstyle={styles.title} />
+      <SubHeading text={description} style={styles.description} />
     </View>
   </View>
 );
@@ -68,7 +70,7 @@ const NotificationList = () => {
           <NotificationItem {...item} />
         )}
         renderSectionHeader={({ section: { title } }) => (
-          <Text style={styles.dateText}>{title}</Text>
+          <SubHeading text={title} style={styles.dateText} />
         )}
       />
     </View>

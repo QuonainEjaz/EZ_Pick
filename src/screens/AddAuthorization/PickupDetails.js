@@ -1,5 +1,9 @@
 import React from 'react';
-import { View, Text, Image, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Image, StyleSheet, TouchableOpacity,ScrollView } from 'react-native';
+import Heading from '../../components/Heading';
+import SubHeading from '../../components/SubHeading';
+import CustomButton from '../../components/CustomButton';
+import CustomLink from '../../components/CustomLink';
 
 const PickupDetails = ({ style, pickupData = {} }) => {
   const defaultPickupData = {
@@ -23,17 +27,11 @@ const PickupDetails = ({ style, pickupData = {} }) => {
   };
 
   return (
-    <View style={[styles.container, style]}>
+    <ScrollView style={[styles.container, style]}>
       {/* Back Navigation */}
       <View style={styles.header}>
-        <TouchableOpacity style={styles.backButton}>
-          <Image 
-            source={{ uri: 'https://dashboard.codeparrot.ai/api/image/Z7iqnlCHtJJZ6v_B/icon-arr-3.png' }}
-            style={styles.backIcon}
-          />
-          <Text style={styles.backText}>Back</Text>
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>Pickup Details</Text>
+        <CustomLink title="Back" touchStyle={styles.backButton} textStyle={styles.backText} />
+        <Heading title="Pickup Details" textstyle={styles.headerTitle} />
       </View>
 
       {/* Profile Section */}
@@ -43,15 +41,15 @@ const PickupDetails = ({ style, pickupData = {} }) => {
           style={styles.profileImage}
         />
         <View style={styles.profileInfo}>
-          <Text style={styles.profileName}>{defaultPickupData.name}</Text>
-          <Text style={styles.profileRelation}>{defaultPickupData.relation}</Text>
+          <SubHeading text={defaultPickupData.name} style={styles.profileName} />
+          <SubHeading text={defaultPickupData.relation} style={styles.profileRelation} />
         </View>
       </View>
 
       {/* Details Section */}
       <View style={styles.detailsContainer}>
         <View style={styles.detailsHeader}>
-          <Text style={styles.detailsTitle}>Authorized Pickup Details</Text>
+          <SubHeading text="Authorized Pickup Details" style={styles.detailsTitle} />
           <TouchableOpacity style={styles.editButton}>
             <Image 
               source={{ uri: 'https://dashboard.codeparrot.ai/api/image/Z7iqnlCHtJJZ6v_B/edit-edi.png' }}
@@ -63,30 +61,30 @@ const PickupDetails = ({ style, pickupData = {} }) => {
         <View style={styles.detailsContent}>
           <View style={styles.detailsRow}>
             <View style={styles.detailsColumn}>
-              <Text style={styles.label}>Relation</Text>
-              <Text style={styles.value}>{defaultPickupData.relation}</Text>
+              <SubHeading text="Relation" style={styles.label} />
+              <SubHeading text={defaultPickupData.relation} style={styles.value} />
             </View>
             <View style={styles.detailsColumn}>
-              <Text style={styles.label}>Name</Text>
-              <Text style={styles.value}>{defaultPickupData.name}</Text>
-            </View>
-          </View>
-
-          <View style={styles.detailsRow}>
-            <View style={styles.detailsColumn}>
-              <Text style={styles.label}>ID Number</Text>
-              <Text style={styles.value}>{defaultPickupData.idNumber}</Text>
-            </View>
-            <View style={styles.detailsColumn}>
-              <Text style={styles.label}>Cell No</Text>
-              <Text style={styles.value}>{defaultPickupData.cellNo}</Text>
+              <SubHeading text="Name" style={styles.label} />
+              <SubHeading text={defaultPickupData.name} style={styles.value} />
             </View>
           </View>
 
           <View style={styles.detailsRow}>
             <View style={styles.detailsColumn}>
-              <Text style={styles.label}>Vehicle #</Text>
-              <Text style={styles.value}>{defaultPickupData.vehicleNo}</Text>
+              <SubHeading text="ID Number" style={styles.label} />
+              <SubHeading text={defaultPickupData.idNumber} style={styles.value} />
+            </View>
+            <View style={styles.detailsColumn}>
+              <SubHeading text="Cell No" style={styles.label} />
+              <SubHeading text={defaultPickupData.cellNo} style={styles.value} />
+            </View>
+          </View>
+
+          <View style={styles.detailsRow}>
+            <View style={styles.detailsColumn}>
+              <SubHeading text="Vehicle #" style={styles.label} />
+              <SubHeading text={defaultPickupData.vehicleNo} style={styles.value} />
             </View>
           </View>
         </View>
@@ -94,7 +92,7 @@ const PickupDetails = ({ style, pickupData = {} }) => {
 
       {/* Assigned Kids Section */}
       <View style={styles.assignedKidsContainer}>
-        <Text style={styles.assignedKidsTitle}>Assigned Kids</Text>
+        <SubHeading text="Assigned Kids" style={styles.assignedKidsTitle} />
         <View style={styles.kidsRow}>
           {defaultPickupData.assignedKids.map((kid, index) => (
             <View key={index} style={styles.kidCard}>
@@ -108,35 +106,24 @@ const PickupDetails = ({ style, pickupData = {} }) => {
                 source={{ uri: kid.image }}
                 style={styles.kidImage}
               />
-              <Text style={styles.kidName}>{kid.name}</Text>
+              <SubHeading text={kid.name} style={styles.kidName} />
             </View>
           ))}
         </View>
       </View>
 
-      {/* QR Code Section */}
       <View style={styles.qrContainer}>
         <View style={styles.qrContent}>
           <Image 
             source={{ uri: 'https://dashboard.codeparrot.ai/api/image/Z7iqnlCHtJJZ6v_B/qr.png' }}
             style={styles.qrCode}
           />
-          <Text style={styles.qrText}>Scan QR Code</Text>
-          <TouchableOpacity style={styles.copyButton}>
-            <Text style={styles.copyButtonText}>Copy</Text>
-          </TouchableOpacity>
+          <SubHeading text="Scan QR Code" style={styles.qrText} />
+          <CustomButton title="Copy" touchStyle={styles.copyButton} textStyle={styles.copyButtonText} />
         </View>
         <View style={styles.shareContainer}>
-          <TouchableOpacity style={styles.shareButton}>
-            <Image 
-              source={{ uri: 'https://dashboard.codeparrot.ai/api/image/Z7iqnlCHtJJZ6v_B/share-ic.png' }}
-              style={styles.shareIcon}
-            />
-            <Text style={styles.shareText}>Share</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.saveButton}>
-            <Text style={styles.saveButtonText}>Save</Text>
-          </TouchableOpacity>
+          <CustomButton title="Share" touchStyle={styles.shareButton} textStyle={styles.shareText} />
+          <CustomButton title="Save" touchStyle={styles.saveButton} textStyle={styles.saveButtonText} />
           <TouchableOpacity style={styles.viewButton}>
             <Image 
               source={{ uri: 'https://dashboard.codeparrot.ai/api/image/Z7iqnlCHtJJZ6v_B/iconex-l.png' }}
@@ -145,7 +132,7 @@ const PickupDetails = ({ style, pickupData = {} }) => {
           </TouchableOpacity>
         </View>
       </View>
-    </View>
+    </ScrollView>
   );
 };
 
@@ -156,8 +143,6 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#fff',
     width: '100%',
-    // maxWidth: 440,
-    // minHeight: 956,
     borderRadius: 20,
     padding: 10,
   },
@@ -418,4 +403,3 @@ const styles = StyleSheet.create({
     height: 24,
   },
 });
-

@@ -1,5 +1,7 @@
 import React from 'react';
-import { View, Text, Image, StyleSheet } from 'react-native';
+import { View, Image, StyleSheet } from 'react-native';
+import Heading from '../../components/Heading'; // Import Heading component
+import SubHeading from '../../components/SubHeading'; // Import SubHeading component
 
 const UserInfoHeader = ({
   userName = "Umar bin Alkufi",
@@ -9,17 +11,25 @@ const UserInfoHeader = ({
 }) => {
   return (
     <View style={styles.headerContainer}>
+      {/* Profile Image */}
       <Image 
         source={{ uri: profileImage }} 
         style={styles.profileImage}
         resizeMode="cover"
       />
+      
+      {/* Text Container */}
       <View style={styles.textContainer}>
-        <Text style={styles.userName}>{userName}</Text>
-        <Text style={styles.dateTime}>{dateTime}</Text>
+        {/* Using SubHeading for user name */}
+        <Heading title={userName} textstyle={styles.userName} />
+        {/* Using SubHeading for date/time */}
+        <SubHeading text={dateTime} style={styles.dateTime} />
       </View>
+      
+      {/* Status Container */}
       <View style={styles.statusContainer}>
-        <Text style={styles.statusText}>{status}</Text>
+        {/* Using SubHeading for status text */}
+        <SubHeading text={status} style={styles.statusText} />
       </View>
     </View>
   );
@@ -75,4 +85,3 @@ const styles = StyleSheet.create({
 });
 
 export default UserInfoHeader;
-

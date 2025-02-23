@@ -1,17 +1,36 @@
 import React, { useState } from 'react';
-import { View, Text, Image, TextInput, TouchableOpacity, ScrollView, Dimensions, StyleSheet } from 'react-native';
-const { width } = Dimensions.get('window');
-const isSmallScreen = width < 375;
+import { View, Image, ScrollView, StyleSheet, TouchableOpacity, Text } from 'react-native';
+import { Formik } from 'formik';
+import * as Yup from 'yup';
+import CustomButton from '../../components/CustomButton';
+import CustomCheckbox from '../../components/CustomCheckbox';
+import CustomPicker from '../../components/CustomPicker';
+import Heading from '../../components/Heading';
+import InputField from '../../components/InputFeild';
+import SubHeading from '../../components/SubHeading';
+import AddKidsModal from './AddKidsModal';
+import { launchImageLibrary } from 'react-native-image-picker'; 
+import { Dimensions } from 'react-native';
 
-const defaultProps = {
-  initialData: {
+const { width, height } = Dimensions.get('window');
+
+const validationSchema = Yup.object().shape({
+  relation: Yup.string().required('Relation is required'),
+  name: Yup.string().required('Name is required'),
+  idNumber: Yup.string().required('ID Number is required'),
+  cellNo: Yup.string().required('Cell No is required'),
+  vehicleNo: Yup.string().required('Vehicle # is required'),
+});
+
+const EditAuthorizedPickup = ({ 
+  initialData = {
     relation: 'Driver',
     name: 'Khalid al-Jameel',
     idNumber: '545135',
     cellNo: '+966 123 456 7890',
     vehicleNo: 'SA-5715B',
   },
-  assignedKids: [
+  assignedKids = [
     {
       id: 1,
       name: 'Jabir bin Hayan',
@@ -23,186 +42,181 @@ const defaultProps = {
       image: 'https://dashboard.codeparrot.ai/api/image/Z7iqnlCHtJJZ6v_B/kid-imag-2.png'
     }
   ],
-  onSave: () => {},
-  style: {}
-};
-
-const EditAuthorizedPickup = ({ 
-  initialData = defaultProps.initialData,
-  assignedKids = defaultProps.assignedKids,
-  onSave = defaultProps.onSave,
-  style = defaultProps.style 
+  onSave = () => {},
+  style = {}
 }) => {
-  const [formData, setFormData] = useState(initialData);
   const [acknowledgement, setAcknowledgement] = useState(false);
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [profileImage, setProfileImage] = useState('https://dashboard.codeparrot.ai/api/image/Z7iqnlCHtJJZ6v_B/kid-imag-2.png'); 
 
-  const handleSave = () => {
+  // Function to handle image picking
+  const handleChangePicture = () => {
+    launchImageLibrary(
+      {
+        mediaType: 'photo',
+        includeBase64: false,
+        quality: 1,
+      },
+      (response) => {
+        if (response.didCancel) {
+          console.log('User cancelled image picker');
+        } else if (response.errorCode) {
+          console.log('ImagePicker Error: ', response.errorCode);
+        } else if (response.assets && response.assets.length > 0) {
+          const selectedImage = response.assets[0];
+          setProfileImage(selectedImage.uri); // Set the selected image URI
+        }
+      }
+    );
+  };
+
+  const handleSave = (values) => {
     if (acknowledgement) {
-      onSave(formData);
+      onSave(values);
     }
+  };
+
+  const handleAssignKids = (selectedKids) => {
+    setIsModalVisible(false);
   };
 
   return (
     <ScrollView style={[styles.container, style]}>
-      <Text style={styles.title}>Edit Authorized Pickup</Text>
+      <Heading title="Edit Authorized Pickup" textstyle={styles.title} />
       
-      <View style={styles.content}>
-        <View style={styles.imageSection}>
-          <View style={styles.imageContainer}>
-            <Image 
-              source={{ uri: 'https://dashboard.codeparrot.ai/api/image/Z7iqnlCHtJJZ6v_B/image-2.png' }}
-              style={styles.profileImage}
-            />
-          </View>
-          <TouchableOpacity style={styles.changePictureButton}>
-            <Text style={styles.changePictureText}>Change Picture</Text>
-          </TouchableOpacity>
-        </View>
-
-        <View style={styles.formContainer}>
-          <View style={styles.inputGroup}>
-            <Text style={styles.label}>Relation</Text>
-            <View style={styles.inputContainer}>
-              <TextInput 
-                style={styles.input}
-                value={formData.relation}
-                onChangeText={(text) => setFormData({...formData, relation: text})}
-                placeholder="Select relation"
-                placeholderTextColor="#6c757d"
-              />
-              <Image 
-                source={{ uri: 'https://dashboard.codeparrot.ai/api/image/Z7iqnlCHtJJZ6v_B/dropdown-2.png' }}
-                style={styles.inputIcon}
-              />
-            </View>
-          </View>
-
-          <View style={styles.inputGroup}>
-            <Text style={styles.label}>Name</Text>
-            <View style={styles.inputContainer}>
-              <TextInput 
-                style={styles.input}
-                value={formData.name}
-                onChangeText={(text) => setFormData({...formData, name: text})}
-                placeholder="Enter name"
-                placeholderTextColor="#6c757d"
-              />
-              <Image 
-                source={{ uri: 'https://dashboard.codeparrot.ai/api/image/Z7iqnlCHtJJZ6v_B/icon-i-5.png' }}
-                style={styles.inputIcon}
-              />
-            </View>
-          </View>
-
-          <View style={styles.inputGroup}>
-            <Text style={styles.label}>ID Number</Text>
-            <View style={styles.inputContainer}>
-              <TextInput 
-                style={styles.input}
-                value={formData.idNumber}
-                onChangeText={(text) => setFormData({...formData, idNumber: text})}
-                placeholder="Enter ID number"
-                placeholderTextColor="#6c757d"
-              />
-              <Image 
-                source={{ uri: 'https://dashboard.codeparrot.ai/api/image/Z7iqnlCHtJJZ6v_B/icon-i-6.png' }}
-                style={styles.inputIcon}
-              />
-            </View>
-          </View>
-
-          <View style={styles.inputGroup}>
-            <Text style={styles.label}>Cell No</Text>
-            <View style={styles.inputContainer}>
-              <TextInput 
-                style={styles.input}
-                value={formData.cellNo}
-                onChangeText={(text) => setFormData({...formData, cellNo: text})}
-                placeholder="Enter cell number"
-                placeholderTextColor="#6c757d"
-              />
-              <Image 
-                source={{ uri: 'https://dashboard.codeparrot.ai/api/image/Z7iqnlCHtJJZ6v_B/icon-i-7.png' }}
-                style={styles.inputIcon}
-              />
-            </View>
-          </View>
-
-          <View style={styles.inputGroup}>
-            <Text style={styles.label}>Vehicle #</Text>
-            <View style={styles.inputContainer}>
-              <TextInput 
-                style={styles.input}
-                value={formData.vehicleNo}
-                onChangeText={(text) => setFormData({...formData, vehicleNo: text})}
-                placeholder="Enter vehicle number"
-                placeholderTextColor="#6c757d"
-              />
-              <Image 
-                source={{ uri: 'https://dashboard.codeparrot.ai/api/image/Z7iqnlCHtJJZ6v_B/icon-i-8.png' }}
-                style={styles.inputIcon}
-              />
-            </View>
-          </View>
-
-          <View style={styles.assignedKidsSection}>
-            <Text style={styles.label}>Assigned Kids</Text>
-            <View style={styles.kidsContainer}>
-              {assignedKids.map((kid) => (
-                <View key={kid.id} style={styles.kidCard}>
-                  <View style={styles.kidInfo}>
-                    <TouchableOpacity style={styles.removeKidButton}>
-                      <Image 
-                        source={{ uri: 'https://dashboard.codeparrot.ai/api/image/Z7iqnlCHtJJZ6v_B/interfac.png' }}
-                        style={styles.removeKidIcon}
-                      />
-                    </TouchableOpacity>
-                    <Image 
-                      source={{ uri: kid.image }}
-                      style={styles.kidImage}
-                    />
-                    <Text style={styles.kidName}>{kid.name}</Text>
-                  </View>
-                </View>
-              ))}
-              <TouchableOpacity style={styles.addKidButton}>
+      <Formik
+        initialValues={initialData}
+        validationSchema={validationSchema}
+        onSubmit={handleSave}
+      >
+        {({ handleChange, handleBlur, handleSubmit, values, errors, touched }) => (
+          <View style={styles.content}>
+            <View style={styles.imageSection}>
+              <View style={styles.imageContainer}>
                 <Image 
-                  source={{ uri: 'https://dashboard.codeparrot.ai/api/image/Z7iqnlCHtJJZ6v_B/interfac-3.png' }}
-                  style={styles.addKidIcon}
+                  source={{ uri: profileImage }}  // Display the selected or default image
+                  style={styles.profileImage}
                 />
-              </TouchableOpacity>
+              </View>
+              <CustomButton
+                title="Change Picture"
+                touchStyle={styles.changePictureButton}
+                textStyle={styles.changePictureText}
+                onPress={handleChangePicture}  // Call the image picker
+              />
+            </View>
+
+            <View style={styles.formContainer}>
+              <CustomPicker
+                label="Relation"
+                items={['Driver', 'Parent', 'Guardian']}
+                selectedValue={values.relation}
+                onValueChange={handleChange('relation')}
+                style={styles.inputGroup}
+              />
+              {errors.relation && touched.relation && <Text style={styles.errorText}>{errors.relation}</Text>}
+
+              <InputField
+                label="Name"
+                value={values.name}
+                onChangeText={handleChange('name')}
+                onBlur={handleBlur('name')}
+                placeholder="Enter name"
+                style={styles.inputGroup}
+              />
+              {errors.name && touched.name && <Text style={styles.errorText}>{errors.name}</Text>}
+
+              <InputField
+                label="ID Number"
+                value={values.idNumber}
+                onChangeText={handleChange('idNumber')}
+                onBlur={handleBlur('idNumber')}
+                placeholder="Enter ID number"
+                style={styles.inputGroup}
+              />
+              {errors.idNumber && touched.idNumber && <Text style={styles.errorText}>{errors.idNumber}</Text>}
+
+              <InputField
+                label="Cell No"
+                value={values.cellNo}
+                onChangeText={handleChange('cellNo')}
+                onBlur={handleBlur('cellNo')}
+                placeholder="Enter cell number"
+                style={styles.inputGroup}
+              />
+              {errors.cellNo && touched.cellNo && <Text style={styles.errorText}>{errors.cellNo}</Text>}
+
+              <InputField
+                label="Vehicle #"
+                value={values.vehicleNo}
+                onChangeText={handleChange('vehicleNo')}
+                onBlur={handleBlur('vehicleNo')}
+                placeholder="Enter vehicle number"
+                style={styles.inputGroup}
+              />
+              {errors.vehicleNo && touched.vehicleNo && <Text style={styles.errorText}>{errors.vehicleNo}</Text>}
+
+              <View style={styles.assignedKidsSection}>
+                <SubHeading text="Assigned Kids" style={styles.label} />
+                <View style={styles.kidsContainer}>
+                  {assignedKids.map((kid) => (
+                    <View key={kid.id} style={styles.kidCard}>
+                      <View style={styles.kidInfo}>
+                        <TouchableOpacity style={styles.removeKidButton}>
+                          <Image 
+                            source={{ uri: 'https://dashboard.codeparrot.ai/api/image/Z7iqnlCHtJJZ6v_B/interfac.png' }}
+                            style={styles.removeKidIcon}
+                          />
+                        </TouchableOpacity>
+                        <Image 
+                          source={{ uri: kid.image }}
+                          style={styles.kidImage}
+                        />
+                        <SubHeading text={kid.name} style={styles.kidName} />
+                      </View>
+                    </View>
+                  ))}
+                  <TouchableOpacity style={styles.addKidButton} onPress={() => setIsModalVisible(true)}>
+                    <Image 
+                      source={{ uri: 'https://dashboard.codeparrot.ai/api/image/Z7iqnlCHtJJZ6v_B/interfac-3.png' }}
+                      style={styles.addKidIcon}
+                    />
+                  </TouchableOpacity>
+                </View>
+              </View>
+
+              <View style={styles.acknowledgementContainer}>
+                <CustomCheckbox
+                  value={acknowledgement}
+                  onValueChange={setAcknowledgement}
+                  label="I acknowledge that the information is accurate & that I am legally responsible for it."
+                  style={{checkboxTouch: styles.checkbox,
+                  checkboxText: styles.checkboxText
+                  }}
+                />
+              </View>
+
+              <CustomButton 
+                title="Save"
+                onPress={handleSubmit}
+                touchStyle={[styles.saveButton, !acknowledgement && styles.saveButtonDisabled]}
+                textStyle={styles.saveButtonText}
+                disabled={!acknowledgement}
+              />
             </View>
           </View>
+        )}
+      </Formik>
 
-          <View style={styles.acknowledgementContainer}>
-            <TouchableOpacity
-              style={styles.checkbox}
-              onPress={() => setAcknowledgement(!acknowledgement)}
-            >
-              <Image 
-                source={{ uri: 'https://dashboard.codeparrot.ai/api/image/Z7iqnlCHtJJZ6v_B/componen-2.png' }}
-                style={styles.checkboxIcon}
-              />
-            </TouchableOpacity>
-            <Text style={styles.acknowledgementText}>
-              I acknowledge that the information is accurate & that i am legally responsible for it.
-            </Text>
-          </View>
-
-          <TouchableOpacity 
-            style={[styles.saveButton, !acknowledgement && styles.saveButtonDisabled]}
-            onPress={handleSave}
-            disabled={!acknowledgement}
-          >
-            <Text style={styles.saveButtonText}>Save</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
+      <AddKidsModal
+        visible={isModalVisible}
+        onClose={() => setIsModalVisible(false)}
+        kids={assignedKids}
+        onAssign={handleAssignKids}
+      />
     </ScrollView>
   );
 };
-
-EditAuthorizedPickup.defaultProps = defaultProps;
 
 export default EditAuthorizedPickup;
 
@@ -231,17 +245,17 @@ export const styles = StyleSheet.create({
     gap: 10,
   },
   imageContainer: {
-    width: 85,
-    height: 85,
+    width: width * 0.22, 
+    height: width * 0.22, 
     borderRadius: 9.66,
     backgroundColor: '#fef6e6',
     justifyContent: 'center',
     alignItems: 'center',
-    padding: 17.386,
+    padding: width * 0.05,
   },
   profileImage: {
-    width: 48.3,
-    height: 48.3,
+    width: width * 0.14,
+    height: width * 0.14, 
   },
   changePictureButton: {
     backgroundColor: '#f8ac16',
@@ -270,29 +284,6 @@ export const styles = StyleSheet.create({
     fontWeight: '500',
     lineHeight: 14,
     color: '#212529',
-  },
-  inputContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#f8f8f9',
-    borderRadius: 5,
-    borderWidth: 1,
-    borderColor: '#e3e3e3',
-    paddingHorizontal: 10,
-    paddingVertical: 8,
-    height: 38,
-  },
-  input: {
-    flex: 1,
-    fontFamily: 'Outfit',
-    fontSize: 14,
-    color: '#6c757d',
-    height: '100%',
-    padding: 0,
-  },
-  inputIcon: {
-    width: 24,
-    height: 24,
   },
   assignedKidsSection: {
     gap: 6,
@@ -366,15 +357,11 @@ export const styles = StyleSheet.create({
     width: 20,
     height: 20,
   },
-  checkboxIcon: {
-    width: 20,
-    height: 20,
-  },
-  acknowledgementText: {
-    flex: 1,
+  checkboxText: {
     fontFamily: 'Outfit',
     fontSize: 14,
-    lineHeight: 14,
+    fontWeight: '400',
+    lineHeight: 20,
     color: '#212529',
   },
   saveButton: {

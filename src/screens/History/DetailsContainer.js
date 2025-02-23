@@ -1,5 +1,7 @@
 import React from 'react';
-import { View, Text, StyleSheet, Dimensions } from 'react-native';
+import { View, StyleSheet, Dimensions } from 'react-native';
+import Heading from '../../components/Heading'; 
+import SubHeading from '../../components/SubHeading';  
 
 const DetailsContainer = ({
   studentId = "ST6562984",
@@ -13,46 +15,47 @@ const DetailsContainer = ({
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>Details</Text>
+        {/* Use Heading for the title */}
+        <Heading title="Details" textstyle={styles.headerTitle} />
       </View>
       
       <View style={styles.content}>
         <View style={styles.row}>
           <View style={styles.column}>
-            <Text style={styles.label}>Student ID</Text>
-            <Text style={styles.value}>{studentId}</Text>
+            <SubHeading text="Student ID" style={styles.label} />
+            <SubHeading text={studentId} style={styles.value} />
           </View>
           <View style={styles.column}>
-            <Text style={styles.label}>Grade</Text>
-            <Text style={styles.value}>{grade}</Text>
-          </View>
-        </View>
-
-        <View style={styles.row}>
-          <View style={styles.column}>
-            <Text style={styles.label}>Request by</Text>
-            <Text style={styles.value}>{requestBy}</Text>
-          </View>
-          <View style={styles.column}>
-            <Text style={styles.label}>Date</Text>
-            <Text style={styles.value}>{date}</Text>
+            <SubHeading text="Grade" style={styles.label} />
+            <SubHeading text={grade} style={styles.value} />
           </View>
         </View>
 
         <View style={styles.row}>
           <View style={styles.column}>
-            <Text style={styles.label}>Request Time</Text>
-            <Text style={styles.value}>{requestTime}</Text>
+            <SubHeading text="Request by" style={styles.label} />
+            <SubHeading text={requestBy} style={styles.value} />
           </View>
           <View style={styles.column}>
-            <Text style={styles.label}>Response</Text>
-            <Text style={styles.value}>{responseTime}</Text>
+            <SubHeading text="Date" style={styles.label} />
+            <SubHeading text={date} style={styles.value} />
+          </View>
+        </View>
+
+        <View style={styles.row}>
+          <View style={styles.column}>
+            <SubHeading text="Request Time" style={styles.label} />
+            <SubHeading text={requestTime} style={styles.value} />
+          </View>
+          <View style={styles.column}>
+            <SubHeading text="Response" style={styles.label} />
+            <SubHeading text={responseTime} style={styles.value} />
           </View>
         </View>
 
         <View style={styles.confirmSection}>
-          <Text style={styles.label}>Confirm Pickup</Text>
-          <Text style={styles.value}>{confirmTime}</Text>
+          <SubHeading text="Confirm Pickup" style={styles.label} />
+          <SubHeading text={confirmTime} style={styles.value} />
         </View>
       </View>
     </View>

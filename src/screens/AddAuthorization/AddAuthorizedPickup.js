@@ -1,7 +1,12 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, Image, TouchableOpacity, StyleSheet, ScrollView, Dimensions } from 'react-native';
-const { width } = Dimensions.get('window');
+import { View, TextInput, Image, TouchableOpacity, StyleSheet, ScrollView, Dimensions } from 'react-native';
+import Heading from '../../components/Heading';
+import SubHeading from '../../components/SubHeading';
+import CustomButton from '../../components/CustomButton'; 
 import CustomModal from '../../components/CustomModal';
+
+const { width } = Dimensions.get('window');
+
 const AddAuthorizedPickup = ({ 
   style,
   onSave = () => {},
@@ -14,36 +19,12 @@ const AddAuthorizedPickup = ({
   defaultSelectedKids = []
 }) => {
   const [selectedKids, setSelectedKids] = useState(defaultSelectedKids.length > 0 ? defaultSelectedKids : [
-    {
-      id: 1,
-      name: 'Jabir bin Hayan',
-      image: 'https://dashboard.codeparrot.ai/api/image/Z7iqnlCHtJJZ6v_B/rectangl.png',
-      selected: false
-    },
-    {
-      id: 2, 
-      name: 'Ali bin Abi Talib',
-      image: 'https://dashboard.codeparrot.ai/api/image/Z7iqnlCHtJJZ6v_B/rectangl-6.png',
-      selected: false
-    },
-    {
-      id: 3,
-      name: 'Umar bin Alkufi',
-      image: 'https://dashboard.codeparrot.ai/api/image/Z7iqnlCHtJJZ6v_B/rectangl-12.png',
-      selected: false
-    },
-    {
-      id: 4,
-      name: 'Sara al-Nasr',
-      image: 'https://dashboard.codeparrot.ai/api/image/Z7iqnlCHtJJZ6v_B/rectangl-19.png',
-      selected: false
-    },
-    {
-      id: 5,
-      name: 'Rami al-Jabari',
-      image: 'https://dashboard.codeparrot.ai/api/image/Z7iqnlCHtJJZ6v_B/rectangl-25.png',
-      selected: false
-    }
+    // default kids data
+    { id: 1, name: 'Jabir bin Hayan', image: 'https://dashboard.codeparrot.ai/api/image/Z7iqnlCHtJJZ6v_B/rectangl.png', selected: false },
+    { id: 2, name: 'Ali bin Abi Talib', image: 'https://dashboard.codeparrot.ai/api/image/Z7iqnlCHtJJZ6v_B/rectangl-6.png', selected: false },
+    { id: 3, name: 'Umar bin Alkufi', image: 'https://dashboard.codeparrot.ai/api/image/Z7iqnlCHtJJZ6v_B/rectangl-12.png', selected: false },
+    { id: 4, name: 'Sara al-Nasr', image: 'https://dashboard.codeparrot.ai/api/image/Z7iqnlCHtJJZ6v_B/rectangl-19.png', selected: false },
+    { id: 5, name: 'Rami al-Jabari', image: 'https://dashboard.codeparrot.ai/api/image/Z7iqnlCHtJJZ6v_B/rectangl-25.png', selected: false }
   ]);
 
   const [formData, setFormData] = useState({
@@ -81,13 +62,13 @@ const AddAuthorizedPickup = ({
             style={styles.backIcon}
             resizeMode="contain"
           />
-          <Text style={styles.backText}>Back</Text>
+          <SubHeading text="Back" style={styles.backText} />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Authorized Pickup Details</Text>
+        <Heading title="Authorized Pickup Details" style={styles.headerTitle} />
       </View>
 
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
-        <Text style={styles.title}>Add New Authorized Pickup</Text>
+        <Heading title="Add New Authorized Pickup" style={styles.title} />
 
         <View style={styles.imageUploadContainer}>
           <View style={styles.imageContainer}>
@@ -98,13 +79,13 @@ const AddAuthorizedPickup = ({
             />
           </View>
           <TouchableOpacity style={styles.uploadButton}>
-            <Text style={styles.uploadButtonText}>Upload Picture</Text>
+            <SubHeading text="Upload Picture" style={styles.uploadButtonText} />
           </TouchableOpacity>
         </View>
 
         <View style={styles.formContainer}>
           <View style={styles.inputGroup}>
-            <Text style={styles.label}>Relation</Text>
+            <SubHeading text="Relation" style={styles.label} />
             <View style={styles.inputContainer}>
               <TextInput
                 style={styles.input}
@@ -122,7 +103,7 @@ const AddAuthorizedPickup = ({
           </View>
 
           <View style={styles.inputGroup}>
-            <Text style={styles.label}>Name</Text>
+            <SubHeading text="Name" style={styles.label} />
             <View style={styles.inputContainer}>
               <TextInput
                 style={styles.input}
@@ -135,7 +116,7 @@ const AddAuthorizedPickup = ({
           </View>
 
           <View style={styles.inputGroup}>
-            <Text style={styles.label}>ID Number</Text>
+            <SubHeading text="ID Number" style={styles.label} />
             <View style={styles.inputContainer}>
               <TextInput
                 style={styles.input}
@@ -148,7 +129,7 @@ const AddAuthorizedPickup = ({
           </View>
 
           <View style={styles.inputGroup}>
-            <Text style={styles.label}>Cell No</Text>
+            <SubHeading text="Cell No" style={styles.label} />
             <View style={styles.inputContainer}>
               <TextInput
                 style={styles.input}
@@ -162,7 +143,7 @@ const AddAuthorizedPickup = ({
           </View>
 
           <View style={styles.inputGroup}>
-            <Text style={styles.label}>Vehicle #</Text>
+            <SubHeading text="Vehicle #" style={styles.label} />
             <View style={styles.inputContainer}>
               <TextInput
                 style={styles.input}
@@ -174,7 +155,7 @@ const AddAuthorizedPickup = ({
             </View>
           </View>
 
-          <Text style={styles.label}>Select Kids</Text>
+          <SubHeading text="Select Kids" style={styles.label} />
           <ScrollView 
             horizontal 
             showsHorizontalScrollIndicator={false}
@@ -192,7 +173,7 @@ const AddAuthorizedPickup = ({
                     style={styles.kidImage}
                     resizeMode="cover"
                   />
-                  <Text style={styles.kidName}>{kid.name}</Text>
+                  <SubHeading text={kid.name} style={styles.kidName} />
                 </TouchableOpacity>
               ))}
             </View>
@@ -209,30 +190,23 @@ const AddAuthorizedPickup = ({
                 resizeMode="contain"
               />
             </TouchableOpacity>
-            <Text style={styles.checkboxText}>
-              I acknowledge that the information is accurate & that i am legally responsible for it.
-            </Text>
+            <SubHeading text="I acknowledge that the information is accurate & that I am legally responsible for it." style={styles.checkboxText} />
           </View>
 
-          <TouchableOpacity 
-            style={[
-              styles.saveButton,
-              (!formData.acknowledgement || !selectedKids.some(kid => kid.selected)) && 
-              styles.saveButtonDisabled
-            ]}
+          <CustomButton
+            text="Save"
             onPress={handleSave}
             disabled={!formData.acknowledgement || !selectedKids.some(kid => kid.selected)}
-          >
-            <Text style={styles.saveButtonText}>Save</Text>
-          </TouchableOpacity>
+            style={[styles.saveButton, (!formData.acknowledgement || !selectedKids.some(kid => kid.selected)) && styles.saveButtonDisabled]}
+          />
         </View>
       </ScrollView>
+
       <CustomModal
         visible={modalVisible}
         onClose={() => setModalVisible(false)}
         title="Khalid al-Jameel"
         description="Are you sure you want to remove authorized pick-up?"
-        // imageSource={require('../assets/profile-image.png')}
         primaryButtonText="Yes, Sure"
         primaryButtonAction={() => console.log('Removed Authorized Pick-Up')}
         secondaryButtonText="No, I Don’t"
