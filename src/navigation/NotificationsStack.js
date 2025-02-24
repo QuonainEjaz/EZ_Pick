@@ -5,7 +5,7 @@ import { createStackNavigator } from '@react-navigation/stack';
 
 const Stack = createStackNavigator();
 
-const NotificationsNavigator = () => {
+const NotificationsStack = () => {
   return (
     <Stack.Navigator
       initialRouteName="NotificationScreen" screenOptions={({ route }) => ({
@@ -16,4 +16,4 @@ const NotificationsNavigator = () => {
   );
 };
 
-export default NotificationsNavigator;
+export default NotificationsStack;

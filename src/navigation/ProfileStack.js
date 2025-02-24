@@ -1,14 +1,15 @@
 import React from 'react';
 import CustomHeader from '../components/CustomHeader';
 import Profile from '../screens/Profile/Profile';
-import { createStackNavigator } from '@react-navigation/stack';
+import {createStackNavigator} from '@react-navigation/stack';
 
 const Stack = createStackNavigator();
 
-const ProfileNavigator = () => {
+const ProfileStack = () => {
   return (
     <Stack.Navigator
-      initialRouteName="ProfileScreen" screenOptions={({ route }) => ({
+      initialRouteName="ProfileScreen"
+      screenOptions={({route}) => ({
         header: () => <CustomHeader screen={route.name} />,
       })}>
       <Stack.Screen name="ProfileScreen" component={Profile} />
@@ -16,4 +17,4 @@ const ProfileNavigator = () => {
   );
 };
 
-export default ProfileNavigator;
+export default ProfileStack;

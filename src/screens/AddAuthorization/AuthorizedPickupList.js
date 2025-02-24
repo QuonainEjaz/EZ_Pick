@@ -11,6 +11,7 @@ import SubHeading from '../../components/SubHeading';
 import CustomButton from '../../components/CustomButton';
 import CustomOptionsModal from '../../components/AuthScreenComponents/CustomOptionsModal';
 
+
 const AuthorizedPickupList = ({onAddNew = () => {}}) => {
   const pickupList = [
     {
@@ -45,8 +46,7 @@ const AuthorizedPickupList = ({onAddNew = () => {}}) => {
 
   const [modalVisible, setModalVisible] = React.useState(false);
   const renderPickupItem = ({item}) => (
-    
-    <View key={item.id} style={styles.pickupItem}>
+    <TouchableOpacity style={styles.pickupItem}>
       <Image
         source={{uri: item.image}}
         style={styles.profileImage}
@@ -75,7 +75,7 @@ const AuthorizedPickupList = ({onAddNew = () => {}}) => {
         // onDelete={handleDelete}
         style={styles.optionsModal}
       />
-    </View>
+    </TouchableOpacity>
   );
 
   return (

@@ -5,7 +5,7 @@ import { createStackNavigator } from '@react-navigation/stack';
 
 const Stack = createStackNavigator();
 
-const HomeNavigator = () => {
+const HomeStack = () => {
   return (
     <Stack.Navigator
       initialRouteName="HomeScreen"
@@ -18,4 +18,4 @@ const HomeNavigator = () => {
   );
 };
 
-export default HomeNavigator;
+export default HomeStack;

@@ -6,7 +6,7 @@ import { createStackNavigator } from '@react-navigation/stack';
 
 const Stack = createStackNavigator();
 
-const HistoryNavigator = () => {
+const HistoryStack = () => {
   return (
     <Stack.Navigator
       initialRouteName="HistoryScreen" screenOptions={({ route, navigation }) => ({
@@ -18,4 +18,4 @@ const HistoryNavigator = () => {
   );  
 };
 
-export default HistoryNavigator;
+export default HistoryStack;

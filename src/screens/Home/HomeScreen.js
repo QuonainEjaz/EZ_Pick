@@ -18,8 +18,8 @@ const HomeScreen = () => {
           'https://dashboard.codeparrot.ai/api/image/Z7W8qDO_YEiK217K/student-4.png',
         outOfRange: true,
         timer: {
-          hours: '01',
-          minutes: '00',
+          hours: '00',
+          minutes: '02',
           seconds: '00',
         },
       },
@@ -32,8 +32,8 @@ const HomeScreen = () => {
           'https://dashboard.codeparrot.ai/api/image/Z7W8qDO_YEiK217K/student-5.png',
         outOfRange: true,
         timer: {
-          hours: '01',
-          minutes: '00',
+          hours: '00',
+          minutes: '01',
           seconds: '00',
         },
       },
@@ -46,9 +46,9 @@ const HomeScreen = () => {
           'https://dashboard.codeparrot.ai/api/image/Z7W8qDO_YEiK217K/student-6.png',
         outOfRange: true,
         timer: {
-          hours: '01',
+          hours: '00',
           minutes: '00',
-          seconds: '00',
+          seconds: '30',
         },
       },
     ];

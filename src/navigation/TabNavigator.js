@@ -6,11 +6,11 @@ import { HistoryIcon, FocusedHistoryIcon } from '../assets/Icons/svg/HistoryIcon
 import { AddIcon, FocusedAddIcon } from '../assets/Icons/svg/AddIcons';
 import { NotificationIcon, FocusedNotificationIcon } from '../assets/Icons/svg/NotificationIcons';
 import { ProfileIcon, FocusedProfileIcon } from '../assets/Icons/svg/ProfileIcons';
-import HomeNavigator from './HomeNavigator';
-import HistoryNavigator from './HistoryNavigator';
-import NotificationsNavigator from './NotificationsNavigator';
-import ProfileNavigator from './ProfileNavigator';
-import AddAuthorizationNavigator from './AddAuthorizationNavigator';
+import HomeStack from './HomeStack';
+import HistoryStack from './HistoryStack';
+import NotificationsStack from './NotificationsStack';
+import ProfileStack from './ProfileStack';
+import AddAuthorizationStack from './AddAuthorizationStack';
 
 
 const Tab = createBottomTabNavigator();
@@ -45,7 +45,7 @@ const TabNavigator = () => {
     >
       <Tab.Screen
         name="Home"
-        component={HomeNavigator}
+        component={HomeStack}
         options={{
           tabBarIcon: ({ focused }) => (
             <TabIcon
@@ -58,7 +58,7 @@ const TabNavigator = () => {
       />
       <Tab.Screen
         name="History"
-        component={HistoryNavigator}
+        component={HistoryStack}
         options={{
           tabBarIcon: ({ focused }) => (
             <TabIcon
@@ -71,7 +71,7 @@ const TabNavigator = () => {
       />
       <Tab.Screen
         name="Add"
-        component={AddAuthorizationNavigator}
+        component={AddAuthorizationStack}
         options={{
           tabBarIcon: ({ focused }) => (
             <TabIcon
@@ -84,7 +84,7 @@ const TabNavigator = () => {
       />
       <Tab.Screen
         name="Notification"
-        component={NotificationsNavigator}
+        component={NotificationsStack}
         options={{
           tabBarIcon: ({ focused }) => (
             <TabIcon
@@ -97,7 +97,7 @@ const TabNavigator = () => {
       />
       <Tab.Screen
         name="Profile"
-        component={ProfileNavigator}
+        component={ProfileStack}
         options={{
           tabBarIcon: ({ focused }) => (
             <TabIcon

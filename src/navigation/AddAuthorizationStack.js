@@ -5,7 +5,7 @@ import { createStackNavigator } from '@react-navigation/stack';
 
 const Stack = createStackNavigator();
 
-const AddAuthorizationNavigator = () => {
+const AddAuthorizationStack = () => {
   return (
     <Stack.Navigator
       initialRouteName="AddAuthorizationScreen" screenOptions={({ route }) => ({
@@ -16,4 +16,4 @@ const AddAuthorizationNavigator = () => {
   );
 };
 
-export default AddAuthorizationNavigator;
+export default AddAuthorizationStack;
