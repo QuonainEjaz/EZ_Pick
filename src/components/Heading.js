@@ -10,7 +10,6 @@ const Heading = ({ title, textstyle, boxStyle }) => {
     </View>
   );
 };
-
 const styles = StyleSheet.create({
   container: {
     alignItems: 'center',

@@ -1,12 +1,12 @@
-import React, {useEffect} from 'react';
-import {View, StyleSheet, FlatList} from 'react-native';
-import {useDispatch, useSelector} from 'react-redux'; 
+import React, { useEffect, useState } from 'react';
+import { View, StyleSheet } from 'react-native';
+import { useDispatch } from 'react-redux';
 import { setStudents } from '../../store/App/action';
-import StudentCard from '../../components/HomeScreenComponents/StudentCard';
 
-const HomeScreen = () => {
+const HomeScreen = ({ navigation }) => {
   const dispatch = useDispatch();
-  const students = useSelector(state => state.students.students);
+  const [isFirstLoad, setIsFirstLoad] = useState(true);
+
   useEffect(() => {
     const staticStudents = [
       {
@@ -15,8 +15,8 @@ const HomeScreen = () => {
         grade: 'Grade 7th',
         pickupTime: '12:30 PM',
         image:
-          'https://dashboard.codeparrot.ai/api/image/Z7W8qDO_YEiK217K/student-4.png',
-        outOfRange: true,
+          'https://th.bing.com/th/id/R.29b9abf79392b775503a4c001d62c6b6?rik=ZNrA1V2yiKFI8A&riu=http%3a%2f%2fmantraya.org%2fwp-content%2fuploads%2f2018%2f06%2fPassport-Size.jpg&ehk=ICOC3izvQ2e2mFkTFjJG0jefCqcsUS17n%2f1kjq7uIzI%3d&risl=&pid=ImgRaw&r=0',
+        range: 'pickup_successful', // Status: PICKUP SUCCESSFULLY!
         timer: {
           hours: '00',
           minutes: '02',
@@ -29,8 +29,8 @@ const HomeScreen = () => {
         grade: 'Grade 7th',
         pickupTime: '12:30 PM',
         image:
-          'https://dashboard.codeparrot.ai/api/image/Z7W8qDO_YEiK217K/student-5.png',
-        outOfRange: true,
+          'https://th.bing.com/th/id/R.29b9abf79392b775503a4c001d62c6b6?rik=ZNrA1V2yiKFI8A&riu=http%3a%2f%2fmantraya.org%2fwp-content%2fuploads%2f2018%2f06%2fPassport-Size.jpg&ehk=ICOC3izvQ2e2mFkTFjJG0jefCqcsUS17n%2f1kjq7uIzI%3d&risl=&pid=ImgRaw&r=0',
+        range: 'out_of_range', // Status: You are out of range
         timer: {
           hours: '00',
           minutes: '01',
@@ -43,61 +43,76 @@ const HomeScreen = () => {
         grade: 'Grade 7th',
         pickupTime: '12:30 PM',
         image:
-          'https://dashboard.codeparrot.ai/api/image/Z7W8qDO_YEiK217K/student-6.png',
-        outOfRange: true,
+          'https://th.bing.com/th/id/R.29b9abf79392b775503a4c001d62c6b6?rik=ZNrA1V2yiKFI8A&riu=http%3a%2f%2fmantraya.org%2fwp-content%2fuploads%2f2018%2f06%2fPassport-Size.jpg&ehk=ICOC3izvQ2e2mFkTFjJG0jefCqcsUS17n%2f1kjq7uIzI%3d&risl=&pid=ImgRaw&r=0',
+        range: 'request_accepted', // Status: REQUEST ACCEPTED
         timer: {
           hours: '00',
           minutes: '00',
           seconds: '30',
         },
       },
+      {
+        id: '4',
+        name: 'Fatima bin Muhammad',
+        grade: 'Grade 6th',
+        pickupTime: '01:00 PM',
+        image:
+          'https://th.bing.com/th/id/R.29b9abf79392b775503a4c001d62c6b6?rik=ZNrA1V2yiKFI8A&riu=http%3a%2f%2fmantraya.org%2fwp-content%2fuploads%2f2018%2f06%2fPassport-Size.jpg&ehk=ICOC3izvQ2e2mFkTFjJG0jefCqcsUS17n%2f1kjq7uIzI%3d&risl=&pid=ImgRaw&r=0',
+        range: 'ready_to_pickup', // Status: READY TO PICKUP!
+        timer: {
+          hours: '00',
+          minutes: '05',
+          seconds: '00',
+        },
+      },
+      {
+        id: '5',
+        name: 'Hassan bin Ali',
+        grade: 'Grade 8th',
+        pickupTime: '01:30 PM',
+        image:
+          'https://th.bing.com/th/id/R.29b9abf79392b775503a4c001d62c6b6?rik=ZNrA1V2yiKFI8A&riu=http%3a%2f%2fmantraya.org%2fwp-content%2fuploads%2f2018%2f06%2fPassport-Size.jpg&ehk=ICOC3izvQ2e2mFkTFjJG0jefCqcsUS17n%2f1kjq7uIzI%3d&risl=&pid=ImgRaw&r=0',
+        range: 'request_sent', // Status: REQUEST SENT SUCCESSFULLY
+        timer: {
+          hours: '00',
+          minutes: '00',
+          seconds: '00',
+        },
+      },
+      {
+        id: '6',
+        name: 'Zaynab bin Ali',
+        grade: 'Grade 9th',
+        pickupTime: '02:00 PM',
+        image:
+          'https://th.bing.com/th/id/R.29b9abf79392b775503a4c001d62c6b6?rik=ZNrA1V2yiKFI8A&riu=http%3a%2f%2fmantraya.org%2fwp-content%2fuploads%2f2018%2f06%2fPassport-Size.jpg&ehk=ICOC3izvQ2e2mFkTFjJG0jefCqcsUS17n%2f1kjq7uIzI%3d&risl=&pid=ImgRaw&r=0',
+        range: 'in_range', // Status: You are in School range
+
+        timer: {
+          hours: '00',
+          minutes: '00',
+          seconds: '45',
+        },
+      },
     ];
+
+ 
     dispatch(setStudents(staticStudents));
-  }, [dispatch]);
-  return (
-    <View style={styles.container}>
-      <View style={styles.cardsContainer}>
-        <FlatList
-          showsVerticalScrollIndicator={false}
-          data={students}
-          renderItem={({item}) => (
-            <StudentCard
-              key={item.id}
-              student={item}
-              style={styles.studentCard}
-            />
-          )}
-          keyExtractor={item => item.id}
-        />
-      </View>
-    </View>
-  );
+
+    if (isFirstLoad) {
+      navigation.navigate('StudentUploadScreen');
+    } else {
+      navigation.navigate('StudentListScreen');
+    }
+  }, [dispatch, isFirstLoad, navigation]);
+
+  return <View style={styles.container} />;
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    flexDirection: 'column',
     backgroundColor: '#f8f8f9',
-  },
-  topBar: {
-    width: '100%',
-    height: 120,
-  },
-  cardsContainer: {
-    flex: 1,
-    flexDirection: 'column',
-    paddingHorizontal: 20,
-    paddingVertical: 10,
-    gap: 14,
-  },
-  studentCard: {
-    width: '100%',
-    height: 'auto',
-  },
-  bottomNavigation: {
-    width: '100%',
-    height: 100,
   },
 });
 

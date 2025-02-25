@@ -28,9 +28,12 @@ const SplashScreen_2 = ({navigation}) => {
           />
           <SubHeading
             text={'Lorem ipsum dolor sit amet consectetur. Faucibus.'}
-            style={{fontSize: 16, lineHeight: 24, marginBottom: 20}}
+            style={styles.subHeadingText}
           />
-          <TouchableOpacity onPress={() => {navigation.navigate('SplashScreen_3');}}>
+          <TouchableOpacity
+            onPress={() => {
+              navigation.navigate('SplashScreen_3');
+            }}>
             <Image
               resizeMode="contain"
               style={[styles.icon, {width: width * 0.15, height: width * 0.15}]}
@@ -53,9 +56,16 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   text: {
-    fontSize: 32,
+    textAlign: 'center',
+    fontSize: 34,
     lineHeight: 40,
     color: '#212529',
+    marginBottom: 20,
+  },
+  subHeadingText: {
+    textAlign: 'center',
+    fontSize: 16,
+    lineHeight: 24,
     marginBottom: 20,
   },
 });

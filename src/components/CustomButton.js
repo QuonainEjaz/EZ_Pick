@@ -6,16 +6,13 @@ import {
   useWindowDimensions,
 } from 'react-native';
 
-const CustomButton = ({title, onPress, touchStyle, textStyle, disabled}) => {
-  const {width} = useWindowDimensions();
-  const buttonPadding = width * 0.045;
+const CustomButton = ({title, onPress, touchStyle, textStyle, disabled,width=useWindowDimensions().width}) => {
   const fontSize = width * 0.04;
 
   return (
     <TouchableOpacity
       style={[
         styles.button,
-        {paddingVertical: buttonPadding},
         touchStyle
       ]}
       onPress={disabled ? null : onPress} // Disable onPress if the button is disabled

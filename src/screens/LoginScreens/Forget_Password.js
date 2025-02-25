@@ -1,5 +1,5 @@
-import React,{useState} from 'react';
-import {View, Text, StyleSheet,Dimensions} from 'react-native';
+import React, {useState} from 'react';
+import {View, Text, StyleSheet, Dimensions} from 'react-native';
 import LinkButton from '../../components/LinkButton';
 import Heading from '../../components/Heading';
 import SubHeading from '../../components/SubHeading';
@@ -8,11 +8,17 @@ import CustomButton from '../../components/CustomButton';
 import CustomAlert from '../../components/CustomAlert';
 
 const Forget_Password = ({navigation}) => {
-      const {width, height} = Dimensions.get('window');
-      const [modalVisible, setModalVisible] = useState(false);
+  const {width, height} = Dimensions.get('window');
+  const [modalVisible, setModalVisible] = useState(false);
   return (
     <View style={styles.container}>
-      <LinkButton label={'Back'} style={{alignSelf:'flex-start'}} onPress={()=>{navigation.navigate('Login')}}/>
+      <LinkButton
+        label={'Back'}
+        style={{alignSelf: 'flex-start'}}
+        onPress={() => {
+          navigation.navigate('Login');
+        }}
+      />
       <View style={[styles.viewContainer, {width: width * 0.9}]}>
         <Heading boxStyle={styles.heading} title="Forget Password" />
         <SubHeading
@@ -20,7 +26,7 @@ const Forget_Password = ({navigation}) => {
           boxStyle={styles.heading}
           style={{fontSize: 14, textAlign: 'start', color: '#6C757D'}}
         />
-        <View style={{height: height*0.03}}/>
+        <View style={{height: height * 0.03}} />
         <InputField
           label="Username"
           placeholder="Enter your username"
@@ -28,19 +34,32 @@ const Forget_Password = ({navigation}) => {
           value=""
           onChangeText={() => {}}
           onBlur={() => {}}
-          style={{label: {fontSize: 14, fontWeight: 'bold',marginBottom:10}}}
+          style={{
+            label: {fontSize: 14, fontWeight: 'bold', marginBottom: 10},
+            input: {
+              paddingVertical: 12,
+              borderWidth: 1,
+              borderColor: '#E3E3E3',
+            },
+          }}
           keyboardType="email-address"
           secureTextEntry={false}
           multiline={false}
         />
-        <View style={{height: height*0.4}}/>
-        <CustomButton title="Send" onPress={() => {setModalVisible(true)}} />
+        <View style={{height: height * 0.4}} />
+        <CustomButton
+          title="Send"
+          onPress={() => {
+            setModalVisible(true);
+          }}
+          touchStyle={{width: width * 0.9, height: height * 0.06}}
+        />
       </View>
-      <CustomAlert 
-        visible={modalVisible} 
-        onClose={() => setModalVisible(false)} 
+      <CustomAlert
+        visible={modalVisible}
+        onClose={() => setModalVisible(false)}
         label={'Email Send Successfully!'}
-        message={'We have send you a link to reset your password.' }
+        message={'We have send you a link to reset your password.'}
         buttonText={'Ok, Got it'}
       />
     </View>
@@ -50,7 +69,7 @@ const Forget_Password = ({navigation}) => {
 const styles = StyleSheet.create({
   heading: {
     alignItems: 'flex-start',
-    marginTop:10,
+    marginTop: 10,
   },
   container: {
     flex: 1,

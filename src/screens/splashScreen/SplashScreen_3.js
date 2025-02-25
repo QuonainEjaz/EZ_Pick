@@ -29,12 +29,12 @@ const SplashScreen_3 = ({navigation}) => {
           />
           <SubHeading
             text={'Lorem ipsum dolor sit amet consectetur. Faucibus.'}
-            style={{fontSize: 16, lineHeight: 24, marginBottom: 20}}
+            style={styles.subHeadingStyle}
           />
 
           <CustomButton
             title="Get Started"
-            touchStyle={{width: width * 0.9}}
+            touchStyle={{width: width * 0.9,height: height * 0.06}}
             onPress={() => {
               navigation.navigate('Login');
             }}
@@ -59,6 +59,13 @@ const styles = StyleSheet.create({
     lineHeight: 40,
     color: '#212529',
     marginBottom: 10,
+    textAlign: 'center',
+  },
+  subHeadingStyle: {
+    textAlign: 'center',
+    fontSize: 16,
+    lineHeight: 24,
+    marginBottom: 20,
   },
 });
 

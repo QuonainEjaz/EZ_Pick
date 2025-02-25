@@ -81,8 +81,6 @@ const styles = StyleSheet.create({
     backgroundColor: '#F8F8F9',
   },
   inputContainer: {
-    // flexDirection: 'row',
-    // alignItems: 'center',
     position: 'relative',
   },
   eyeIconContainer: {

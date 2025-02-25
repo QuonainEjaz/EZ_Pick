@@ -22,7 +22,12 @@ const Login = ({navigation}) => {
         <SubHeading
           text="Lorem ipsum dolor sit amet consectetur. Elit malesuada massa sit sagittis."
           boxStyle={styles.heading}
-          style={{fontSize: 14, textAlign: 'start', color: '#6C757D'}}
+          style={{
+            fontSize: 14,
+            textAlign: 'start',
+            color: '#6C757D',
+            marginBottom: '5%',
+          }}
         />
         <InputField
           label="Username"
@@ -31,7 +36,14 @@ const Login = ({navigation}) => {
           value=""
           onChangeText={() => {}}
           onBlur={() => {}}
-          style={{label:{fontSize: 16, fontWeight:'bold'}}}
+          style={{
+            label: {fontSize: 14, fontWeight: 'bold', marginBottom: 10},
+            input: {
+              paddingVertical: 12,
+              borderWidth: 1,
+              borderColor: '#E3E3E3',
+            },
+          }}
           keyboardType="email-address"
           secureTextEntry={false}
           multiline={false}
@@ -43,17 +55,32 @@ const Login = ({navigation}) => {
           value=""
           onChangeText={() => {}}
           onBlur={() => {}}
-          style={{label:{fontSize: 16, fontWeight:'bold'}}}
+          style={{
+            label: {fontSize: 14, fontWeight: 'bold', marginBottom: 10},
+            input: {
+              paddingVertical: 12,
+              borderWidth: 1,
+              borderColor: '#E3E3E3',
+            },
+          }}
           keyboardType="password"
           secureTextEntry={true}
           multiline={false}
         />
         <CustomLink
           label="Forget Password?"
-          onPress={() => {navigation.navigate('Forget_Password')}}
-          style={{alignSelf: 'flex-end',marginTop: -15,marginBottom:40}}
+          onPress={() => {
+            navigation.navigate('Forget_Password');
+          }}
+          style={{alignSelf: 'flex-end', marginTop: -15, marginBottom: 40}}
         />
-        <CustomButton title="Login" onPress={() => {navigation.navigate('MainScreen')}} hoverable={true} />
+        <CustomButton
+          title="Login"
+          onPress={() => {
+            navigation.navigate('TabNavigator');
+          }}
+          touchStyle={{width: width * 0.9, height: height * 0.06}}
+        />
       </View>
     </View>
   );
@@ -72,7 +99,7 @@ const styles = StyleSheet.create({
     flex: 1,
     // backgroundColor: 'grey',
     padding: 1,
-    paddingTop: 30
+    paddingTop: 30,
   },
   heading: {
     // backgroundColor: '#EDEDED',
