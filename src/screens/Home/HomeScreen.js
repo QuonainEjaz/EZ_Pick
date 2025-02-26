@@ -1,13 +1,29 @@
 import React, { useEffect, useState } from 'react';
 import { View, StyleSheet } from 'react-native';
 import { useDispatch } from 'react-redux';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { setStudents } from '../../store/App/action';
 
 const HomeScreen = ({ navigation }) => {
   const dispatch = useDispatch();
-  const [isFirstLoad, setIsFirstLoad] = useState(true);
+  const [isFirstLoad, setIsFirstLoad] = useState(true); 
 
   useEffect(() => {
+    const checkFirstVisit = async () => {
+      try {
+        const isFirstTime = await AsyncStorage.getItem('isFirstTime');
+        if (isFirstTime === null) {
+          await AsyncStorage.setItem('isFirstTime', 'false');
+          setIsFirstLoad(true); 
+        } else {
+          setIsFirstLoad(false); 
+        }
+      } catch (error) {
+        console.error('Error checking first time visit:', error);
+      }
+    };
+
+    checkFirstVisit()
     const staticStudents = [
       {
         id: '1',
@@ -96,11 +112,11 @@ const HomeScreen = ({ navigation }) => {
       },
     ];
 
- 
+
     dispatch(setStudents(staticStudents));
 
     if (isFirstLoad) {
-      navigation.navigate('StudentUploadScreen');
+      navigation.navigate('SplashScreen');
     } else {
       navigation.navigate('StudentListScreen');
     }

@@ -7,17 +7,7 @@ import CustomHeader from '../components/CustomHeader';
 
 const Stack = createStackNavigator();
 
-const HomeStack = ({navigation}) => {
-  const [isFirstLoad, setIsFirstLoad] = useState(true);
-
-  useEffect(() => {
-    if (isFirstLoad) {
-      navigation.navigate('StudentUploadScreen');
-    } else {
-      navigation.navigate('StudentListScreen');
-    }
-  }, [isFirstLoad, navigation]);
-
+const HomeStack = () => {
   return (
     <Stack.Navigator
       initialRouteName="HomeScreen"
