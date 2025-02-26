@@ -29,6 +29,7 @@ const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
     justifyContent: 'space-between',
+    backgroundColor: 'transparent',
   },
   uploadLaterButton: {
     borderWidth: 1,

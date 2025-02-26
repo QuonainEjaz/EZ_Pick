@@ -9,8 +9,8 @@ const CustomOptionsModal = ({
   onEdit,
   onDelete,
 }) => {
-  const handleOptionPress = action => {
-    // action(); // Call the action (onViewDetails, onEdit, or onDelete)
+  const handleOptionPress = (action) => {
+    action(); // Call the action (onViewDetails, onEdit, or onDelete)
     onClose(); // Close the modal after action
   };
 

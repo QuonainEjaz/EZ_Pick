@@ -1,24 +1,27 @@
 import React from 'react';
-import { View, StyleSheet, Dimensions } from 'react-native';
-import Heading from '../../components/Heading'; 
-import SubHeading from '../../components/SubHeading';  
+import {View, StyleSheet, Dimensions} from 'react-native';
+import Heading from '../../components/Heading';
+import SubHeading from '../../components/SubHeading';
 
-const DetailsContainer = ({
-  studentId = "ST6562984",
-  grade = "6A",
-  requestBy = "Driver",
-  date = "02 Jan 2024",
-  requestTime = "12:30PM",
-  responseTime = "12:32PM",
-  confirmTime = "12:38PM"
-}) => {
+const DetailsContainer = ({student}) => {
+  const {
+    date,
+    pickupTime,
+    status,
+    studentId,
+    grade,
+    requestBy,
+    requestTime,
+    responseTime,
+    confirmTime,
+  } = student;
+
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        {/* Use Heading for the title */}
         <Heading title="Details" textstyle={styles.headerTitle} />
       </View>
-      
+
       <View style={styles.content}>
         <View style={styles.row}>
           <View style={styles.column}>
@@ -70,9 +73,9 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     padding: 12,
     width: '100%',
-    maxWidth: Math.min(400, windowWidth - 40), // Responsive width with max 400
+    maxWidth: Math.min(400, windowWidth - 40),
     minWidth: 300,
-    shadowColor: '#000',
+    shadowColor: '#67676714',
     shadowOffset: {
       width: 0,
       height: 2,
@@ -91,7 +94,7 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontFamily: 'Outfit',
     fontSize: 18,
-    fontWeight: '600',
+    fontWeight: '700',
     color: '#212529',
     lineHeight: 22,
   },
@@ -111,14 +114,14 @@ const styles = StyleSheet.create({
   label: {
     fontFamily: 'Outfit',
     fontSize: 14,
-    fontWeight: '500',
+    fontWeight: '900',
     color: '#212529',
     lineHeight: 18,
   },
   value: {
     fontFamily: 'Outfit',
     fontSize: 14,
-    fontWeight: '400',
+    fontWeight: '500',
     color: '#6C757D',
     lineHeight: 18,
   },

@@ -3,12 +3,13 @@ import { View, StyleSheet } from 'react-native';
 import UserInfoHeader from './UserInfoHeader';
 import DetailsContainer from './DetailsContainer';
 
-const PickupDetails = () => {
+const PickupDetails = ({route}) => {
+  const { student } = route.params;
   return (
     <View style={styles.container}>
       <View style={styles.contentContainer}>
-        <UserInfoHeader />
-        <DetailsContainer />
+        <UserInfoHeader student={student}/>
+        <DetailsContainer student={student}/>
       </View>
     </View>
   );

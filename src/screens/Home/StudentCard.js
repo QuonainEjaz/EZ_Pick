@@ -1,13 +1,14 @@
-import React, { useState, useEffect, useMemo } from 'react';
-import { View, Text, Image, StyleSheet, Dimensions } from 'react-native';
+import React, {useState, useEffect, useMemo} from 'react';
+import {View, Text, Image,TouchableOpacity, StyleSheet, Dimensions} from 'react-native';
 import Heading from '../../components/Heading';
 import CustomModal from '../../components/CustomModal';
 import CustomButton from '../../components/CustomButton';
 import Success from '../../assets/Icons/svg/Successfull';
+import Export from '../../assets/Icons/svg/Export';
 
-const { width, height } = Dimensions.get('window');
+const {width, height} = Dimensions.get('window');
 
-const StudentCard = ({ student }) => {
+const StudentCard = ({student}) => {
   const [modalVisible, setModalVisible] = useState(false);
   const [status, setStatus] = useState(student.range);
 
@@ -32,91 +33,99 @@ const StudentCard = ({ student }) => {
     }
   }, [timeLeft, student.range]);
 
-  const time = useMemo(() => ({
-    hours: Math.floor(timeLeft / 3600),
-    minutes: Math.floor((timeLeft % 3600) / 60),
-    seconds: timeLeft % 60,
-  }), [timeLeft]);
+  const time = useMemo(
+    () => ({
+      hours: Math.floor(timeLeft / 3600),
+      minutes: Math.floor((timeLeft % 3600) / 60),
+      seconds: timeLeft % 60,
+    }),
+    [timeLeft],
+  );
 
-  const statusConfig = useMemo(() => ({
-    out_of_range: {
-      text: 'You are out of range:',
-      buttonText: 'Pickup Request',
-      textStyle: { color: '#212529' },
-      buttonTextStyle: { color: '#F8AC1650' },
-      buttonTouchStyle: { borderWidth: 1, borderColor: '#F8AC1650' },
-      disabled: false,
-    },
-    in_range: {
-      text: `You are in School's range:`,
-      buttonText: 'Pickup Request',
-      textStyle: { color: '#212529',fontSize: width * 0.032 },
-      buttonTextStyle: null,
-      buttonTouchStyle: null,
-      disabled: false,
-    },
-    ready_to_pickup: {
-      text: 'READY TO PICKUP!',
-      buttonText: 'Pickup Request',
-      textStyle: { color: '#F8AC16' },
-      buttonTextStyle: null,
-      buttonTouchStyle: null,
-      disabled: false,
-    },
-    request_sent: {
-      text: 'REQUEST SENT SUCCESSFULLY',
-      buttonText: 'Confirm Pickup',
-      textStyle: { color: '#F8AC16',fontSize: width * 0.034 },
-      buttonTextStyle: { color: '#FFFFFF', fontWeight: 'bold' },
-      buttonTouchStyle: { backgroundColor: '#F8AC16' },
-      disabled: false,
-    },
-    request_accepted: {
-      text: 'REQUEST ACCEPTED',
-      buttonText: 'Confirm Pickup',
-      textStyle: { color: '#F8AC16'},
-      buttonTextStyle: { color: '#FFFFFF' },
-      buttonTouchStyle: { backgroundColor: '#F8AC16' },
-      disabled: false,
-      cardStyle: { backgroundColor: '#FEF8EB' },
-      headerStyle: { backgroundColor: '#FEEFD2', borderColor: '#F8AC16' },
-    },
-    pickup_successful: {
-      text: 'PICKUP SUCCESSFULLY!',
-      buttonText: 'Confirm Pickup',
-      textStyle: { color: '#F8AC16' },
-      buttonTextStyle: { color: '#FFFFFF'},
-      buttonTouchStyle: { backgroundColor: '#F8AC1650', borderWidth: 0 },
-      disabled: true,
-    },
-  }), []);
+  const statusConfig = useMemo(
+    () => ({
+      out_of_range: {
+        text: 'You are out of range:',
+        buttonText: 'Pickup Request',
+        textStyle: {color: '#212529'},
+        buttonTextStyle: {color: '#F8AC1650'},
+        buttonTouchStyle: {borderWidth: 1, borderColor: '#F8AC1650'},
+        disabled: false,
+      },
+      in_range: {
+        text: `You are in School's range:`,
+        buttonText: 'Pickup Request',
+        textStyle: {color: '#212529', fontSize: width * 0.032},
+        buttonTextStyle: null,
+        buttonTouchStyle: null,
+        disabled: false,
+      },
+      ready_to_pickup: {
+        text: 'READY TO PICKUP!',
+        buttonText: 'Pickup Request',
+        textStyle: {color: '#F8AC16'},
+        buttonTextStyle: null,
+        buttonTouchStyle: null,
+        disabled: false,
+      },
+      request_sent: {
+        text: 'REQUEST SENT SUCCESSFULLY',
+        buttonText: 'Confirm Pickup',
+        textStyle: {color: '#F8AC16', fontSize: width * 0.034},
+        buttonTextStyle: {color: '#FFFFFF', fontWeight: 'bold'},
+        buttonTouchStyle: {backgroundColor: '#F8AC16'},
+        disabled: false,
+      },
+      request_accepted: {
+        text: 'REQUEST ACCEPTED',
+        buttonText: 'Confirm Pickup',
+        textStyle: {color: '#F8AC16'},
+        buttonTextStyle: {color: '#FFFFFF'},
+        buttonTouchStyle: {backgroundColor: '#F8AC16'},
+        disabled: false,
+        cardStyle: {backgroundColor: '#FEF8EB'},
+        headerStyle: {backgroundColor: '#FEEFD2', borderColor: '#F8AC16'},
+      },
+      pickup_successful: {
+        text: 'PICKUP SUCCESSFULLY!',
+        buttonText: 'Confirm Pickup',
+        textStyle: {color: '#F8AC16'},
+        buttonTextStyle: {color: '#FFFFFF'},
+        buttonTouchStyle: {backgroundColor: '#F8AC1650', borderWidth: 0},
+        disabled: true,
+      },
+    }),
+    [],
+  );
 
   const renderModal = () => {
     const modalConfig = {
       ready_to_pickup: {
-        title: "Jabir bin Hayan Albarsi",
-        description: "Your request for pick-up of your child has been accepted. Please wait patiently. If they're late, feel free to submit another request.",
-        primaryButtonText: "Ok, Got it",
+        title: 'Jabir bin Hayan Albarsi',
+        description:
+          "Your request for pick-up of your child has been accepted. Please wait patiently. If they're late, feel free to submit another request.",
+        primaryButtonText: 'Ok, Got it',
         primaryButtonAction: () => console.log('Acknowledged'),
       },
       out_of_range: {
-        title: "Enable Location",
-        description: "By turning on location, will allow us to accurately track your child's pickup location and notify you when they are on their way to be picked up or have been dropped off. This will help ensure a safe and efficient pickup process.",
-        primaryButtonText: "Go to Settings",
+        title: 'Enable Location',
+        description:
+          "By turning on location, will allow us to accurately track your child's pickup location and notify you when they are on their way to be picked up or have been dropped off. This will help ensure a safe and efficient pickup process.",
+        primaryButtonText: 'Go to Settings',
         primaryButtonAction: () => console.log('Settings Pressed'),
       },
       request_accepted: {
-        title: "Confirmation!",
-        description: "Have you picked up your child from school?",
-        primaryButtonText: "Yes, Confirm",
+        title: 'Confirmation!',
+        description: 'Have you picked up your child from school?',
+        primaryButtonText: 'Yes, Confirm',
         primaryButtonAction: () => console.log('Confirmed'),
-        secondaryButtonText: "No, I Don’t",
+        secondaryButtonText: 'No, I Don’t',
         secondaryButtonAction: () => console.log('Not Confirmed'),
         style: {
-          title: { marginBottom: 5 },
-          description: { marginBottom: 20 },
-          titleText: { fontWeight: '700' },
-          descriptionText: { fontSize: 14, marginBottom: 10 },
+          title: {marginBottom: 5},
+          description: {marginBottom: 20},
+          titleText: {fontWeight: '700'},
+          descriptionText: {fontSize: 14, marginBottom: 10},
         },
       },
     };
@@ -132,8 +141,13 @@ const StudentCard = ({ student }) => {
   const config = statusConfig[status] || {};
 
   return (
-    <View style={{ ...styles.card, ...config.cardStyle }}>
-      <View style={[styles.header, config.headerStyle, student.status === 'pickup_successful' && styles.successHeader]}>
+    <View style={{...styles.card, ...config.cardStyle}}>
+      <View
+        style={[
+          styles.header,
+          config.headerStyle,
+          student.status === 'pickup_successful' && styles.successHeader,
+        ]}>
         <Heading
           title={config.text}
           textstyle={[styles.headerText, config.textStyle]}
@@ -170,9 +184,9 @@ const StudentCard = ({ student }) => {
         )}
       </View>
 
-      <View style={styles.infoContainer}>
+      <TouchableOpacity style={styles.infoContainer}>
         <Image
-          source={{ uri: student.image }}
+          source={{uri: student.image}}
           style={styles.image}
           resizeMode="cover"
         />
@@ -182,13 +196,16 @@ const StudentCard = ({ student }) => {
             textstyle={styles.name}
             boxStyle={styles.nameBox}
           />
-          <Text style={styles.grade}>{student.grade}</Text>
+          <Text style={styles.grade}>{`Grade ${student.grade}`}</Text>
           <View style={styles.pickupTimeContainer}>
-            <Text style={styles.pickupTimeLabel}>Today's Pick up time:</Text>
-            <Text style={styles.pickupTime}>{student.pickupTime}</Text>
+            <Text
+              style={
+                styles.pickupTime
+              }>{`Today's Pick up time: ${student.pickupTime}`}</Text>
           </View>
         </View>
-      </View>
+        <TouchableOpacity style={styles.exportContainer}><Export/></TouchableOpacity>
+      </TouchableOpacity>
       <CustomButton
         title={config.buttonText}
         onPress={() => {
@@ -212,7 +229,7 @@ const styles = StyleSheet.create({
     paddingVertical: width * 0.05,
     gap: 15,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
+    shadowOffset: {width: 0, height: 2},
     shadowOpacity: 0.1,
     shadowRadius: 8,
     elevation: 0.1,
@@ -321,6 +338,9 @@ const styles = StyleSheet.create({
   buttonText: {
     color: '#F8AC16',
     fontWeight: 'bold',
+  },
+  exportContainer: {
+    padding: 2,
   },
 });
 

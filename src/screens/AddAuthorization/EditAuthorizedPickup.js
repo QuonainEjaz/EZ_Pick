@@ -43,7 +43,8 @@ const EditAuthorizedPickup = ({
     }
   ],
   onSave = () => {},
-  style = {}
+  style = {},
+  navigation
 }) => {
   const [acknowledgement, setAcknowledgement] = useState(false);
   const [isModalVisible, setIsModalVisible] = useState(false);
@@ -74,6 +75,7 @@ const EditAuthorizedPickup = ({
     if (acknowledgement) {
       onSave(values);
     }
+    navigation.goBack();
   };
 
   const handleAssignKids = (selectedKids) => {

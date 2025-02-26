@@ -1,66 +1,48 @@
-import React, { useEffect, useState } from 'react';
-import { View, FlatList, StyleSheet } from 'react-native';
+import React, {useEffect, useState} from 'react';
+import {View, FlatList, StyleSheet, TouchableOpacity} from 'react-native';
 import Heading from '../../components/Heading';
 import CustomButton from '../../components/CustomButton';
 import UserInfoCard from '../../components/HistoryScreenComponents/UserInfoCard';
 import SubHeading from '../../components/SubHeading';
-import { useDispatch, useSelector } from 'react-redux';
-import { setStudents } from '../../store/App/action';
-import PickupDetails from './PickupDetails';
+import {useDispatch, useSelector} from 'react-redux';
+import ArrowDown from '../../assets/Icons/svg/ArrowDown';
 
-const HistoryScreen = ({ navigation }) => {
+const HistoryScreen = ({navigation}) => {
   const dispatch = useDispatch();
-  const students = useSelector((state) => state.students.students);  // Select students from state
+  const students = useSelector(state => state.students.students);
   const [selectedFilter, setSelectedFilter] = useState('Last Week');
-
-  const handleAddStudent = () => {
-    const newStudent = {
-      id: '8',
-      name: 'New Student',
-      dateTime: '15 Feb 2024, 03:20PM',
-      status: 'Pending',
-    };
-    // Update the students' list by adding the new student
-    dispatch(setStudents([...students, newStudent]));  // Update the students state in Redux
-  };
 
   return (
     <View style={styles.container}>
       {/* Header Section */}
       <View style={styles.header}>
         <Heading title="History" textstyle={styles.heading} />
-        
-        {/* Custom button for filter, replacing TouchableOpacity */}
-        <CustomButton
-          title={selectedFilter}
-          onPress={() => {}}
-          touchStyle={styles.filterButton}
-          textStyle={styles.filterText}
-        />
+        <TouchableOpacity style={[styles.filterTouch,{flexDirection:'row', alignItems:'center'}]} onPress={() => {}}>
+          <CustomButton
+            title={selectedFilter}
+            touchStyle={styles.filterButton}
+            textStyle={styles.filterText}
+            disabled={true}
+          />
+          <ArrowDown />
+        </TouchableOpacity>
       </View>
 
-      {/* List of History Items */}
       <FlatList
-        data={students}  // Use the students from Redux store
-        keyExtractor={(item) => item.id}
-        renderItem={({ item }) => (
+        data={students}
+        keyExtractor={item => item.id}
+        renderItem={({item}) => (
           <UserInfoCard
             name={item.name}
-            dateTime={item.dateTime}
+            dateTime={[item.date, ', ', item.pickupTime]}
             status={item.status}
-            imageSource={require('../../assets/pics/EmailPic.png')}
-            onPress={() => navigation.navigate('PickupDetails', { student: item })}
+            imageSource={item.image}
+            onPress={() =>
+              navigation.navigate('PickupDetails', {student: item})
+            }
           />
         )}
         contentContainerStyle={styles.listContainer}
-      />
-      
-      {/* Custom Button for Add New Student */}
-      <CustomButton
-        title="Add New Student"
-        onPress={handleAddStudent}
-        touchStyle={styles.addButton}
-        textStyle={styles.addButtonText}
       />
     </View>
   );
@@ -82,19 +64,26 @@ const styles = StyleSheet.create({
   heading: {
     fontSize: 18,
     fontWeight: 'bold',
+    color: '#212529',
   },
   filterButton: {
     backgroundColor: '#EFEFEF',
-    paddingVertical: 8,
-    paddingHorizontal: 15,
+    borderRadius: 8,
+  },
+  filterTouch: {
+    backgroundColor: '#EFEFEF',
+    paddingVertical: 10,
+    paddingHorizontal: 5,
     borderRadius: 8,
   },
   filterText: {
-    fontSize: 14,
-    color: '#333',
+    fontSize: 12,
+    color: '#6C757D',
   },
   listContainer: {
-    paddingBottom: 20,
+    flex: 1,
+    gap: 10,
+    backgroundColor: '#F8F9FA',
   },
   addButton: {
     backgroundColor: '#F8AC16',

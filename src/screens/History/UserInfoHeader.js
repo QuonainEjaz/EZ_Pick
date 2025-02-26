@@ -1,34 +1,24 @@
 import React from 'react';
-import { View, Image, StyleSheet } from 'react-native';
-import Heading from '../../components/Heading'; // Import Heading component
-import SubHeading from '../../components/SubHeading'; // Import SubHeading component
+import {View, Image, StyleSheet} from 'react-native';
+import Heading from '../../components/Heading';
+import SubHeading from '../../components/SubHeading';
 
-const UserInfoHeader = ({
-  userName = "Umar bin Alkufi",
-  dateTime = "02 Jan 2024, 12:38PM",
-  status = "Picked",
-  profileImage = "https://dashboard.codeparrot.ai/api/image/Z7cuqP3atcswnoun/profile.png"
-}) => {
+const UserInfoHeader = ({student}) => {
+  const {name, image, date, pickupTime, status} = student;
+  dateTime = [date, ', ', pickupTime];
   return (
     <View style={styles.headerContainer}>
-      {/* Profile Image */}
-      <Image 
-        source={{ uri: profileImage }} 
+      <Image
+        source={{uri: image}}
         style={styles.profileImage}
         resizeMode="cover"
       />
-      
-      {/* Text Container */}
       <View style={styles.textContainer}>
-        {/* Using SubHeading for user name */}
-        <Heading title={userName} textstyle={styles.userName} />
-        {/* Using SubHeading for date/time */}
+        <Heading title={name} textstyle={styles.userName} boxStyle={styles.userNameContainer}/>
         <SubHeading text={dateTime} style={styles.dateTime} />
       </View>
-      
-      {/* Status Container */}
+
       <View style={styles.statusContainer}>
-        {/* Using SubHeading for status text */}
         <SubHeading text={status} style={styles.statusText} />
       </View>
     </View>
@@ -55,6 +45,11 @@ const styles = StyleSheet.create({
     flex: 1,
     marginLeft: 14,
     justifyContent: 'center',
+    gap: 0,
+  },
+  userNameContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
     gap: 5,
   },
   userName: {
@@ -70,16 +65,16 @@ const styles = StyleSheet.create({
     color: '#6C757D',
   },
   statusContainer: {
-    backgroundColor: '#FEF6E6',
-    paddingVertical: 10,
-    paddingHorizontal: 10,
+    backgroundColor: '#FEF5D6',
+    paddingVertical: 8,
+    paddingHorizontal: 8,
     borderRadius: 8,
     marginLeft: 14,
   },
   statusText: {
     fontFamily: 'Outfit',
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: 'bold',
     color: '#F8AC16',
   },
 });

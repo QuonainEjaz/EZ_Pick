@@ -10,9 +10,14 @@ import Heading from '../../components/Heading';
 import SubHeading from '../../components/SubHeading';
 import CustomButton from '../../components/CustomButton';
 import CustomOptionsModal from '../../components/AuthScreenComponents/CustomOptionsModal';
+import AuthConfirmationModal from '../../components/AuthConfirmationModal';
+import AuthPickupDetails from './AuthPickupDetails';
+import EditAuthorizedPickup from './EditAuthorizedPickup';
+import AddAuthorizedPickup from './AddAuthorization';
+import StudentPickupCard from './StudentPickupCard';
+import ShareOptions from './ShareOptions';
 
-
-const AuthorizedPickupList = ({onAddNew = () => {}}) => {
+const AuthorizedPickupList = ({navigation}) => {
   const pickupList = [
     {
       id: 1,
@@ -46,7 +51,7 @@ const AuthorizedPickupList = ({onAddNew = () => {}}) => {
 
   const [modalVisible, setModalVisible] = React.useState(false);
   const renderPickupItem = ({item}) => (
-    <TouchableOpacity style={styles.pickupItem}>
+    <View style={styles.pickupItem}>
       <Image
         source={{uri: item.image}}
         style={styles.profileImage}
@@ -57,7 +62,9 @@ const AuthorizedPickupList = ({onAddNew = () => {}}) => {
         <SubHeading text={item.name} style={styles.nameText} />
         <SubHeading text={item.role} style={styles.roleText} />
       </View>
-      <TouchableOpacity style={styles.optionsButton} onPress={() => setModalVisible(true)}>
+      <TouchableOpacity
+        style={styles.optionsButton}
+        onPress={() => setModalVisible(true)}>
         <View style={styles.optionsCircle}>
           <Image
             source={{
@@ -69,28 +76,71 @@ const AuthorizedPickupList = ({onAddNew = () => {}}) => {
       </TouchableOpacity>
       <CustomOptionsModal
         visible={modalVisible}
-        onClose={() => setModalVisible(false)} // Set modal visibility to false to close it
-        // onViewDetails={handleViewDetails}
-        // onEdit={handleEdit}
+        onClose={() => setModalVisible(false)}
+        onViewDetails={() => navigation.navigate('AuthPickupDetails')}
+        onEdit={() => navigation.navigate('EditAuthorizedPickup')}
         // onDelete={handleDelete}
         style={styles.optionsModal}
       />
-    </TouchableOpacity>
+      <AuthConfirmationModal
+        visible={modalVisible}
+        onClose={() => setModalVisible(false)}
+        title="Khalid al-Jameel"
+        description="Are you sure you want to remove authorized pick-up?"
+        imageSource={require('../../assets/pics/EmailPic.png')} // Replace with actual image source
+        primaryButtonText="Yes, Sure"
+        primaryButtonAction={() => console.log('Confirmed')}
+        secondaryButtonText="No, I Don’t"
+        secondaryButtonAction={() => console.log('Cancelled')}
+        style={{
+          titleText: {fontWeight: 'bold', fontSize: 16},
+          descriptionText: {
+            textAlign: 'center',
+            fontSize: 14,
+            color: '#6C757D',
+          },
+          primaryButton: {
+            backgroundColor: '#F8AC16',
+            borderRadius: 10,
+            paddingVertical: 12,
+          },
+          primaryButtonText: {color: '#FFFFFF', fontWeight: '600'},
+          secondaryButton: {
+            borderWidth: 1,
+            borderColor: '#F8AC16',
+            backgroundColor: 'transparent',
+            borderRadius: 10,
+            paddingVertical: 12,
+          },
+          secondaryButtonText: {color: '#F8AC16', fontWeight: '600'},
+        }}
+      />
+    </View>
   );
 
   return (
+    //  <AuthPickupDetails  />
+    //  <EditAuthorizedPickup  />
+    //  <AddAuthorizedPickup  />
+    //  <StudentPickupCard />
+    //  <ShareOptions />
     <View style={styles.container}>
-      <Heading title="Authorized Pickup" style={styles.headerTitle} />
+      <Heading
+        title="Authorized Pickup"
+        boxStyle={styles.headerTitle}
+        textstyle={styles.headerTitleText}
+      />
       <FlatList
         data={pickupList}
         renderItem={renderPickupItem}
-        keyExtractor={item => item.id.toString()} // keyExtractor ensures a unique key is used
-        contentContainerStyle={styles.scrollView} // FlatList content style
+        keyExtractor={item => item.id.toString()}
+        contentContainerStyle={styles.scrollView}
       />
       <CustomButton
-        onPress={onAddNew}
+        onPress={() => navigation.navigate('EditAuthorizedPickup')}
         title="Add New"
-        style={styles.addButton}
+        touchStyle={styles.addButton}
+        textStyle={styles.addButtonText}
       />
     </View>
   );
@@ -107,11 +157,13 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   headerTitle: {
+    alignItems: 'flex-start',
+  },
+  headerTitleText: {
     fontSize: 18,
-    fontWeight: '600',
+    fontWeight: '700',
     color: '#212529',
     textAlign: 'center',
-    paddingVertical: 12,
   },
   scrollView: {
     flexGrow: 1,

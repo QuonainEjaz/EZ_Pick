@@ -1,17 +1,18 @@
 import React from 'react';
 import CustomHeader from '../components/CustomHeader';
-import AddAuthorization from '../screens/AddAuthorization/AddAuthorization';
-import { createStackNavigator } from '@react-navigation/stack';
+import AuthorizedPickupList from '../screens/AddAuthorization/AuthorizedPickupList';
+import {createStackNavigator} from '@react-navigation/stack';
 
 const Stack = createStackNavigator();
 
 const AddAuthorizationStack = () => {
   return (
     <Stack.Navigator
-      initialRouteName="AddAuthorizationScreen" screenOptions={({ route }) => ({
+      initialRouteName="AuthorizedPickupList"
+      screenOptions={({route}) => ({
         header: () => <CustomHeader screen={route.name} />,
       })}>
-      <Stack.Screen name="AddAuthorizationScreen" component={AddAuthorization} />
+      <Stack.Screen name="AuthorizedPickupList" component={AuthorizedPickupList} />
     </Stack.Navigator>
   );
 };

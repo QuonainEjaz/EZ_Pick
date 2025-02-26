@@ -1,21 +1,47 @@
 import React from 'react';
-import { View, Image, StyleSheet, useWindowDimensions, TouchableOpacity } from 'react-native';
+import {
+  View,
+  Image,
+  StyleSheet,
+  useWindowDimensions,
+  TouchableOpacity,
+} from 'react-native';
 import Heading from '../Heading';
 import SubHeading from '../SubHeading';
-import CustomButton from '../CustomButton';
 
-const UserInfoCard = ({ name, dateTime, status, imageSource, onPress }) => {
-  const { width } = useWindowDimensions();
+const UserInfoCard = ({name, dateTime, status, imageSource, onPress}) => {
+  const {width} = useWindowDimensions();
   const imageSize = width * 0.12;
 
   return (
     <TouchableOpacity style={styles.container} onPress={onPress}>
-      <Image source={imageSource} style={[styles.image, { width: imageSize, height: imageSize }]} />
+      <Image
+        source={{uri: imageSource}}
+        style={[styles.image, {width: imageSize, height: imageSize}]}
+      />
       <View style={styles.textContainer}>
-        <Heading title={name} textstyle={styles.heading} />
+        <Heading
+          title={name}
+          textstyle={styles.heading}
+          boxStyle={{alignItems: 'flex-start'}}
+        />
         <SubHeading text={dateTime} style={styles.subHeading} />
       </View>
-      <CustomButton title={status} touchStyle={styles.button} textStyle={styles.buttonText} />
+      <Heading
+        title={status}
+        textstyle={[
+          styles.statusHeading,
+          {alignItems: 'center', justifyContent: 'center', fontSize: 14},
+        ]}
+        boxStyle={{
+          alignItems: 'center',
+          justifyContent: 'center',
+          backgroundColor: '#FEF5D6',
+          paddingVertical: 10,
+          paddingHorizontal: 10,
+          borderRadius: 8,
+        }}
+      />
     </TouchableOpacity>
   );
 };
@@ -24,18 +50,18 @@ const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#FFF',
+    backgroundColor: '#FFFFFF',
     padding: 10,
     borderRadius: 10,
-    shadowColor: '#000',
+    shadowColor: '#67676714',
     shadowOpacity: 0.1,
-    shadowOffset: { width: 0, height: 2 },
+    shadowOffset: {width: 0, height: 2},
     shadowRadius: 5,
-    elevation: 3,
+    elevation: 5,
+    gap: 15,
   },
   image: {
-    borderRadius: 50,
-    marginRight: 10,
+    borderRadius: 10,
   },
   textContainer: {
     flex: 1,
@@ -44,20 +70,18 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
     textAlign: 'left',
+    color: '#212529',
   },
   subHeading: {
     fontSize: 14,
     textAlign: 'left',
     color: '#6C757D',
   },
-  button: {
-    backgroundColor: '#F8E1A1',
-    paddingVertical: 5,
-    paddingHorizontal: 10,
-  },
-  buttonText: {
-    color: '#D48C00',
-    fontWeight: '600',
+  statusHeading: {
+    fontSize: 16,
+    textAlign: 'center',
+    fontWeight: 'bold',
+    color: '#F8AC16',
   },
 });
 

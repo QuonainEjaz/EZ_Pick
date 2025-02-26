@@ -5,7 +5,7 @@ import SubHeading from '../../components/SubHeading';
 import CustomButton from '../../components/CustomButton';
 import CustomLink from '../../components/CustomLink';
 
-const PickupDetails = ({ style, pickupData = {} }) => {
+const AuthPickupDetails = ({ style, pickupData = {} }) => {
   const defaultPickupData = {
     name: 'Khalid al-Jameel',
     relation: 'Uncle',
@@ -136,7 +136,7 @@ const PickupDetails = ({ style, pickupData = {} }) => {
   );
 };
 
-export default PickupDetails;
+export default AuthPickupDetails;
 
 const styles = StyleSheet.create({
   container: {

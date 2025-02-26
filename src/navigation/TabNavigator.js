@@ -1,12 +1,12 @@
 import React from 'react';
-import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { View, Text } from 'react-native';
-import { HomeIcon, FocusedHomeIcon } from '../assets/Icons/svg/HomeIcons';
+import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
+import {View, Text} from 'react-native';
+import {HomeIcon, FocusedHomeIcon} from '../assets/Icons/svg/HomeIcons';
 import {
   HistoryIcon,
   FocusedHistoryIcon,
 } from '../assets/Icons/svg/HistoryIcons';
-import { AddIcon, FocusedAddIcon } from '../assets/Icons/svg/AddIcons';
+import {AddIcon, FocusedAddIcon} from '../assets/Icons/svg/AddIcons';
 import {
   NotificationIcon,
   FocusedNotificationIcon,
@@ -20,28 +20,27 @@ import HistoryStack from './HistoryStack';
 import NotificationsStack from './NotificationsStack';
 import ProfileStack from './ProfileStack';
 import AddAuthorizationStack from './AddAuthorizationStack';
-
 const Tab = createBottomTabNavigator();
 
-const TabIcon = ({ focused, FocusedIcon, Icon }) => {
-  return <View style={{ marginTop: 15 }}>{focused ? FocusedIcon : Icon}</View>;
+const TabIcon = ({focused, FocusedIcon, Icon}) => {
+  return <View style={{marginTop: 15}}>{focused ? FocusedIcon : Icon}</View>;
 };
 
 const TabNavigator = () => {
   return (
     <Tab.Navigator
       initialRouteName="Home"
-      screenOptions={({ route }) => ({
+      screenOptions={({route}) => ({
         headerShown: false,
         tabBarShowLabel: true,
         tabBarActiveTintColor: '#F8AC16',
         tabBarInactiveTintColor: '#6C757D',
-        tabBarLabelStyle: { fontSize: 12, fontWeight: '500', marginTop: 10 },
-        tabBarIndicatorStyle: { backgroundColor: '#F8AC16' },
-        tabBarActiveIconStyle: { opacity: 1 },
-        tabBarUnselectedIconStyle: { opacity: 0.6 },
+        tabBarLabelStyle: {fontSize: 12, fontWeight: '500', marginTop: 10},
+        tabBarIndicatorStyle: {backgroundColor: '#F8AC16'},
+        tabBarActiveIconStyle: {opacity: 1},
+        tabBarUnselectedIconStyle: {opacity: 0.6},
         tabBarStyle: {
-          height: 80,
+          height: 70,
           borderTopLeftRadius: 20,
           borderTopRightRadius: 20,
         },
@@ -49,27 +48,14 @@ const TabNavigator = () => {
       <Tab.Screen
         name="Home"
         component={HomeStack}
-        options={({ route }) => {
-          // Accessing the state of the nested stack navigator
-          const { routes } = route?.state || {};
-          const currentScreen = routes ? routes[0]?.name : '';
-
-          return {
-            tabBarStyle: currentScreen === 'StudentUploadScreen'
-              ? { display: 'none' }  // Hide tab bar for StudentUploadScreen
-              : {
-                height: 80,
-                borderTopLeftRadius: 20,
-                borderTopRightRadius: 20,
-              },
-            tabBarIcon: ({ focused }) => (
-              <TabIcon
-                focused={focused}
-                FocusedIcon={<FocusedHomeIcon />}
-                Icon={<HomeIcon />}
-              />
-            ),
-          };
+        options={{
+          tabBarIcon: ({focused}) => (
+            <TabIcon
+              focused={focused}
+              FocusedIcon={<FocusedHomeIcon />}
+              Icon={<HomeIcon />}
+            />
+          ),
         }}
       />
 
@@ -77,7 +63,7 @@ const TabNavigator = () => {
         name="History"
         component={HistoryStack}
         options={{
-          tabBarIcon: ({ focused }) => (
+          tabBarIcon: ({focused}) => (
             <TabIcon
               focused={focused}
               FocusedIcon={<FocusedHistoryIcon />}
@@ -90,7 +76,7 @@ const TabNavigator = () => {
         name="Add"
         component={AddAuthorizationStack}
         options={{
-          tabBarIcon: ({ focused }) => (
+          tabBarIcon: ({focused}) => (
             <TabIcon
               focused={focused}
               FocusedIcon={<FocusedAddIcon />}
@@ -103,7 +89,7 @@ const TabNavigator = () => {
         name="Notification"
         component={NotificationsStack}
         options={{
-          tabBarIcon: ({ focused }) => (
+          tabBarIcon: ({focused}) => (
             <TabIcon
               focused={focused}
               FocusedIcon={<FocusedNotificationIcon />}
@@ -116,7 +102,7 @@ const TabNavigator = () => {
         name="Profile"
         component={ProfileStack}
         options={{
-          tabBarIcon: ({ focused }) => (
+          tabBarIcon: ({focused}) => (
             <TabIcon
               focused={focused}
               FocusedIcon={<FocusedProfileIcon />}

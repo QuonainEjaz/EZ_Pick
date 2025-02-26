@@ -11,6 +11,7 @@ const SubHeading = ({text, style,boxStyle}) => {
 
 const styles = StyleSheet.create({
   text: {
+    fontFamily: 'Outfit',
     color: '#6C757D',
     fontSize: 16,
     lineHeight: 24,

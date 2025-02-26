@@ -1,111 +1,78 @@
-import React from 'react';
+import React, { memo } from 'react';
 import { View, TouchableOpacity, Image, StyleSheet } from 'react-native';
 import LinkButton from './LinkButton';
 import Heading from './Heading';
 
 const CustomHeader = ({ screen, name, navigation }) => {
-  let title;
-  let button = false;
+  const getTitleAndButton = () => {
+    switch (name) {
+      case 'HistoryScreen':
+        return { title: 'History', button: false };
+      case 'PickupDetails':
+        return { title: 'Pickup Details', button: true };
+        case 'NotificationScreen':
+        return { title: 'Notifications', button: false };
+      default:
+        return { title: '', button: false };
+    }
+  };
 
-  if (name === 'HistoryScreen') {
-    title = 'History';
-  } else if (name === 'PickupDetails') {
-    title = 'Pickup Details';
-    button = true;
-  }
+  const { title, button } = getTitleAndButton();
 
-  if (screen === 'HomeScreen') {
-    return (
-      <View style={styles.headerContainer}>
-        <View style={styles.headerContent}>
-          <TouchableOpacity style={styles.logoContainer}>
-            <Image
-              resizeMode="contain"
-              source={require('../assets/Logo/whetstonezLogo.png')}
-              style={styles.logo}
-            />
-          </TouchableOpacity>
-        </View>
-      </View>
-    );
-  }
-  
-  if (screen === 'History') {
-    return (
-      <View style={button ? styles.headerContentWithButton : styles.headerContainer}>
-        {button && (
-          <LinkButton
-            label="Back"
-            onPress={(() => navigation.goBack())}
-            touchStyle={styles.addButton}
-          />
-        )}
-        <Heading
-          title={title}
-          textstyle={{
-            color: '#212529',
-            fontSize: 18,
-            fontWeight: '600',
-            lineHeight: 22.68,
-          }}
-          boxStyle={{ justifyContent: 'center' }}
+  const renderLogo = () => (
+    <TouchableOpacity style={styles.logoContainer}>
+      <Image
+        resizeMode="contain"
+        source={require('../assets/Logo/whetstonezLogo.png')}
+        style={styles.logo}
+      />
+    </TouchableOpacity>
+  );
+
+  const renderContent = () => (
+    <>
+      {button && (
+        <LinkButton
+          label="Back"
+          onPress={() => navigation.goBack()}
+          touchStyle={styles.addButton}
         />
-      </View>
-    );
-  }
+      )}
+      <Heading
+        title={title}
+        textstyle={styles.headingText}
+        boxStyle={styles.headingBox}
+      />
+      {button && <View width={'10%'} />}
+    </>
+  );
 
-  if (screen === 'Add') {
-    return (
-      <View style={styles.headerContainer}>
-        <View style={styles.headerContent}>
-          <TouchableOpacity style={styles.logoContainer}>
-            <Image
-              resizeMode="contain"
-              source={require('../assets/Logo/whetstonezLogo.png')}
-              style={styles.logo}
-            />
-          </TouchableOpacity>
-        </View>
-      </View>
-    );
-  }
+  const renderHeader = () => {
+    switch (screen) {
+      case 'History':
+      case 'NotificationScreen':
+        return (
+          <View style={button ? styles.headerContentWithButton : styles.headerContainer}>
+            {renderContent()}
+          </View>
+        );
+      case 'HomeScreen':
+      case 'Add':
+      case 'Profile':
+        return (
+          <View style={styles.headerContainer}>
+            <View style={styles.headerContent}>{renderLogo()}</View>
+          </View>
+        );
+      default:
+        return null;
+    }
+  };
 
-  if (screen === 'Notification') {
-    return (
-      <View style={styles.headerContainer}>
-        <Heading
-          title={'Notifications'}
-          textstyle={{
-            color: '#212529',
-            fontSize: 18,
-            fontWeight: '600',
-            lineHeight: 22.68,
-            textAlign: 'center',
-          }}
-          boxStyle={{ justifyContent: 'center' }}
-        />
-      </View>
-    );
-  }
-
-  if (screen === 'Profile') {
-    return (
-      <View style={styles.headerContainer}>
-        <View style={styles.headerContent}>
-          <TouchableOpacity style={styles.logoContainer}>
-            <Image
-              resizeMode="contain"
-              source={require('../assets/Logo/whetstonezLogo.png')}
-              style={styles.logo}
-            />
-          </TouchableOpacity>
-        </View>
-      </View>
-    );
-  }
-
-  return null;
+  return renderHeader();
 };
+
+export default memo(CustomHeader);
 
 const styles = StyleSheet.create({
   headerContainer: {
@@ -114,16 +81,34 @@ const styles = StyleSheet.create({
     width: '100%',
     height: 70,
     backgroundColor: '#FFFFFF',
+    shadowColor: '#67676714',
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 5,
+    elevation: 5,
   },
   headerContentWithButton: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
+    justifyContent: 'center',
     alignItems: 'center',
-    width: '90%',
+    gap: 80,
+    width: '100%',
+    height: 70,
+    alignSelf: 'center',
+    backgroundColor: '#FFFFFF',
+    shadowColor: '#67676714',
+    shadowOpacity: 0.1,
+    shadowOffset: { width: 0, height: 4 },
+    shadowRadius: 5,
+    elevation: 5,
   },
   headerContent: {
     justifyContent: 'center',
     width: '90%',
+    alignSelf: 'center',
   },
   logoContainer: {
     width: '38%',
@@ -133,6 +118,18 @@ const styles = StyleSheet.create({
   logo: {
     width: '100%',
   },
+  headingText: {
+    color: '#212529',
+    fontSize: 20,
+    fontWeight: '900',
+    lineHeight: 22.68,
+    justifyContent: 'center',
+    alignItems: 'center',
+    textAlign: 'center',
+  },
+  headingBox: {
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
 });
 
-export default CustomHeader;

@@ -74,7 +74,7 @@ const StudentUploadScreen = ({ navigation }) => {
       dispatch(setStudents(updatedStudents));
     }
     setIsPhotoSelectionModalVisible(false);
-    navigation.navigate('StudentListScreen');
+    navigation.navigate('TabNavigator');
   };
 
   return (
@@ -104,7 +104,7 @@ const StudentUploadScreen = ({ navigation }) => {
           keyExtractor={item => item.id}
         />
         <CustomDoubleButton
-          onUploadLater={() => navigation.navigate('StudentListScreen')}
+          onUploadLater={() => navigation.navigate('TabNavigator')}
           onSave={handleSavePhoto}
         />
         <PhotoSelectionModal

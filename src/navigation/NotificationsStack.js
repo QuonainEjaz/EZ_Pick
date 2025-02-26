@@ -9,7 +9,7 @@ const NotificationsStack = () => {
   return (
     <Stack.Navigator
       initialRouteName="NotificationScreen" screenOptions={({ route }) => ({
-        header: () => <CustomHeader screen={route.name} />,
+        header: () => <CustomHeader name={route.name} screen={'NotificationScreen'}   />,
       })}>
       <Stack.Screen name="NotificationScreen" component={Notification} />
     </Stack.Navigator>
