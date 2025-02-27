@@ -14,6 +14,9 @@ import EditAuthorizedPickup from '../screens/AddAuthorization/EditAuthorizedPick
 import AddAuthorizedPickup from '../screens/AddAuthorization/AddAuthorization';
 import StudentPickupCard from '../screens/AddAuthorization/StudentPickupCard';
 import ShareOptions from '../screens/AddAuthorization/ShareOptions';
+import ProfileDetail from '../screens/Profile/ProfileDetail';
+import UpdatePassword from '../screens/Profile/UpdatePassword';
+import LanguageSelection from '../screens/Profile/LanguageSelection';
 
 const Stack = createStackNavigator();
 
@@ -123,6 +126,51 @@ const StackNavigator = () => {
             <CustomHeader
               name={route.name}
               screen={'ShareOptions'}
+              navigation={navigation}
+            />
+          ),
+        })}
+      />
+      <Stack.Screen
+        name="ProfileDetail"
+        component={ProfileDetail}
+        options={({route, navigation}) => ({
+          headerShown: true,
+
+          header: () => (
+            <CustomHeader
+              name={route.name}
+              screen={'ProfileDetail'}
+              navigation={navigation}
+            />
+          ),
+        })}
+      />
+      <Stack.Screen
+        name="UpdatePassword"
+        component={UpdatePassword}
+        options={({route, navigation}) => ({
+          headerShown: true,
+
+          header: () => (
+            <CustomHeader
+              name={route.name}
+              screen={'UpdatePassword'}
+              navigation={navigation}
+            />
+          ),
+        })}
+      />
+      <Stack.Screen
+        name="LanguageSelection"
+        component={LanguageSelection}
+        options={({route, navigation}) => ({
+          headerShown: true,
+
+          header: () => (
+            <CustomHeader
+              name={route.name}
+              screen={'LanguageSelection'}
               navigation={navigation}
             />
           ),

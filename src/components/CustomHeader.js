@@ -1,23 +1,33 @@
-import React, { memo } from 'react';
-import { View, TouchableOpacity, Image, StyleSheet } from 'react-native';
+import React, {memo} from 'react';
+import {View, TouchableOpacity, Image, StyleSheet} from 'react-native';
 import LinkButton from './LinkButton';
 import Heading from './Heading';
 
-const CustomHeader = ({ screen, name, navigation }) => {
+const CustomHeader = ({screen, name, navigation}) => {
   const getTitleAndButton = () => {
     switch (name) {
       case 'HistoryScreen':
-        return { title: 'History', button: false };
+        return {title: 'History', button: false};
       case 'PickupDetails':
-        return { title: 'Pickup Details', button: true };
-        case 'NotificationScreen':
-        return { title: 'Notifications', button: false };
+        return {title: 'Pickup Details', button: true};
+      case 'NotificationScreen':
+        return {title: 'Notifications', button: false};
+      case 'ProfileScreen':
+        return {title: 'Profile', button: false};
+      case 'AddAuthorization':
+        return {title: 'Add Authorization', button: false};
+      case 'ProfileDetail':
+        return {title: 'Profile', button: true};
+      case 'UpdatePassword':
+        return {title: 'Update Password', button: true};
+      case 'LanguageSelection':
+        return {title: 'Language', button: true};
       default:
-        return { title: '', button: false };
+        return {title: '', button: false};
     }
   };
 
-  const { title, button } = getTitleAndButton();
+  const {title, button} = getTitleAndButton();
 
   const renderLogo = () => (
     <TouchableOpacity style={styles.logoContainer}>
@@ -35,7 +45,7 @@ const CustomHeader = ({ screen, name, navigation }) => {
         <LinkButton
           label="Back"
           onPress={() => navigation.goBack()}
-          touchStyle={styles.addButton}
+          style={styles.addButton}
         />
       )}
       <Heading
@@ -51,14 +61,20 @@ const CustomHeader = ({ screen, name, navigation }) => {
     switch (screen) {
       case 'History':
       case 'NotificationScreen':
+      case 'Profile':
+      case 'ProfileDetail':
+      case 'UpdatePassword':
+      case 'LanguageSelection':
         return (
-          <View style={button ? styles.headerContentWithButton : styles.headerContainer}>
+          <View
+            style={
+              button ? styles.headerContentWithButton : styles.headerContainer
+            }>
             {renderContent()}
           </View>
         );
       case 'HomeScreen':
       case 'Add':
-      case 'Profile':
         return (
           <View style={styles.headerContainer}>
             <View style={styles.headerContent}>{renderLogo()}</View>
@@ -81,27 +97,27 @@ const styles = StyleSheet.create({
     width: '100%',
     height: 70,
     backgroundColor: '#FFFFFF',
-    shadowColor: '#67676714',
+    shadowColor: '#676767',
     shadowOffset: {
       width: 0,
       height: 4,
     },
     shadowOpacity: 0.1,
     shadowRadius: 5,
-    elevation: 5,
+    elevation: 16,
   },
   headerContentWithButton: {
     flexDirection: 'row',
-    justifyContent: 'center',
+    justifyContent: 'space-between',
     alignItems: 'center',
-    gap: 80,
+    paddingHorizontal: 20,
     width: '100%',
     height: 70,
     alignSelf: 'center',
     backgroundColor: '#FFFFFF',
-    shadowColor: '#67676714',
+    shadowColor: '#676767',
     shadowOpacity: 0.1,
-    shadowOffset: { width: 0, height: 4 },
+    shadowOffset: {width: 0, height: 4},
     shadowRadius: 5,
     elevation: 5,
   },
@@ -115,6 +131,7 @@ const styles = StyleSheet.create({
     height: '60%',
     justifyContent: 'center',
   },
+
   logo: {
     width: '100%',
   },
@@ -132,4 +149,3 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
 });
-

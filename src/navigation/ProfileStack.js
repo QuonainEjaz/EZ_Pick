@@ -10,7 +10,7 @@ const ProfileStack = () => {
     <Stack.Navigator
       initialRouteName="ProfileScreen"
       screenOptions={({route}) => ({
-        header: () => <CustomHeader screen={route.name} />,
+        header: () => <CustomHeader name={route.name} screen={'Profile'} />,
       })}>
       <Stack.Screen name="ProfileScreen" component={Profile} />
     </Stack.Navigator>

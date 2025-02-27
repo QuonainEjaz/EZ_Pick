@@ -1,13 +1,14 @@
-import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import React from 'react';
+import {View, TouchableOpacity, StyleSheet} from 'react-native';
+import Heading from './Heading';
 
-const CustomSelectButton = ({ 
-  options = [], 
-  onSelect, 
-  selectedValue, 
-  containerStyle, 
-  labelStyle, 
-  selectedLabelStyle 
+const CustomSelectButton = ({
+  options = [],
+  onSelect,
+  selectedValue,
+  containerStyle,
+  labelStyle,
+  selectedLabelStyle,
 }) => {
   return (
     <View style={[styles.container, containerStyle]}>
@@ -15,19 +16,29 @@ const CustomSelectButton = ({
         <TouchableOpacity
           key={index}
           style={styles.option}
-          onPress={() => onSelect(option.value)}
-        >
-          <View style={[
-            styles.circle,
-            selectedValue === option.value && styles.selectedCircle
-          ]} />
-          <Text style={[
-            styles.label,
-            labelStyle,
-            selectedValue === option.value && selectedLabelStyle
-          ]}>
-            {option.label}
-          </Text>
+          onPress={() => onSelect(option?.value)}>
+          <View
+            style={[
+              styles.circleOuter,
+              selectedValue !== option?.value && {
+                borderColor: '#6C757D80',
+              },
+            ]}>
+            {selectedValue === option?.value && (
+              <View style={styles.circleInner} />
+            )}
+          </View>
+          <Heading
+            title={option?.name}
+            textstyle={[
+              styles.label,
+              labelStyle,
+              selectedValue === option?.value && {
+                fontWeight: '700',
+              },
+              selectedValue === option?.value && selectedLabelStyle,
+            ]}
+          />
         </TouchableOpacity>
       ))}
     </View>
@@ -36,31 +47,38 @@ const CustomSelectButton = ({
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: '#F9F9F9',
     paddingVertical: 10,
-    borderRadius: 10,
   },
   option: {
+    backgroundColor: '#F9F9F9',
+    borderRadius: 10,
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 10,
+    paddingVertical: 20,
     paddingHorizontal: 15,
+    marginBottom: 10,
   },
-  circle: {
-    width: 18,
-    height: 18,
-    borderRadius: 9,
+  circleOuter: {
+    width: 22,
+    height: 22,
+    borderRadius: 11,
     borderWidth: 2,
-    borderColor: '#C0C0C0',
+    borderColor: '#F8AC16',
+    justifyContent: 'center',
+    alignItems: 'center',
     marginRight: 10,
   },
-  selectedCircle: {
-    borderColor: '#F8AC16',
+  circleInner: {
+    width: 12,
+    height: 12,
+    borderRadius: 6,
     backgroundColor: '#F8AC16',
   },
   label: {
-    fontSize: 16,
-    color: '#666',
+    fontWeight: '500',
+    fontSize: 14,
+    fontFamily: 'Outfit',
+    color: '#6C757D',
   },
 });
 

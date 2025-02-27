@@ -1,77 +1,60 @@
 import React from 'react';
-import { View, Text, Image, TouchableOpacity, StyleSheet } from 'react-native';
+import {View, Image, TouchableOpacity, StyleSheet} from 'react-native';
+import Heading from '../../components/Heading';
+import SubHeading from '../../components/SubHeading';
+import EditImage from '../../assets/Icons/svg/EditImage';
 
-const ProfileDetail = ({
-  name = "Jabir bin Hayan",
-  arabicName = "جابر بن حيان",
-  studentId = "ST-515656",
-  grade = "6A",
-  gender = "Male",
-  email = "jabir@whetstonez.com",
-  profileImage = "https://dashboard.codeparrot.ai/api/image/Z7l_eFCHtJJZ6wAs/profile-6.png"
-}) => {
+const ProfileDetail = ({route}) => {
+  const {student} = route.params;
+  const {image, name, arabicName, studentId, grade, gender, email} = student;
+
   return (
     <View style={styles.container}>
-      <View style={styles.header}>
-        <TouchableOpacity style={styles.backButton}>
-          <Image 
-            source={{uri: 'https://dashboard.codeparrot.ai/api/image/Z7l_eFCHtJJZ6wAs/icon-arr.png'}}
-            style={styles.backIcon}
-          />
-          <Text style={styles.backText}>Back</Text>
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>Profile</Text>
-      </View>
-
       <View style={styles.profileImageContainer}>
-        <Image 
-          source={{uri: profileImage}}
-          style={styles.profileImage}
-        />
+        <Image source={{uri: image}} resizeMode="cover" style={styles.profileImage} />
         <TouchableOpacity style={styles.editButton}>
-          <Image 
-            source={{uri: 'https://dashboard.codeparrot.ai/api/image/Z7l_eFCHtJJZ6wAs/edit-edi.png'}}
-            style={styles.editIcon}
-          />
+          <EditImage />
         </TouchableOpacity>
       </View>
 
       <View style={styles.detailsContainer}>
-        <View style={styles.detailsHeader}>
-          <Text style={styles.detailsHeaderText}>Student Details</Text>
-        </View>
-        
+        <Heading
+          title="Student Details"
+          textstyle={styles.detailsHeaderText}
+          boxStyle={styles.detailsHeaderBox}
+        />
+
         <View style={styles.detailsContent}>
           <View style={styles.row}>
             <View style={styles.column}>
-              <Text style={styles.label}>Name</Text>
-              <Text style={styles.value}>{name}</Text>
+              <SubHeading text="Name" style={styles.label} />
+              <SubHeading text={name} style={styles.value} />
             </View>
             <View style={styles.column}>
-              <Text style={styles.label}>Arabic Name</Text>
-              <Text style={styles.value}>{arabicName}</Text>
-            </View>
-          </View>
-
-          <View style={styles.row}>
-            <View style={styles.column}>
-              <Text style={styles.label}>Student ID</Text>
-              <Text style={styles.value}>{studentId}</Text>
-            </View>
-            <View style={styles.column}>
-              <Text style={styles.label}>Grade</Text>
-              <Text style={styles.value}>{grade}</Text>
+              <SubHeading text="Arabic Name" style={styles.label} />
+              <SubHeading text={arabicName} style={styles.value} />
             </View>
           </View>
 
           <View style={styles.row}>
             <View style={styles.column}>
-              <Text style={styles.label}>Gender</Text>
-              <Text style={styles.value}>{gender}</Text>
+              <SubHeading text="Student ID" style={styles.label} />
+              <SubHeading text={studentId} style={styles.value} />
             </View>
             <View style={styles.column}>
-              <Text style={styles.label}>Student Email</Text>
-              <Text style={styles.value}>{email}</Text>
+              <SubHeading text="Grade" style={styles.label} />
+              <SubHeading text={grade} style={styles.value} />
+            </View>
+          </View>
+
+          <View style={styles.row}>
+            <View style={styles.column}>
+              <SubHeading text="Gender" style={styles.label} />
+              <SubHeading text={gender} style={styles.value} />
+            </View>
+            <View style={styles.column}>
+              <SubHeading text="Student Email" style={styles.label} />
+              <SubHeading text={email} style={styles.value} />
             </View>
           </View>
         </View>
@@ -80,55 +63,25 @@ const ProfileDetail = ({
   );
 };
 
+export default ProfileDetail;
+
 const styles = StyleSheet.create({
   container: {
-    width: '100%',
-    maxWidth: 440,
-    backgroundColor: '#fff',
-    borderRadius: 20,
-    padding: 10,
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: 20,
-    paddingVertical: 12,
-    backgroundColor: '#fff',
-  },
-  backButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-  },
-  backIcon: {
-    width: 7,
-    height: 12,
-  },
-  backText: {
-    fontFamily: 'Outfit',
-    fontSize: 14,
-    fontWeight: '500',
-    color: '#212529',
-    letterSpacing: 0.14,
-  },
-  headerTitle: {
     flex: 1,
-    textAlign: 'center',
-    fontFamily: 'Outfit',
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#212529',
-    marginLeft: -45,
+    width: '100%',
+    backgroundColor: '#FFFFFF',
   },
   profileImageContainer: {
     position: 'relative',
     width: '100%',
-    height: 440,
+    height: '53%',
   },
   profileImage: {
     width: '100%',
     height: '100%',
     backgroundColor: '#d9d9d9',
+    borderRadius: 12,
+    overflow: 'hidden',
   },
   editButton: {
     position: 'absolute',
@@ -149,47 +102,52 @@ const styles = StyleSheet.create({
     height: 20,
   },
   detailsContainer: {
-    margin: 12,
+    marginHorizontal: 20,
+    marginTop: 20,
     backgroundColor: '#fff',
     borderRadius: 12,
+    shadowColor: '#000',
+    shadowOffset: {width: 0, height: 2},
+    shadowOpacity: 0.1,
+    shadowRadius: 6,
+    elevation: 2,
   },
-  detailsHeader: {
-    borderBottomWidth: 1,
+  detailsHeaderBox: {
+    alignItems: 'flex-start',
+    paddingTop: 12,
+    marginHorizontal: 12,
+    paddingBottom: 5,
     borderBottomColor: '#e3e3e3',
-    paddingBottom: 6,
+    borderBottomWidth: 1,
   },
   detailsHeaderText: {
     fontFamily: 'Outfit',
     fontSize: 18,
-    fontWeight: '600',
+    fontWeight: '700',
     color: '#212529',
   },
   detailsContent: {
     padding: 12,
-    gap: 14,
+    gap: 10,
   },
   row: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    gap: 12,
+    gap: 10,
   },
   column: {
     flex: 1,
-    gap: 8,
+    gap: 4,
   },
   label: {
-    fontFamily: 'Outfit',
     fontSize: 14,
-    fontWeight: '500',
-    color: '#212529',
+    fontWeight: '700',
+    color: '##212529',
   },
   value: {
     fontFamily: 'Outfit',
     fontSize: 14,
     fontWeight: '400',
-    color: '#6c757d',
   },
 });
-
-export default ProfileDetail;
 

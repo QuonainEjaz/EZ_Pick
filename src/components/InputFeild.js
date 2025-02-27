@@ -9,7 +9,7 @@ const SvgEyeComponent = (props) => (
       strokeWidth={1.5}
       d="M1.178 9.03a1.453 1.453 0 0 1 0-1.394A8.906 8.906 0 0 1 9 3a8.906 8.906 0 0 1 7.822 4.636c.237.435.237.96 0 1.395A8.906 8.906 0 0 1 9 13.667 8.906 8.906 0 0 1 1.178 9.03Z"
     />
-    <Circle cx={9} cy={8.333} r={2.667} stroke="#6C757D" strokeWidth={1.5} />
+    <Circle cx={9} cy={8.333} r={2.667} stroke="#6C757D" strokeWidth={1.7} />
   </Svg>
 );
 
@@ -92,13 +92,13 @@ const styles = StyleSheet.create({
   },
   strikeThrough: {
     position: 'absolute',
-    top: '50%',
+    top: '40%',
     left: 0,
-    right: 0,
+    right: 2,
     height: 1.5,
     backgroundColor: '#6C757D',
     transform: [{rotate: '45deg'}],
-    zIndex: 2,
+    zIndex: 10,
   },
   text: {
     fontFamily: 'poppins',
