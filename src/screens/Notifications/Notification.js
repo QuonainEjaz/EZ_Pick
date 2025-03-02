@@ -32,6 +32,7 @@ const NotificationList = () => {
   return (
     <View style={styles.container}>
       <SectionList
+        showsVerticalScrollIndicator={false}
         sections={sectionData}
         keyExtractor={(item, index) => item.id || index.toString()}
         renderItem={({item}) => <NotificationItem {...item} />}

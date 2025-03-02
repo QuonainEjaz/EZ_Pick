@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import {
   View,
   ScrollView,
@@ -6,34 +6,61 @@ import {
   StyleSheet,
   FlatList,
   Image,
+  Alert,
 } from 'react-native';
 import SubHeading from '../../components/SubHeading';
 import Heading from '../../components/Heading';
-import {useSelector} from 'react-redux';
+import { useSelector } from 'react-redux';
 import ArrowRight from '../../assets/Icons/svg/ArrowRight';
-import {ProfileScreenIcons} from '../../assets/Icons/svg/ProfileScreenIcons';
-import { Screen } from 'react-native-screens';
+import { ProfileScreenIcons } from '../../assets/Icons/svg/ProfileScreenIcons';
+import ReactNativeBiometrics from 'react-native-biometrics'; // Import the biometric library
 
-const renderItem = ({item, index, navigation}, isPage = false) => {
+const renderItem = ({ item, index, navigation }, isPage = false) => {
   console.log(item);
   const IconComponent = isPage ? ProfileScreenIcons[item.icon] : null;
   const handlePress = item => {
-    if (!isPage) {
-      navigation.navigate('ProfileDetail', {student: item});
-    }
-    if (isPage) {
-      navigation.navigate(item.screen);
+    if (item.title === 'Enable Smart Login') {
+      // Trigger biometric authentication when "Enable Smart Login" is clicked
+      handleBiometricAuthentication();
+    } else {
+      // Navigate to other screens for non-smart-login options
+      if (!isPage) {
+        navigation.navigate('ProfileDetail', { student: item });
+      }
+      if (isPage) {
+        navigation.navigate(item.screen);
+      }
     }
   };
+
+  const handleBiometricAuthentication = async () => {
+    try {
+      const { available, biometryType } = await ReactNativeBiometrics.isSensorAvailable();
+
+      if (available) {
+        // Trigger biometric authentication
+        const { success, error } = await ReactNativeBiometrics.simplePrompt({
+          promptMessage: 'Login using fingerprint or face recognition',
+        });
+
+        if (success) {
+          Alert.alert('Authentication Successful');
+          // Perform the login logic here (e.g., navigate to the dashboard or home screen)
+        } else {
+          Alert.alert('Authentication Failed');
+        }
+      } else {
+        Alert.alert('Biometric authentication is not available on this device.');
+      }
+    } catch (error) {
+      Alert.alert('Error', error.message);
+    }
+  };
+
   return (
-    <TouchableOpacity
-      key={index}
-      style={styles.listItem}
-      onPress={() => handlePress(item)}>
+    <TouchableOpacity key={index} style={styles.listItem} onPress={() => handlePress(item)}>
       {isPage && IconComponent && <IconComponent />}
-      {isPage ? null : (
-        <Image source={{uri: item.image}} style={styles.profileImage} />
-      )}
+      {isPage ? null : <Image source={{ uri: item.image }} style={styles.profileImage} />}
       <View style={styles.listItemContent}>
         <SubHeading
           text={isPage ? item.title : item.name}
@@ -46,7 +73,7 @@ const renderItem = ({item, index, navigation}, isPage = false) => {
   );
 };
 
-const Profile = ({navigation}) => {
+const Profile = ({ navigation }) => {
   const students = useSelector(state => state.students.students);
 
   const pages = [
@@ -73,7 +100,7 @@ const Profile = ({navigation}) => {
     {
       title: 'Logout',
       icon: 'LogoutIcon',
-      screen: 'AuthorizedPickupList',
+      screen: 'Login',
     },
   ];
 
@@ -90,7 +117,7 @@ const Profile = ({navigation}) => {
       />
       <FlatList
         data={students}
-        renderItem={({item, index}) => renderItem({item, index, navigation})}
+        renderItem={({ item, index }) => renderItem({ item, index, navigation })}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.listContentContainer}
       />
@@ -105,9 +132,7 @@ const Profile = ({navigation}) => {
         renderItem={({ item, index }) =>
           item.title === 'Logout' ? (
             <TouchableOpacity style={styles.listItem}>
-              {item.icon && ProfileScreenIcons[item.icon] && (
-                <ProfileScreenIcons.LogoutIcon />
-              )}
+              {item.icon && ProfileScreenIcons[item.icon] && <ProfileScreenIcons.LogoutIcon />}
               <View style={styles.listItemContent}>
                 <SubHeading
                   text={item.title}
@@ -121,12 +146,13 @@ const Profile = ({navigation}) => {
             renderItem({ item, index, navigation }, true)
           )
         }
-        keyExtractor={(item) => item.title}
+        keyExtractor={item => item.title}
         contentContainerStyle={styles.listContentContainer}
       />
     </ScrollView>
   );
 };
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -186,4 +212,5 @@ const styles = StyleSheet.create({
     height: 20,
   },
 });
+
 export default Profile;

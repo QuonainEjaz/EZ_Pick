@@ -8,7 +8,10 @@ buildscript {
         kotlinVersion = "1.9.25"
     }
     repositories {
+        mavenLocal()
+        maven { url 'https://jitpack.io' }
         google()
+        jcenter()
         mavenCentral()
     }
     dependencies {
@@ -19,3 +22,13 @@ buildscript {
 }
 
 apply plugin: "com.facebook.react.rootproject"
+
+allprojects {
+    repositories {
+        mavenLocal()
+        maven { url 'https://jitpack.io' }
+        google()
+        jcenter()
+        mavenCentral()
+    }
+}

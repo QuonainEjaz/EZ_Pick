@@ -24,7 +24,6 @@ const StudentCard = ({student}) => {
   useEffect(() => {
     if (timeLeft > 0) {
       const timer = setInterval(() => {
-        console.log('Timer tick:', timeLeft);
         setTimeLeft(prevTime => prevTime - 1);
       }, 1000);
       return () => clearInterval(timer);
