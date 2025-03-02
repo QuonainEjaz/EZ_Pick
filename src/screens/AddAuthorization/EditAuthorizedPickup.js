@@ -1,6 +1,13 @@
-import React, { useState } from 'react';
-import { View, Image, ScrollView, StyleSheet, TouchableOpacity, Text } from 'react-native';
-import { Formik } from 'formik';
+import React, {useState} from 'react';
+import {
+  View,
+  Image,
+  ScrollView,
+  StyleSheet,
+  TouchableOpacity,
+  Text,
+} from 'react-native';
+import {Formik} from 'formik';
 import * as Yup from 'yup';
 import CustomButton from '../../components/CustomButton';
 import CustomCheckbox from '../../components/CustomCheckbox';
@@ -9,10 +16,46 @@ import Heading from '../../components/Heading';
 import InputField from '../../components/InputFeild';
 import SubHeading from '../../components/SubHeading';
 import AddKidsModal from './AddKidsModal';
-import { launchImageLibrary } from 'react-native-image-picker'; 
-import { Dimensions } from 'react-native';
+import {launchImageLibrary} from 'react-native-image-picker';
+import {Dimensions} from 'react-native';
+import CustomModal from '../../components/CustomModal';
+import Svg, {Path} from 'react-native-svg';
 
-const { width, height } = Dimensions.get('window');
+const MinusIcon = props => (
+  <Svg
+    xmlns="http://www.w3.org/2000/svg"
+    width={18}
+    height={18}
+    fill="none"
+    {...props}>
+    <Path
+      fill="#D83A3C"
+      fillRule="evenodd"
+      d="M8.496 0h1.008A8.496 8.496 0 0 1 18 8.496v1.008A8.496 8.496 0 0 1 9.504 18H8.496A8.496 8.496 0 0 1 0 9.504V8.496A8.496 8.496 0 0 1 8.496 0ZM5.4 9.675h7.2a.675.675 0 1 0 0-1.35H5.4a.675.675 0 0 0 0 1.35Z"
+      clipRule="evenodd"
+    />
+  </Svg>
+);
+const PlusIcon = props => (
+  <Svg
+    xmlns="http://www.w3.org/2000/svg"
+    width={45}
+    height={46}
+    fill="none"
+    {...props}>
+    <Path
+      fill="#6C757D"
+      fillRule="evenodd"
+      d="M21.45 4.25h2.1c9.775 0 17.7 7.925 17.7 17.7v2.1c0 9.775-7.925 17.7-17.7 17.7h-2.1c-9.775 0-17.7-7.925-17.7-17.7v-2.1c0-9.775 7.925-17.7 17.7-17.7Zm2.1 34.688c8.197-.062 14.826-6.691 14.887-14.888v-2.1c-.06-8.197-6.69-14.826-14.887-14.887h-2.1c-8.197.06-14.826 6.69-14.887 14.887v2.1c.06 8.197 6.69 14.826 14.887 14.887h2.1Z"
+      clipRule="evenodd"
+    />
+    <Path
+      fill="#6C757D"
+      d="M30 21.594h-6.094V15.5a1.406 1.406 0 1 0-2.812 0v6.094H15a1.406 1.406 0 1 0 0 2.812h6.094V30.5a1.406 1.406 0 0 0 2.812 0v-6.094H30a1.406 1.406 0 0 0 0-2.812Z"
+    />
+  </Svg>
+);
+const {width, height} = Dimensions.get('window');
 
 const validationSchema = Yup.object().shape({
   relation: Yup.string().required('Relation is required'),
@@ -22,7 +65,7 @@ const validationSchema = Yup.object().shape({
   vehicleNo: Yup.string().required('Vehicle # is required'),
 });
 
-const EditAuthorizedPickup = ({ 
+const EditAuthorizedPickup = ({
   initialData = {
     relation: 'Driver',
     name: 'Khalid al-Jameel',
@@ -34,21 +77,25 @@ const EditAuthorizedPickup = ({
     {
       id: 1,
       name: 'Jabir bin Hayan',
-      image: 'https://dashboard.codeparrot.ai/api/image/Z7iqnlCHtJJZ6v_B/kid-imag.png'
+      image:
+        'https://dashboard.codeparrot.ai/api/image/Z7iqnlCHtJJZ6v_B/kid-imag.png',
     },
     {
-      id: 2, 
+      id: 2,
       name: 'Ali bin Abi Talib',
-      image: 'https://dashboard.codeparrot.ai/api/image/Z7iqnlCHtJJZ6v_B/kid-imag-2.png'
-    }
+      image:
+        'https://dashboard.codeparrot.ai/api/image/Z7iqnlCHtJJZ6v_B/kid-imag-2.png',
+    },
   ],
   onSave = () => {},
   style = {},
-  navigation
+  navigation,
 }) => {
   const [acknowledgement, setAcknowledgement] = useState(false);
   const [isModalVisible, setIsModalVisible] = useState(false);
-  const [profileImage, setProfileImage] = useState('https://dashboard.codeparrot.ai/api/image/Z7iqnlCHtJJZ6v_B/kid-imag-2.png'); 
+  const [profileImage, setProfileImage] = useState(
+    'https://dashboard.codeparrot.ai/api/image/Z7iqnlCHtJJZ6v_B/kid-imag-2.png',
+  );
 
   // Function to handle image picking
   const handleChangePicture = () => {
@@ -58,7 +105,7 @@ const EditAuthorizedPickup = ({
         includeBase64: false,
         quality: 1,
       },
-      (response) => {
+      response => {
         if (response.didCancel) {
           console.log('User cancelled image picker');
         } else if (response.errorCode) {
@@ -67,36 +114,48 @@ const EditAuthorizedPickup = ({
           const selectedImage = response.assets[0];
           setProfileImage(selectedImage.uri); // Set the selected image URI
         }
-      }
+      },
     );
   };
 
-  const handleSave = (values) => {
+  const handleSave = values => {
     if (acknowledgement) {
       onSave(values);
     }
     navigation.goBack();
   };
 
-  const handleAssignKids = (selectedKids) => {
+  const handleAssignKids = selectedKids => {
     setIsModalVisible(false);
   };
 
   return (
-    <ScrollView style={[styles.container, style]}>
-      <Heading title="Edit Authorized Pickup" textstyle={styles.title} />
-      
+    <ScrollView
+      contentContainerStyle={[styles.container, style]}
+      showsVerticalScrollIndicator={false}>
+      <Heading
+        title="Edit Authorized Pickup"
+        textstyle={styles.title}
+        boxStyle={styles.titleBox}
+      />
+
       <Formik
         initialValues={initialData}
         validationSchema={validationSchema}
-        onSubmit={handleSave}
-      >
-        {({ handleChange, handleBlur, handleSubmit, values, errors, touched }) => (
+        onSubmit={handleSave}>
+        {({
+          handleChange,
+          handleBlur,
+          handleSubmit,
+          values,
+          errors,
+          touched,
+        }) => (
           <View style={styles.content}>
             <View style={styles.imageSection}>
               <View style={styles.imageContainer}>
-                <Image 
-                  source={{ uri: profileImage }}  // Display the selected or default image
+                <Image
+                  source={{uri: profileImage}} // Display the selected or default image
                   style={styles.profileImage}
                 />
               </View>
@@ -104,7 +163,7 @@ const EditAuthorizedPickup = ({
                 title="Change Picture"
                 touchStyle={styles.changePictureButton}
                 textStyle={styles.changePictureText}
-                onPress={handleChangePicture}  // Call the image picker
+                onPress={handleChangePicture} // Call the image picker
               />
             </View>
 
@@ -116,7 +175,9 @@ const EditAuthorizedPickup = ({
                 onValueChange={handleChange('relation')}
                 style={styles.inputGroup}
               />
-              {errors.relation && touched.relation && <Text style={styles.errorText}>{errors.relation}</Text>}
+              {errors.relation && touched.relation && (
+                <Text style={styles.errorText}>{errors.relation}</Text>
+              )}
 
               <InputField
                 label="Name"
@@ -126,7 +187,9 @@ const EditAuthorizedPickup = ({
                 placeholder="Enter name"
                 style={styles.inputGroup}
               />
-              {errors.name && touched.name && <Text style={styles.errorText}>{errors.name}</Text>}
+              {errors.name && touched.name && (
+                <Text style={styles.errorText}>{errors.name}</Text>
+              )}
 
               <InputField
                 label="ID Number"
@@ -136,7 +199,9 @@ const EditAuthorizedPickup = ({
                 placeholder="Enter ID number"
                 style={styles.inputGroup}
               />
-              {errors.idNumber && touched.idNumber && <Text style={styles.errorText}>{errors.idNumber}</Text>}
+              {errors.idNumber && touched.idNumber && (
+                <Text style={styles.errorText}>{errors.idNumber}</Text>
+              )}
 
               <InputField
                 label="Cell No"
@@ -146,7 +211,9 @@ const EditAuthorizedPickup = ({
                 placeholder="Enter cell number"
                 style={styles.inputGroup}
               />
-              {errors.cellNo && touched.cellNo && <Text style={styles.errorText}>{errors.cellNo}</Text>}
+              {errors.cellNo && touched.cellNo && (
+                <Text style={styles.errorText}>{errors.cellNo}</Text>
+              )}
 
               <InputField
                 label="Vehicle #"
@@ -156,33 +223,31 @@ const EditAuthorizedPickup = ({
                 placeholder="Enter vehicle number"
                 style={styles.inputGroup}
               />
-              {errors.vehicleNo && touched.vehicleNo && <Text style={styles.errorText}>{errors.vehicleNo}</Text>}
+              {errors.vehicleNo && touched.vehicleNo && (
+                <Text style={styles.errorText}>{errors.vehicleNo}</Text>
+              )}
 
               <View style={styles.assignedKidsSection}>
                 <SubHeading text="Assigned Kids" style={styles.label} />
                 <View style={styles.kidsContainer}>
-                  {assignedKids.map((kid) => (
+                  {assignedKids.map(kid => (
                     <View key={kid.id} style={styles.kidCard}>
                       <View style={styles.kidInfo}>
                         <TouchableOpacity style={styles.removeKidButton}>
-                          <Image 
-                            source={{ uri: 'https://dashboard.codeparrot.ai/api/image/Z7iqnlCHtJJZ6v_B/interfac.png' }}
-                            style={styles.removeKidIcon}
-                          />
+                          <MinusIcon />
                         </TouchableOpacity>
-                        <Image 
-                          source={{ uri: kid.image }}
+                        <Image
+                          source={{uri: kid.image}}
                           style={styles.kidImage}
                         />
                         <SubHeading text={kid.name} style={styles.kidName} />
                       </View>
                     </View>
                   ))}
-                  <TouchableOpacity style={styles.addKidButton} onPress={() => setIsModalVisible(true)}>
-                    <Image 
-                      source={{ uri: 'https://dashboard.codeparrot.ai/api/image/Z7iqnlCHtJJZ6v_B/interfac-3.png' }}
-                      style={styles.addKidIcon}
-                    />
+                  <TouchableOpacity
+                    style={styles.addKidButton}
+                    onPress={() => setIsModalVisible(true)}>
+                    <PlusIcon />
                   </TouchableOpacity>
                 </View>
               </View>
@@ -192,20 +257,37 @@ const EditAuthorizedPickup = ({
                   value={acknowledgement}
                   onValueChange={setAcknowledgement}
                   label="I acknowledge that the information is accurate & that I am legally responsible for it."
-                  style={{checkboxTouch: styles.checkbox,
-                  checkboxText: styles.checkboxText
+                  style={{
+                    checkboxTouch: styles.checkbox,
+                    checkboxText: styles.checkboxText,
                   }}
                 />
               </View>
 
-              <CustomButton 
+              <CustomButton
                 title="Save"
                 onPress={handleSubmit}
-                touchStyle={[styles.saveButton, !acknowledgement && styles.saveButtonDisabled]}
+                touchStyle={[
+                  styles.saveButton,
+                  !acknowledgement && styles.saveButtonDisabled,
+                ]}
                 textStyle={styles.saveButtonText}
                 disabled={!acknowledgement}
               />
             </View>
+            <CustomModal
+              visible={isModalVisible}
+              onClose={() => setIsModalVisible(false)}
+              title="Khalid al-Jameel"
+              description="Are you sure you want to remove authorized pick-up?"
+              primaryButtonText="Yes, Sure"
+              primaryButtonAction={() =>
+                console.log('Removed Authorized Pick-Up')
+              }
+              secondaryButtonText="No, I Don’t"
+              secondaryButtonAction={() => console.log('Cancelled Removal')}
+              width={width * 1}
+            />
           </View>
         )}
       </Formik>
@@ -224,21 +306,24 @@ export default EditAuthorizedPickup;
 
 export const styles = StyleSheet.create({
   container: {
-    flex: 1,
     width: '100%',
-    maxWidth: 440,
+    // maxWidth: 440,
+    paddingHorizontal: 20,
     backgroundColor: '#fff',
     alignSelf: 'center',
+  },
+  titleBox: {
+    alignItems: 'flex-start',
   },
   title: {
     fontFamily: 'Outfit',
     fontSize: 18,
-    fontWeight: '600',
+    fontWeight: '900',
     color: '#212529',
-    marginBottom: 24,
+    marginTop: 30,
+    marginBottom: 20,
   },
   content: {
-    padding: 20,
     gap: 24,
   },
   imageSection: {
@@ -247,8 +332,8 @@ export const styles = StyleSheet.create({
     gap: 10,
   },
   imageContainer: {
-    width: width * 0.22, 
-    height: width * 0.22, 
+    width: width * 0.22,
+    height: width * 0.22,
     borderRadius: 9.66,
     backgroundColor: '#fef6e6',
     justifyContent: 'center',
@@ -257,7 +342,7 @@ export const styles = StyleSheet.create({
   },
   profileImage: {
     width: width * 0.14,
-    height: width * 0.14, 
+    height: width * 0.14,
   },
   changePictureButton: {
     backgroundColor: '#f8ac16',
@@ -283,7 +368,7 @@ export const styles = StyleSheet.create({
   label: {
     fontFamily: 'Outfit',
     fontSize: 14,
-    fontWeight: '500',
+    fontWeight: '700',
     lineHeight: 14,
     color: '#212529',
   },

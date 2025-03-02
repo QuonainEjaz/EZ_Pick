@@ -7,7 +7,7 @@ import SubHeading from '../../components/SubHeading';
 const NotificationItem = ({icon, title, description}) => (
   <View style={styles.notificationItem}>
     <View style={styles.iconContainer}>
-      <Image source={{uri: icon}} style={styles.icon} />
+      {icon}
     </View>
     <View style={styles.textContainer}>
       <Heading

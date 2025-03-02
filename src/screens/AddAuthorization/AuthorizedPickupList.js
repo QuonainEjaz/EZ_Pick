@@ -11,45 +11,17 @@ import SubHeading from '../../components/SubHeading';
 import CustomButton from '../../components/CustomButton';
 import CustomOptionsModal from '../../components/AuthScreenComponents/CustomOptionsModal';
 import AuthConfirmationModal from '../../components/AuthConfirmationModal';
-import AuthPickupDetails from './AuthPickupDetails';
+import {useSelector} from 'react-redux';
 import EditAuthorizedPickup from './EditAuthorizedPickup';
 import AddAuthorizedPickup from './AddAuthorization';
-import StudentPickupCard from './StudentPickupCard';
-import ShareOptions from './ShareOptions';
 
 const AuthorizedPickupList = ({navigation}) => {
-  const pickupList = [
-    {
-      id: 1,
-      name: 'Zayd al-Masri',
-      role: 'Driver',
-      image:
-        'https://dashboard.codeparrot.ai/api/image/Z7iqnlCHtJJZ6v_B/profile.png',
-    },
-    {
-      id: 2,
-      name: 'Rami al-Jabari',
-      role: 'Brother',
-      image:
-        'https://dashboard.codeparrot.ai/api/image/Z7iqnlCHtJJZ6v_B/profile-5.png',
-    },
-    {
-      id: 3,
-      name: 'Khalid al-Jameel',
-      role: 'Uncle',
-      image:
-        'https://dashboard.codeparrot.ai/api/image/Z7iqnlCHtJJZ6v_B/profile-9.png',
-    },
-    {
-      id: 4,
-      name: 'Tariq al-Nasr',
-      role: 'Guardian',
-      image:
-        'https://dashboard.codeparrot.ai/api/image/Z7iqnlCHtJJZ6v_B/profile-13.png',
-    },
-  ];
-
+  const students = useSelector(state => state.students.students);
   const [modalVisible, setModalVisible] = React.useState(false);
+  const [visible, setVisible] = React.useState(false);
+  const handleDelete = () => {
+    console.log('Deleted');
+  };
   const renderPickupItem = ({item}) => (
     <View style={styles.pickupItem}>
       <Image
@@ -79,17 +51,17 @@ const AuthorizedPickupList = ({navigation}) => {
         onClose={() => setModalVisible(false)}
         onViewDetails={() => navigation.navigate('AuthPickupDetails')}
         onEdit={() => navigation.navigate('EditAuthorizedPickup')}
-        // onDelete={handleDelete}
+        onDelete={() => setVisible(true)}
         style={styles.optionsModal}
       />
       <AuthConfirmationModal
-        visible={modalVisible}
-        onClose={() => setModalVisible(false)}
-        title="Khalid al-Jameel"
+        visible={visible}
+        onClose={() => setVisible(false)}
+        title={item.name}
         description="Are you sure you want to remove authorized pick-up?"
-        imageSource={require('../../assets/pics/EmailPic.png')} // Replace with actual image source
+        imageSource={{uri: item.image}}
         primaryButtonText="Yes, Sure"
-        primaryButtonAction={() => console.log('Confirmed')}
+        primaryButtonAction={handleDelete}
         secondaryButtonText="No, I Don’t"
         secondaryButtonAction={() => console.log('Cancelled')}
         style={{
@@ -119,11 +91,6 @@ const AuthorizedPickupList = ({navigation}) => {
   );
 
   return (
-    //  <AuthPickupDetails  />
-    //  <EditAuthorizedPickup  />
-    //  <AddAuthorizedPickup  />
-    //  <StudentPickupCard />
-    //  <ShareOptions />
     <View style={styles.container}>
       <Heading
         title="Authorized Pickup"
@@ -131,13 +98,13 @@ const AuthorizedPickupList = ({navigation}) => {
         textstyle={styles.headerTitleText}
       />
       <FlatList
-        data={pickupList}
+        data={students}
         renderItem={renderPickupItem}
         keyExtractor={item => item.id.toString()}
         contentContainerStyle={styles.scrollView}
       />
       <CustomButton
-        onPress={() => navigation.navigate('EditAuthorizedPickup')}
+        onPress={() => navigation.navigate('AddAuthorization')}
         title="Add New"
         touchStyle={styles.addButton}
         textStyle={styles.addButtonText}
@@ -151,7 +118,7 @@ export default AuthorizedPickupList;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: '#F8F9FA',
     borderRadius: 20,
     padding: 20,
     justifyContent: 'space-between',

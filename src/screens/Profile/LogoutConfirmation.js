@@ -1,34 +1,38 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, Image, StyleSheet } from 'react-native';
+import { View, Image, StyleSheet } from 'react-native';
+import Heading from '../../components/Heading';
+import SubHeading from '../../components/SubHeading'; 
+import CustomButton from '../../components/CustomButton'; 
+import LogoutIcon from '../../assets/Icons/svg/LogoutIcon';
 
 const LogoutConfirmation = ({ onLogout = () => {}, onCancel = () => {} }) => {
   return (
     <View style={styles.container}>
       <View style={styles.contentContainer}>
-        <Image 
-          source={{ uri: 'https://dashboard.codeparrot.ai/api/image/Z7l_eFCHtJJZ6wAs/fi-10152.png' }}
-          style={styles.icon}
-        />
+        <LogoutIcon style={styles.icon} />
         
         <View style={styles.textContainer}>
-          <Text style={styles.title}>Logout</Text>
-          <Text style={styles.description}>Are you sure you want to logout?</Text>
+          <Heading title="Logout" textstyle={styles.title} boxStyle={styles.headingBox} />
+          <SubHeading 
+            text="Are you sure you want to logout?" 
+            style={styles.description} 
+          />
         </View>
 
         <View style={styles.buttonContainer}>
-          <TouchableOpacity 
-            style={[styles.button, styles.cancelButton]} 
+          <CustomButton 
+            title="Cancel" 
             onPress={onCancel}
-          >
-            <Text style={[styles.buttonText, styles.cancelButtonText]}>Cancel</Text>
-          </TouchableOpacity>
+            touchStyle={[styles.button, styles.cancelButton]} 
+            textStyle={styles.cancelButtonText} 
+          />
           
-          <TouchableOpacity 
-            style={[styles.button, styles.logoutButton]}
+          <CustomButton 
+            title="Logout" 
             onPress={onLogout}
-          >
-            <Text style={[styles.buttonText, styles.logoutButtonText]}>Logout</Text>
-          </TouchableOpacity>
+            touchStyle={[styles.button, styles.logoutButton]} 
+            textStyle={styles.logoutButtonText} 
+          />
         </View>
       </View>
     </View>
@@ -37,17 +41,17 @@ const LogoutConfirmation = ({ onLogout = () => {}, onCancel = () => {} }) => {
 
 const styles = StyleSheet.create({
   container: {
-    width: '100%',
-    maxWidth: 334,
+    width: '80%',
     backgroundColor: '#fff',
     borderRadius: 20,
     padding: 30,
     alignSelf: 'center',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   contentContainer: {
     width: '100%',
     flexDirection: 'column',
-    gap: 20,
     alignItems: 'center',
   },
   icon: {
@@ -61,7 +65,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   title: {
-    fontFamily: 'Poppins',
+    fontFamily: 'Outfit',
     fontSize: 16,
     fontWeight: '600',
     letterSpacing: 0.16,
@@ -74,6 +78,9 @@ const styles = StyleSheet.create({
     fontWeight: '400',
     color: '#6c757d',
     textAlign: 'center',
+  },
+  headingBox: {
+    alignItems: 'center',
   },
   buttonContainer: {
     width: '100%',
@@ -98,12 +105,6 @@ const styles = StyleSheet.create({
   logoutButton: {
     backgroundColor: '#f8ac16',
   },
-  buttonText: {
-    fontFamily: 'Outfit',
-    fontSize: 16,
-    fontWeight: '500',
-    lineHeight: 28,
-  },
   cancelButtonText: {
     color: '#f8ac16',
   },
@@ -113,4 +114,3 @@ const styles = StyleSheet.create({
 });
 
 export default LogoutConfirmation;
-

@@ -15,6 +15,7 @@ const CustomModal = ({
   secondaryButtonText,
   secondaryButtonAction,
   style,
+  width
 }) => {
   return (
     <Modal transparent visible={visible} animationType="slide">
@@ -42,6 +43,7 @@ const CustomModal = ({
             {primaryButtonText && (
               <CustomButton
                 title={primaryButtonText}
+                width={width}
                 onPress={() => {
                   primaryButtonAction && primaryButtonAction();
                   onClose();
@@ -54,6 +56,7 @@ const CustomModal = ({
             {secondaryButtonText && (
               <CustomButton
                 title={secondaryButtonText}
+                width={width}
                 onPress={() => {
                   secondaryButtonAction && secondaryButtonAction();
                   onClose();
@@ -111,6 +114,7 @@ const styles = StyleSheet.create({
   },
   primaryButton: {
     width: '100%',
+    height: 50,
     backgroundColor: '#F8AC16',
     paddingVertical: 10,
     borderRadius: 8,
@@ -125,6 +129,7 @@ const styles = StyleSheet.create({
   },
   secondaryButton: {
     width: '100%',
+    height: 50,
     marginTop: 10,
     borderWidth: 1,
     borderColor: '#F8AC16',

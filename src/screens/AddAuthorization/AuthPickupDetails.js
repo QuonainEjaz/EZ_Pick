@@ -1,58 +1,75 @@
 import React from 'react';
-import { View, Image, StyleSheet, TouchableOpacity,ScrollView } from 'react-native';
+import {
+  View,
+  Image,
+  StyleSheet,
+  TouchableOpacity,
+  ScrollView,
+} from 'react-native';
 import Heading from '../../components/Heading';
 import SubHeading from '../../components/SubHeading';
 import CustomButton from '../../components/CustomButton';
 import CustomLink from '../../components/CustomLink';
 
-const AuthPickupDetails = ({ style, pickupData = {} }) => {
+const AuthPickupDetails = ({style, pickupData = {}}) => {
   const defaultPickupData = {
     name: 'Khalid al-Jameel',
     relation: 'Uncle',
     idNumber: '545135',
     cellNo: '02 Jan 2024',
     vehicleNo: 'SA-5715B',
-    profileImage: 'https://dashboard.codeparrot.ai/api/image/Z7iqnlCHtJJZ6v_B/profile-20.png',
+    profileImage:
+      'https://dashboard.codeparrot.ai/api/image/Z7iqnlCHtJJZ6v_B/profile-20.png',
     assignedKids: [
       {
         name: 'Jabir bin Hayan',
-        image: 'https://dashboard.codeparrot.ai/api/image/Z7iqnlCHtJJZ6v_B/kid-1-im.png'
+        image:
+          'https://dashboard.codeparrot.ai/api/image/Z7iqnlCHtJJZ6v_B/kid-1-im.png',
       },
       {
         name: 'Ali bin Abi Talib',
-        image: 'https://dashboard.codeparrot.ai/api/image/Z7iqnlCHtJJZ6v_B/kid-2-im.png'
-      }
+        image:
+          'https://dashboard.codeparrot.ai/api/image/Z7iqnlCHtJJZ6v_B/kid-2-im.png',
+      },
     ],
-    ...pickupData
+    ...pickupData,
   };
 
   return (
-    <ScrollView style={[styles.container, style]}>
-      {/* Back Navigation */}
-      <View style={styles.header}>
-        <CustomLink title="Back" touchStyle={styles.backButton} textStyle={styles.backText} />
-        <Heading title="Pickup Details" textstyle={styles.headerTitle} />
-      </View>
-
+    <ScrollView
+      style={[styles.container, style]}
+      contentContainerStyle={styles.contentContainer}
+      showsVerticalScrollIndicator={false}>
       {/* Profile Section */}
       <View style={styles.profileContainer}>
-        <Image 
-          source={{ uri: defaultPickupData.profileImage }}
+        <Image
+          source={{uri: defaultPickupData.profileImage}}
           style={styles.profileImage}
         />
         <View style={styles.profileInfo}>
-          <SubHeading text={defaultPickupData.name} style={styles.profileName} />
-          <SubHeading text={defaultPickupData.relation} style={styles.profileRelation} />
+          <SubHeading
+            text={defaultPickupData.name}
+            style={styles.profileName}
+          />
+          <SubHeading
+            text={defaultPickupData.relation}
+            style={styles.profileRelation}
+          />
         </View>
       </View>
 
       {/* Details Section */}
       <View style={styles.detailsContainer}>
         <View style={styles.detailsHeader}>
-          <SubHeading text="Authorized Pickup Details" style={styles.detailsTitle} />
+          <SubHeading
+            text="Authorized Pickup Details"
+            style={styles.detailsTitle}
+          />
           <TouchableOpacity style={styles.editButton}>
-            <Image 
-              source={{ uri: 'https://dashboard.codeparrot.ai/api/image/Z7iqnlCHtJJZ6v_B/edit-edi.png' }}
+            <Image
+              source={{
+                uri: 'https://dashboard.codeparrot.ai/api/image/Z7iqnlCHtJJZ6v_B/edit-edi.png',
+              }}
               style={styles.editIcon}
             />
           </TouchableOpacity>
@@ -62,7 +79,10 @@ const AuthPickupDetails = ({ style, pickupData = {} }) => {
           <View style={styles.detailsRow}>
             <View style={styles.detailsColumn}>
               <SubHeading text="Relation" style={styles.label} />
-              <SubHeading text={defaultPickupData.relation} style={styles.value} />
+              <SubHeading
+                text={defaultPickupData.relation}
+                style={styles.value}
+              />
             </View>
             <View style={styles.detailsColumn}>
               <SubHeading text="Name" style={styles.label} />
@@ -73,18 +93,27 @@ const AuthPickupDetails = ({ style, pickupData = {} }) => {
           <View style={styles.detailsRow}>
             <View style={styles.detailsColumn}>
               <SubHeading text="ID Number" style={styles.label} />
-              <SubHeading text={defaultPickupData.idNumber} style={styles.value} />
+              <SubHeading
+                text={defaultPickupData.idNumber}
+                style={styles.value}
+              />
             </View>
             <View style={styles.detailsColumn}>
               <SubHeading text="Cell No" style={styles.label} />
-              <SubHeading text={defaultPickupData.cellNo} style={styles.value} />
+              <SubHeading
+                text={defaultPickupData.cellNo}
+                style={styles.value}
+              />
             </View>
           </View>
 
           <View style={styles.detailsRow}>
             <View style={styles.detailsColumn}>
               <SubHeading text="Vehicle #" style={styles.label} />
-              <SubHeading text={defaultPickupData.vehicleNo} style={styles.value} />
+              <SubHeading
+                text={defaultPickupData.vehicleNo}
+                style={styles.value}
+              />
             </View>
           </View>
         </View>
@@ -97,15 +126,14 @@ const AuthPickupDetails = ({ style, pickupData = {} }) => {
           {defaultPickupData.assignedKids.map((kid, index) => (
             <View key={index} style={styles.kidCard}>
               <TouchableOpacity style={styles.removeKidButton}>
-                <Image 
-                  source={{ uri: 'https://dashboard.codeparrot.ai/api/image/Z7iqnlCHtJJZ6v_B/interfac-4.png' }}
+                <Image
+                  source={{
+                    uri: 'https://dashboard.codeparrot.ai/api/image/Z7iqnlCHtJJZ6v_B/interfac-4.png',
+                  }}
                   style={styles.removeIcon}
                 />
               </TouchableOpacity>
-              <Image 
-                source={{ uri: kid.image }}
-                style={styles.kidImage}
-              />
+              <Image source={{uri: kid.image}} style={styles.kidImage} />
               <SubHeading text={kid.name} style={styles.kidName} />
             </View>
           ))}
@@ -114,19 +142,35 @@ const AuthPickupDetails = ({ style, pickupData = {} }) => {
 
       <View style={styles.qrContainer}>
         <View style={styles.qrContent}>
-          <Image 
-            source={{ uri: 'https://dashboard.codeparrot.ai/api/image/Z7iqnlCHtJJZ6v_B/qr.png' }}
+          <Image
+            source={{
+              uri: 'https://dashboard.codeparrot.ai/api/image/Z7iqnlCHtJJZ6v_B/qr.png',
+            }}
             style={styles.qrCode}
           />
           <SubHeading text="Scan QR Code" style={styles.qrText} />
-          <CustomButton title="Copy" touchStyle={styles.copyButton} textStyle={styles.copyButtonText} />
+          <CustomButton
+            title="Copy"
+            touchStyle={styles.copyButton}
+            textStyle={styles.copyButtonText}
+          />
         </View>
         <View style={styles.shareContainer}>
-          <CustomButton title="Share" touchStyle={styles.shareButton} textStyle={styles.shareText} />
-          <CustomButton title="Save" touchStyle={styles.saveButton} textStyle={styles.saveButtonText} />
+          <CustomButton
+            title="Share"
+            touchStyle={styles.shareButton}
+            textStyle={styles.shareText}
+          />
+          <CustomButton
+            title="Save"
+            touchStyle={styles.saveButton}
+            textStyle={styles.saveButtonText}
+          />
           <TouchableOpacity style={styles.viewButton}>
-            <Image 
-              source={{ uri: 'https://dashboard.codeparrot.ai/api/image/Z7iqnlCHtJJZ6v_B/iconex-l.png' }}
+            <Image
+              source={{
+                uri: 'https://dashboard.codeparrot.ai/api/image/Z7iqnlCHtJJZ6v_B/iconex-l.png',
+              }}
               style={styles.viewIcon}
             />
           </TouchableOpacity>

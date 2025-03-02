@@ -8,7 +8,24 @@ import {
   TextInput,
 } from 'react-native';
 import {useWindowDimensions} from 'react-native';
-
+import Svg, { G, Path, Defs, ClipPath } from "react-native-svg"
+const SvgComponent = (props) => (
+  <Svg
+    xmlns="http://www.w3.org/2000/svg"
+    width={14}
+    height={8}
+    fill="none"
+    {...props}
+  >
+    <Path
+      stroke="#6C757D"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      strokeWidth={1.5}
+      d="m1 1 6 6 6-6"
+    />
+  </Svg>
+)
 const CustomPicker = ({items, label, style, selectedValue, onValueChange}) => {
   const {width} = useWindowDimensions();
   const [selectedItem, setSelectedItem] = useState('');
@@ -46,7 +63,7 @@ const CustomPicker = ({items, label, style, selectedValue, onValueChange}) => {
           placeholderTextColor="#999"
           editable={false}
         />
-        <Text style={styles.arrow}>▼</Text>
+        <SvgComponent style={styles.arrow}/>
       </TouchableOpacity>
 
       {isVisible && (

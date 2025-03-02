@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useState, useEffect} from 'react';
 import {
   View,
   TextInput,
@@ -8,67 +8,37 @@ import {
   ScrollView,
   Dimensions,
 } from 'react-native';
+import {useSelector} from 'react-redux';
+import {launchImageLibrary} from 'react-native-image-picker';
 import Heading from '../../components/Heading';
 import SubHeading from '../../components/SubHeading';
 import CustomButton from '../../components/CustomButton';
-import CustomModal from '../../components/CustomModal';
+import CustomCheckbox from '../../components/CustomCheckbox';
+import CustomPicker from '../../components/CustomPicker';
+import InputField from '../../components/InputFeild';
 
 const {width} = Dimensions.get('window');
 
-const AddAuthorization = ({
-  style,
-  onSave = () => {},
-  onBack = () => {},
-  defaultRelation = '',
-  defaultName = '',
-  defaultIdNumber = '',
-  defaultCellNo = '',
-  defaultVehicleNo = '',
-  defaultSelectedKids = [],
-}) => {
+const AddAuthorization = ({navigation,style, onSave = () => {navigation.goBack();}, onBack = () => {}}) => {
+  const students = useSelector(state => state.students.students);
+
+  const defaultRelation = '';
+  const defaultName = '';
+  const defaultIdNumber = '';
+  const defaultCellNo = '';
+  const defaultVehicleNo = '';
+  const defaultSelectedKids = [];
   const [selectedKids, setSelectedKids] = useState(
     defaultSelectedKids.length > 0
       ? defaultSelectedKids
-      : [
-          // default kids data
-          {
-            id: 1,
-            name: 'Jabir bin Hayan',
-            image:
-              'https://dashboard.codeparrot.ai/api/image/Z7iqnlCHtJJZ6v_B/rectangl.png',
-            selected: false,
-          },
-          {
-            id: 2,
-            name: 'Ali bin Abi Talib',
-            image:
-              'https://dashboard.codeparrot.ai/api/image/Z7iqnlCHtJJZ6v_B/rectangl-6.png',
-            selected: false,
-          },
-          {
-            id: 3,
-            name: 'Umar bin Alkufi',
-            image:
-              'https://dashboard.codeparrot.ai/api/image/Z7iqnlCHtJJZ6v_B/rectangl-12.png',
-            selected: false,
-          },
-          {
-            id: 4,
-            name: 'Sara al-Nasr',
-            image:
-              'https://dashboard.codeparrot.ai/api/image/Z7iqnlCHtJJZ6v_B/rectangl-19.png',
-            selected: false,
-          },
-          {
-            id: 5,
-            name: 'Rami al-Jabari',
-            image:
-              'https://dashboard.codeparrot.ai/api/image/Z7iqnlCHtJJZ6v_B/rectangl-25.png',
-            selected: false,
-          },
-        ],
+      : students.map(student => ({
+          id: student.id,
+          name: student.name,
+          image: student.image,
+          selected: false,
+        })),
   );
-  const [modalVisible, setModalVisible] = useState(false);
+
   const [formData, setFormData] = useState({
     relation: defaultRelation,
     name: defaultName,
@@ -76,6 +46,7 @@ const AddAuthorization = ({
     cellNo: defaultCellNo,
     vehicleNo: defaultVehicleNo,
     acknowledgement: false,
+    picture: null,
   });
 
   const handleKidSelect = kidId => {
@@ -96,122 +67,107 @@ const AddAuthorization = ({
       selectedKids: selectedKidIds,
     });
   };
+  const handleImagePick = () => {
+    launchImageLibrary(
+      {
+        mediaType: 'photo',
+        quality: 0.5,
+      },
+      response => {
+        if (response.didCancel) {
+          console.log('User cancelled image picker');
+        } else if (response.errorCode) {
+          console.log('Image Picker Error: ', response.errorMessage);
+        } else {
+          const {uri} = response.assets[0]; // Extract URI from the selected asset
+          setFormData(prevData => ({
+            ...prevData,
+            picture: uri, // Update the formData with the selected image URI
+          }));
+        }
+      },
+    );
+  };
 
   return (
     <View style={[styles.container, style]}>
-      <View style={styles.header}>
-        <TouchableOpacity style={styles.backButton} onPress={onBack}>
-          <Image
-            source={{
-              uri: 'https://dashboard.codeparrot.ai/api/image/Z7iqnlCHtJJZ6v_B/icon-arr.png',
-            }}
-            style={styles.backIcon}
-            resizeMode="contain"
-          />
-          <SubHeading text="Back" style={styles.backText} />
-        </TouchableOpacity>
-        <Heading title="Authorized Pickup Details" style={styles.headerTitle} />
-      </View>
-
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
-        <Heading title="Add New Authorized Pickup" style={styles.title} />
+        <Heading
+          title="Add New Authorized Pickup"
+          textstyle={styles.title}
+          boxStyle={styles.headingContainer}
+        />
 
         <View style={styles.imageUploadContainer}>
           <View style={styles.imageContainer}>
             <Image
-              source={{
-                uri: 'https://dashboard.codeparrot.ai/api/image/Z7iqnlCHtJJZ6v_B/image.png',
-              }}
+              source={
+                formData.picture
+                  ? {uri: formData.picture}
+                  : require('../../assets/pics/UploadPic.png')
+              }
               style={styles.uploadImage}
-              resizeMode="contain"
+              resizeMode="cover"
             />
           </View>
-          <TouchableOpacity style={styles.uploadButton}>
+          <TouchableOpacity
+            style={styles.uploadButton}
+            onPress={handleImagePick}>
             <SubHeading text="Upload Picture" style={styles.uploadButtonText} />
           </TouchableOpacity>
         </View>
 
         <View style={styles.formContainer}>
-          <View style={styles.inputGroup}>
-            <SubHeading text="Relation" style={styles.label} />
-            <View style={styles.inputContainer}>
-              <TextInput
-                style={styles.input}
-                placeholder="Select Relation"
-                placeholderTextColor="#6c757d"
-                value={formData.relation}
-                onChangeText={text =>
-                  setFormData({...formData, relation: text})
-                }
-              />
-              <Image
-                source={{
-                  uri: 'https://dashboard.codeparrot.ai/api/image/Z7iqnlCHtJJZ6v_B/dropdown.png',
-                }}
-                style={styles.dropdownIcon}
-                resizeMode="contain"
-              />
-            </View>
-          </View>
+          <CustomPicker
+            label="Relation"
+            items={['Father', 'Mother', 'Uncle', 'Aunt', 'Other']}
+            selectedValue={formData.relation}
+            onValueChange={value => setFormData({...formData, relation: value})}
+            style={{label: styles.label, input: styles.input}}
+          />
 
-          <View style={styles.inputGroup}>
-            <SubHeading text="Name" style={styles.label} />
-            <View style={styles.inputContainer}>
-              <TextInput
-                style={styles.input}
-                placeholder="Enter Name"
-                placeholderTextColor="#6c757d"
-                value={formData.name}
-                onChangeText={text => setFormData({...formData, name: text})}
-              />
-            </View>
-          </View>
+          <InputField
+            label="Name"
+            placeholder=""
+            placeholderColor="#6c757d"
+            value={formData.name}
+            onChangeText={text => setFormData({...formData, name: text})}
+            style={{label: styles.label, input: styles.input}}
+          />
 
-          <View style={styles.inputGroup}>
-            <SubHeading text="ID Number" style={styles.label} />
-            <View style={styles.inputContainer}>
-              <TextInput
-                style={styles.input}
-                placeholder="Enter ID Number"
-                placeholderTextColor="#6c757d"
-                value={formData.idNumber}
-                onChangeText={text =>
-                  setFormData({...formData, idNumber: text})
-                }
-              />
-            </View>
-          </View>
+          <InputField
+            label="ID Number"
+            placeholder=""
+            placeholderColor="#6c757d"
+            value={formData.idNumber}
+            onChangeText={text => setFormData({...formData, idNumber: text})}
+            style={{label: styles.label, input: styles.input}}
+          />
 
-          <View style={styles.inputGroup}>
-            <SubHeading text="Cell No" style={styles.label} />
-            <View style={styles.inputContainer}>
-              <TextInput
-                style={styles.input}
-                placeholder="Enter Cell Number"
-                placeholderTextColor="#6c757d"
-                value={formData.cellNo}
-                onChangeText={text => setFormData({...formData, cellNo: text})}
-                keyboardType="phone-pad"
-              />
-            </View>
-          </View>
+          <InputField
+            label="Cell No"
+            placeholder=""
+            placeholderColor="#6c757d"
+            value={formData.cellNo}
+            onChangeText={text => setFormData({...formData, cellNo: text})}
+            keyboardType="phone-pad"
+            style={{label: styles.label, input: styles.input}}
+          />
 
-          <View style={styles.inputGroup}>
-            <SubHeading text="Vehicle #" style={styles.label} />
-            <View style={styles.inputContainer}>
-              <TextInput
-                style={styles.input}
-                placeholder="Enter Vehicle Number"
-                placeholderTextColor="#6c757d"
-                value={formData.vehicleNo}
-                onChangeText={text =>
-                  setFormData({...formData, vehicleNo: text})
-                }
-              />
-            </View>
-          </View>
+          <InputField
+            label="Vehicle #"
+            placeholder=""
+            placeholderColor="#6c757d"
+            value={formData.vehicleNo}
+            onChangeText={text => setFormData({...formData, vehicleNo: text})}
+            style={{label: styles.label, input: styles.input}}
+          />
 
-          <SubHeading text="Select Kids" style={styles.label} />
+          <Heading
+            title="Select Kids"
+            boxStyle={styles.headingContainer}
+            textstyle={styles.label}
+          />
           <ScrollView
             horizontal
             showsHorizontalScrollIndicator={false}
@@ -236,56 +192,27 @@ const AddAuthorization = ({
             </View>
           </ScrollView>
 
-          <View style={styles.checkboxContainer}>
-            <TouchableOpacity
-              style={styles.checkbox}
-              onPress={() =>
-                setFormData({
-                  ...formData,
-                  acknowledgement: !formData.acknowledgement,
-                })
-              }>
-              <Image
-                source={{
-                  uri: 'https://dashboard.codeparrot.ai/api/image/Z7iqnlCHtJJZ6v_B/componen.png',
-                }}
-                style={styles.checkboxIcon}
-                resizeMode="contain"
-              />
-            </TouchableOpacity>
-            <SubHeading
-              text="I acknowledge that the information is accurate & that I am legally responsible for it."
-              style={styles.checkboxText}
-            />
-          </View>
+          <CustomCheckbox
+            value={formData.acknowledgement}
+            onValueChange={value =>
+              setFormData({...formData, acknowledgement: value})
+            }
+            label="I acknowledge that the information is accurate & that I am legally responsible for it."
+            style={{
+              checkboxContainer: styles.checkboxContainer,
+              checkboxText: styles.checkboxText,
+            }}
+          />
 
           <CustomButton
-            text="Save"
+            title="Save"
             onPress={handleSave}
-            disabled={
-              !formData.acknowledgement ||
-              !selectedKids.some(kid => kid.selected)
-            }
-            style={[
-              styles.saveButton,
-              (!formData.acknowledgement ||
-                !selectedKids.some(kid => kid.selected)) &&
-                styles.saveButtonDisabled,
-            ]}
+            width={width}
+            touchStyle={[styles.saveButtonContainer]}
+            textStyle={[styles.saveButton]}
           />
         </View>
       </ScrollView>
-
-      <CustomModal
-        visible={modalVisible}
-        onClose={() => setModalVisible(false)}
-        title="Khalid al-Jameel"
-        description="Are you sure you want to remove authorized pick-up?"
-        primaryButtonText="Yes, Sure"
-        primaryButtonAction={() => console.log('Removed Authorized Pick-Up')}
-        secondaryButtonText="No, I Don’t"
-        secondaryButtonAction={() => console.log('Cancelled Removal')}
-      />
     </View>
   );
 };
@@ -297,9 +224,6 @@ export const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#fff',
     width: width >= 440 ? 440 : '100%',
-    minWidth: 320,
-    borderRadius: 20,
-    overflow: 'hidden',
   },
   header: {
     height: 50,
@@ -340,13 +264,18 @@ export const styles = StyleSheet.create({
     flex: 1,
     padding: 20,
   },
+  headingContainer: {
+    alignItems: 'flex-start',
+    marginTop: 10,
+    marginBottom: 24,
+  },
   title: {
     fontFamily: 'Outfit',
     fontSize: 18,
-    fontWeight: '600',
+    fontWeight: '700',
     color: '#212529',
-    marginBottom: 24,
   },
+
   imageUploadContainer: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -354,19 +283,19 @@ export const styles = StyleSheet.create({
     gap: 20,
   },
   imageContainer: {
-    width: 85,
-    height: 85,
+    width: 100,
+    height: 100,
     backgroundColor: '#fef6e6',
     borderRadius: 10,
     borderWidth: 1,
     borderColor: '#fcdea1',
-    padding: 17,
     justifyContent: 'center',
     alignItems: 'center',
   },
   uploadImage: {
-    width: 48,
-    height: 48,
+    width: 100,
+    height: 100,
+    borderRadius: 10,
   },
   uploadButton: {
     backgroundColor: '#f8ac16',
@@ -394,7 +323,6 @@ export const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '500',
     color: '#212529',
-    marginBottom: 6,
   },
   inputContainer: {
     flexDirection: 'row',
@@ -407,23 +335,28 @@ export const styles = StyleSheet.create({
     height: 54,
   },
   input: {
+    borderWidth: 1,
+    borderColor: '#e3e3e3',
+    paddingHorizontal: 12,
+    height: 54,
     flex: 1,
-    fontFamily: 'Outfit',
-    fontSize: 14,
-    color: '#212529',
-    height: '100%',
   },
   dropdownIcon: {
     width: 24,
     height: 24,
   },
   kidsScrollContainer: {
+    backgroundColor: '#f8f8f9',
+    borderRadius: 5,
+    borderWidth: 1,
+    borderColor: '#e3e3e3',
     marginBottom: 12,
   },
   kidsContainer: {
     flexDirection: 'row',
     gap: 10,
     paddingVertical: 8,
+    paddingHorizontal: 10,
   },
   kidCard: {
     backgroundColor: '#fff',
@@ -458,6 +391,11 @@ export const styles = StyleSheet.create({
     gap: 10,
     marginTop: 12,
     paddingRight: 20,
+    marginBottom: 12,
+  },
+  checkboxTouch: {
+    flexDirection: 'row',
+    alignItems: 'center',
   },
   checkbox: {
     width: 20,
@@ -473,24 +411,16 @@ export const styles = StyleSheet.create({
     fontFamily: 'Outfit',
     fontSize: 14,
     color: '#212529',
-    lineHeight: 20,
+  },
+  saveButtonContainer: {
+    paddingVertical: 12,
+    marginBottom: 40,
   },
   saveButton: {
-    backgroundColor: '#f8ac16',
-    borderRadius: 6,
-    paddingVertical: 14,
-    paddingHorizontal: 28,
-    alignItems: 'center',
-    marginTop: 20,
-    marginBottom: 10,
-  },
-  saveButtonDisabled: {
-    opacity: 0.6,
-  },
-  saveButtonText: {
     fontFamily: 'Outfit',
-    fontSize: 18,
-    fontWeight: '500',
-    color: '#fff',
+    fontSize: 22,
+    fontWeight: '700',
+    color: '#ffffff',
   },
+  saveButtonText: {},
 });

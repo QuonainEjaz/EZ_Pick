@@ -1,15 +1,23 @@
 import React from 'react';
-import {View, Text, TouchableOpacity, StyleSheet} from 'react-native';
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  StyleSheet,
+  Dimensions,
+} from 'react-native';
+
+const {width} = Dimensions.get('window');
 
 const CustomCheckbox = ({value, onValueChange, label, style}) => {
   return (
     <View style={[styles.customcheckboxContainer, style?.checkboxContainer]}>
-      {/* Custom TouchableOpacity checkbox */}
-      <TouchableOpacity style={styles.checkboxTouch} onPress={() => onValueChange(!value)}>
+      <TouchableOpacity
+        style={styles.checkboxTouch}
+        onPress={() => onValueChange(!value)}>
         <View style={[styles.checkbox, value && styles.checkboxChecked]}>
           {value && <Text style={styles.checkmark}>✔</Text>}
         </View>
-        {/* Checkbox label */}
         <Text style={[styles.checkboxText, style?.checkboxText]}>{label}</Text>
       </TouchableOpacity>
     </View>
@@ -25,8 +33,10 @@ const styles = StyleSheet.create({
     marginLeft: 1,
   },
   checkbox: {
-    width: 20,
-    height: 20,
+    width: 22,
+    height: 22,
+    padding: 1,
+    paddingHorizontal: 3,
     borderWidth: 2,
     borderColor: '#07193D4D',
     borderRadius: 4,
@@ -37,12 +47,16 @@ const styles = StyleSheet.create({
   checkboxTouch: {
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'center',
   },
   checkboxChecked: {
-    backgroundColor: '#07193D4D',
+    backgroundColor: '#F8AC16',
+    alignSelf: 'center',
+    padding: 1,
+    paddingHorizontal: 3,
   },
   checkmark: {
-    fontSize: 12,
+    fontSize: width >= 410 ? 12 : 12,
     color: 'white',
   },
   checkboxText: {

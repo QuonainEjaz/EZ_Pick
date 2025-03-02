@@ -15,13 +15,19 @@ const CustomHeader = ({screen, name, navigation}) => {
       case 'ProfileScreen':
         return {title: 'Profile', button: false};
       case 'AddAuthorization':
-        return {title: 'Add Authorization', button: false};
+        return {title: 'Add Authorization', button: true};
       case 'ProfileDetail':
         return {title: 'Profile', button: true};
       case 'UpdatePassword':
         return {title: 'Update Password', button: true};
       case 'LanguageSelection':
         return {title: 'Language', button: true};
+      case 'AuthorizedPickupList':
+        return {title: 'Authorized Pickup', button: false};
+      case 'AuthPickupDetails':
+        return {title: 'Pickup Details', button: true};
+      case 'EditAuthorizedPickup':
+        return {title: 'Edit Authorized Pickup', button: true};
       default:
         return {title: '', button: false};
     }
@@ -65,6 +71,7 @@ const CustomHeader = ({screen, name, navigation}) => {
       case 'ProfileDetail':
       case 'UpdatePassword':
       case 'LanguageSelection':
+      case 'AuthorizedPickupList':
         return (
           <View
             style={
@@ -74,7 +81,6 @@ const CustomHeader = ({screen, name, navigation}) => {
           </View>
         );
       case 'HomeScreen':
-      case 'Add':
         return (
           <View style={styles.headerContainer}>
             <View style={styles.headerContent}>{renderLogo()}</View>
@@ -137,7 +143,7 @@ const styles = StyleSheet.create({
   },
   headingText: {
     color: '#212529',
-    fontSize: 20,
+    fontSize: 18,
     fontWeight: '900',
     lineHeight: 22.68,
     justifyContent: 'center',

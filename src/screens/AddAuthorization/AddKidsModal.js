@@ -1,9 +1,17 @@
 import React, {useState} from 'react';
-import {Modal, View, FlatList, Image, StyleSheet} from 'react-native';
+import {
+  Modal,
+  View,
+  FlatList,
+  Image,
+  StyleSheet,
+  Dimensions,
+} from 'react-native';
 import CustomButton from '../../components/CustomButton';
 import CustomCheckbox from '../../components/CustomCheckbox';
 import Heading from '../../components/Heading';
 import SubHeading from '../../components/SubHeading';
+const width = Dimensions.get('window').width;
 
 const AddKidsModal = ({visible, kids, onAssign, onClose}) => {
   const [selectedKids, setSelectedKids] = useState([]);
@@ -20,7 +28,7 @@ const AddKidsModal = ({visible, kids, onAssign, onClose}) => {
     <Modal transparent={true} visible={visible} animationType="slide">
       <View style={styles.modalContainer}>
         <View style={styles.modalContent}>
-          <Heading title="Assign" textstyle={styles.modalTitle} />
+          <Heading title="Assign" textstyle={styles.modalTitle} boxStyle={styles.modalTitleBox}/>
           <FlatList
             data={kids}
             keyExtractor={item => item.id.toString()}
@@ -44,6 +52,7 @@ const AddKidsModal = ({visible, kids, onAssign, onClose}) => {
             onPress={() => onAssign(selectedKids)}
             touchStyle={styles.assignButton}
             onClose={onClose}
+            width={width * 0.9}
           />
         </View>
       </View>
@@ -54,18 +63,22 @@ const AddKidsModal = ({visible, kids, onAssign, onClose}) => {
 const styles = StyleSheet.create({
   modalContainer: {
     flex: 1,
-    justifyContent: 'center',
+    justifyContent: 'flex-end',
     alignItems: 'center',
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
   },
   modalContent: {
-    width: '80%',
+    width: '100%',
     backgroundColor: '#fff',
     borderRadius: 10,
     padding: 20,
   },
   modalTitle: {
+    fontSize: 18,
     marginBottom: 20,
+  },
+  modalTitleBox: {
+    alignItems: 'flex-start',
   },
   kidItem: {
     flexDirection: 'row',
@@ -92,6 +105,7 @@ const styles = StyleSheet.create({
   assignButton: {
     marginTop: 20,
     backgroundColor: '#F8AC16',
+    height: 50,
   },
   closeButton: {
     marginTop: 10,

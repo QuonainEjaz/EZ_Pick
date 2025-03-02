@@ -1,3 +1,4 @@
+import {NotificationScreenIcons} from '../../assets/Icons/svg/NotificationScreenIcons';
 const initialState = {
   isFirstLoad: true,
   students: [
@@ -8,7 +9,7 @@ const initialState = {
       gender: 'Male',
       email: 'jabir@whetstonez.com',
       grade: 'Grade 7th',
-      date: '02 Jan 2024',
+      date: '01 Feb 2025',
       pickupTime: '12:30 PM',
       image:
         'https://res.cloudinary.com/dgv3dpaa8/image/upload/v1740655477/Profile_Image_2_xqxfag.png',
@@ -151,36 +152,36 @@ const initialState = {
   notifications: {
     TODAY: [
       {
-        icon: 'https://dashboard.codeparrot.ai/api/image/Z7cMKf3atcswnotk/notifica.png',
+        icon: <NotificationScreenIcons.WalletMinusIcon/>,
         title: "Hey, the pickup's off!",
         description: 'Lorem ipsum dolor sit amet',
       },
       {
-        icon: 'https://dashboard.codeparrot.ai/api/image/Z7cMKf3atcswnotk/notifica-2.png',
+        icon: <NotificationScreenIcons.WalletMinusIcon/>,
         title: 'Awesome! Your pickup is all set!',
         description: 'Lorem ipsum dolor sit amet',
       },
     ],
     YESTERDAY: [
       {
-        icon: 'https://dashboard.codeparrot.ai/api/image/Z7cMKf3atcswnotk/notifica-3.png',
+        icon: <NotificationScreenIcons.AddSquareIcon/>,
         title: "Here's what we've got for pickups today!",
         description: 'Lorem ipsum dolor sit amet',
       },
       {
-        icon: 'https://dashboard.codeparrot.ai/api/image/Z7cMKf3atcswnotk/notifica-4.png',
+        icon: <NotificationScreenIcons.WalletMinusIcon/>,
         title: 'Great news! Your pickup is confirmed!',
         description: 'Lorem ipsum dolor sit amet',
       },
     ],
     'October 2, 2024': [
       {
-        icon: 'https://dashboard.codeparrot.ai/api/image/Z7cMKf3atcswnotk/notifica-5.png',
+        icon: <NotificationScreenIcons.AddSquareIcon/>,
         title: "Check out today's pickup lineup!",
         description: 'Lorem ipsum dolor sit amet',
       },
       {
-        icon: 'https://dashboard.codeparrot.ai/api/image/Z7cMKf3atcswnotk/notifica-6.png',
+        icon: <NotificationScreenIcons.FrameIcon/>,
         title: "You're all set up with your account!",
         description: 'Lorem ipsum dolor sit amet',
       },
