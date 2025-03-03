@@ -1,39 +1,47 @@
-import React, {useEffect, useState} from 'react';
-import {View, StyleSheet} from 'react-native';
+import React, {useEffect} from 'react';
+import {View, StyleSheet, Text} from 'react-native';
 import {useSelector, useDispatch} from 'react-redux';
+import {CommonActions} from '@react-navigation/native';
 import {toggleFirstLoad} from '../../store/App/action';
-// import AsyncStorage from '@react-native-async-storage/async-storage';
+
 const HomeScreen = ({navigation}) => {
   const dispatch = useDispatch();
   const isFirstLoad = useSelector(state => state.students.isFirstLoad);
+
   useEffect(() => {
-    console.log('isFirstLoad:', isFirstLoad);
-    if (isFirstLoad) {
-      dispatch(toggleFirstLoad());
-      console.log('Navigating to StudentUploadScreen'); 
-      navigation.navigate('StudentUploadScreen'); // Navigate to StudentUploadScreen
-    } else {
-      console.log('Navigating to StudentListScreen'); 
-      navigation.navigate('StudentListScreen'); // Navigate to StudentListScreen
-    }
-  }, [ dispatch, navigation]);
-  //   const checkFirstVisit = async () => {
-  //     try {
-  //       const isFirstTime = await AsyncStorage.getItem('isFirstTime');
-  //       if (isFirstTime === null) {
-  //         await AsyncStorage.setItem('isFirstTime', 'false');
-  //         setIsFirstLoad(true);
-  //       } else {
-  //         setIsFirstLoad(false);
-  //       }
-  //     } catch (error) {
-  //       console.error('Error checking first time visit:', error);
-  //     }
-  //   };
+    const unsubscribe = navigation.addListener('focus', () => {
+      console.log('isFirstLoad:', isFirstLoad);
+      if (isFirstLoad) {
+        dispatch(toggleFirstLoad());
+        console.log('Navigating to StudentUploadScreen');
+        navigation.navigate('StudentUploadScreen'); // Navigate to StudentUploadScreen
+      } else {
+        console.log('Navigating to StudentListScreen');
+        navigation.dispatch(
+          CommonActions.reset({
+            index: 0,
+            routes: [{name: 'StudentListScreen'}],
+          })
+        ); // Reset navigation stack and navigate to StudentListScreen
+      }
+    });
 
-  //   checkFirstVisit()
+    return unsubscribe;
+  }, [navigation, isFirstLoad, dispatch]);
 
-  // }, [navigation]);
+  return (
+    <View style={styles.container}>
+      <Text>Home Screen</Text>
+    </View>
+  );
 };
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+});
 
 export default HomeScreen;

@@ -5,27 +5,75 @@ import {
   Image,
   TouchableOpacity,
   StyleSheet,
+  Text,
 } from 'react-native';
 import Heading from '../../components/Heading';
 import SubHeading from '../../components/SubHeading';
 import CustomButton from '../../components/CustomButton';
 import CustomOptionsModal from '../../components/AuthScreenComponents/CustomOptionsModal';
 import AuthConfirmationModal from '../../components/AuthConfirmationModal';
-import {useSelector} from 'react-redux';
-import EditAuthorizedPickup from './EditAuthorizedPickup';
-import AddAuthorizedPickup from './AddAuthorization';
+import { useSelector } from 'react-redux';
+import Svg, { Circle, Rect } from 'react-native-svg';
 
-const AuthorizedPickupList = ({navigation}) => {
-  const students = useSelector(state => state.students.students);
+const OptionButton = (props) => (
+  <Svg
+    xmlns="http://www.w3.org/2000/svg"
+    width={26}
+    height={26}
+    fill="none"
+    {...props}>
+    <Circle cx={13} cy={13} r={13} fill="#F8F8F9" />
+    <Rect
+      width={3.111}
+      height={3.111}
+      x={11.445}
+      y={6}
+      fill="#525252"
+      rx={1.556}
+    />
+    <Rect
+      width={3.111}
+      height={3.111}
+      x={11.445}
+      y={11.444}
+      fill="#525252"
+      rx={1.556}
+    />
+    <Rect
+      width={3.111}
+      height={3.111}
+      x={11.445}
+      y={16.889}
+      fill="#525252"
+      rx={1.556}
+    />
+  </Svg>
+);
+
+const AuthorizedPickupList = ({ navigation }) => {
+  const students = useSelector((state) => state.students.students);
+  const [selectedItemId, setSelectedItemId] = React.useState(null);
   const [modalVisible, setModalVisible] = React.useState(false);
-  const [visible, setVisible] = React.useState(false);
+  const [confirmationVisible, setConfirmationVisible] = React.useState(false);
+
   const handleDelete = () => {
     console.log('Deleted');
   };
-  const renderPickupItem = ({item}) => (
+
+  const handleOptionPress = (itemId) => {
+    setSelectedItemId(itemId);
+    setModalVisible(true);
+  };
+
+  const handleConfirmationPress = (itemId) => {
+    setSelectedItemId(itemId);
+    setConfirmationVisible(true);
+  };
+
+  const renderPickupItem = ({ item }) => (
     <View style={styles.pickupItem}>
       <Image
-        source={{uri: item.image}}
+        source={{ uri: item.image }}
         style={styles.profileImage}
         defaultSource={require('../../assets/pics/EmailPic.png')}
         resizeMode="cover"
@@ -36,36 +84,33 @@ const AuthorizedPickupList = ({navigation}) => {
       </View>
       <TouchableOpacity
         style={styles.optionsButton}
-        onPress={() => setModalVisible(true)}>
+        onPress={() => handleOptionPress(item.id)}>
         <View style={styles.optionsCircle}>
-          <Image
-            source={{
-              uri: 'https://dashboard.codeparrot.ai/api/image/Z7iqnlCHtJJZ6v_B/frame-11.png',
-            }}
-            style={styles.optionsIcon}
-          />
+          <OptionButton />
         </View>
       </TouchableOpacity>
+
       <CustomOptionsModal
-        visible={modalVisible}
+        visible={modalVisible && selectedItemId === item.id}
         onClose={() => setModalVisible(false)}
         onViewDetails={() => navigation.navigate('AuthPickupDetails')}
         onEdit={() => navigation.navigate('EditAuthorizedPickup')}
-        onDelete={() => setVisible(true)}
+        onDelete={() => handleConfirmationPress(item.id)}
         style={styles.optionsModal}
       />
+
       <AuthConfirmationModal
-        visible={visible}
-        onClose={() => setVisible(false)}
+        visible={confirmationVisible && selectedItemId === item.id}
+        onClose={() => setConfirmationVisible(false)}
         title={item.name}
         description="Are you sure you want to remove authorized pick-up?"
-        imageSource={{uri: item.image}}
+        imageSource={{ uri: item.image }}
         primaryButtonText="Yes, Sure"
         primaryButtonAction={handleDelete}
         secondaryButtonText="No, I Don’t"
         secondaryButtonAction={() => console.log('Cancelled')}
         style={{
-          titleText: {fontWeight: 'bold', fontSize: 16},
+          titleText: { fontWeight: 'bold', fontSize: 16 },
           descriptionText: {
             textAlign: 'center',
             fontSize: 14,
@@ -76,7 +121,7 @@ const AuthorizedPickupList = ({navigation}) => {
             borderRadius: 10,
             paddingVertical: 12,
           },
-          primaryButtonText: {color: '#FFFFFF', fontWeight: '600'},
+          primaryButtonText: { color: '#FFFFFF', fontWeight: '600' },
           secondaryButton: {
             borderWidth: 1,
             borderColor: '#F8AC16',
@@ -84,7 +129,7 @@ const AuthorizedPickupList = ({navigation}) => {
             borderRadius: 10,
             paddingVertical: 12,
           },
-          secondaryButtonText: {color: '#F8AC16', fontWeight: '600'},
+          secondaryButtonText: { color: '#F8AC16', fontWeight: '600' },
         }}
       />
     </View>
@@ -100,7 +145,7 @@ const AuthorizedPickupList = ({navigation}) => {
       <FlatList
         data={students}
         renderItem={renderPickupItem}
-        keyExtractor={item => item.id.toString()}
+        keyExtractor={(item) => item.id.toString()}
         contentContainerStyle={styles.scrollView}
       />
       <CustomButton
@@ -186,9 +231,5 @@ const styles = StyleSheet.create({
     backgroundColor: '#F8F8F9',
     justifyContent: 'center',
     alignItems: 'center',
-  },
-  optionsIcon: {
-    width: 3.11,
-    height: 14,
   },
 });

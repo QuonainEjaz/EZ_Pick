@@ -9,7 +9,7 @@ import ArrowDown from '../../assets/Icons/svg/ArrowDown';
 const HistoryScreen = ({ navigation }) => {
   const dispatch = useDispatch();
   const students = useSelector(state => state.students.students);
-  const [selectedFilter, setSelectedFilter] = useState('Last Week');
+  const [selectedFilter, setSelectedFilter] = useState('All Time');
   const [filteredStudents, setFilteredStudents] = useState(students);
   const [modalVisible, setModalVisible] = useState(false);
   const filterButtonRef = useRef(null);  // To reference the filter button for width calculation

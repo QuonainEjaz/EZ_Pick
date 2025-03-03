@@ -309,7 +309,7 @@ export const styles = StyleSheet.create({
     width: '100%',
     // maxWidth: 440,
     paddingHorizontal: 20,
-    backgroundColor: '#fff',
+    backgroundColor: '#FFFFFF',
     alignSelf: 'center',
   },
   titleBox: {
@@ -341,8 +341,9 @@ export const styles = StyleSheet.create({
     padding: width * 0.05,
   },
   profileImage: {
-    width: width * 0.14,
-    height: width * 0.14,
+    width: width * 0.22,
+    height: width * 0.22,
+    borderRadius: 9.66,
   },
   changePictureButton: {
     backgroundColor: '#f8ac16',
@@ -413,7 +414,7 @@ export const styles = StyleSheet.create({
     borderRadius: 8,
   },
   kidName: {
-    fontFamily: 'Montserrat',
+    fontFamily: 'Outfit',
     fontSize: 14,
     fontWeight: '600',
     color: '#212529',
@@ -421,7 +422,7 @@ export const styles = StyleSheet.create({
     marginTop: 6,
   },
   addKidButton: {
-    backgroundColor: '#f8ac16',
+    // backgroundColor: '#f8ac16',
     borderRadius: 6,
     padding: 10,
     justifyContent: 'center',
@@ -457,8 +458,8 @@ export const styles = StyleSheet.create({
     paddingVertical: 16,
     paddingHorizontal: 28,
     alignItems: 'center',
-    marginTop: 20,
     width: '100%',
+    marginBottom: 20,
   },
   saveButtonDisabled: {
     opacity: 0.6,

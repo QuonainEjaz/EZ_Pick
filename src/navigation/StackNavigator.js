@@ -9,7 +9,6 @@ import TabNavigator from './TabNavigator';
 import StudentUploadScreen from '../screens/Home/StudentUploadScreen';
 import CustomHeader from '../components/CustomHeader';
 import PickupDetails from '../screens/History/PickupDetails';
-import AuthPickupDetails from '../screens/AddAuthorization/AuthPickupDetails';
 import EditAuthorizedPickup from '../screens/AddAuthorization/EditAuthorizedPickup';
 import AddAuthorizedPickup from '../screens/AddAuthorization/AddAuthorization';
 import StudentPickupCard from '../screens/AddAuthorization/StudentPickupCard';
@@ -17,6 +16,9 @@ import ShareOptions from '../screens/AddAuthorization/ShareOptions';
 import ProfileDetail from '../screens/Profile/ProfileDetail';
 import UpdatePassword from '../screens/Profile/UpdatePassword';
 import LanguageSelection from '../screens/Profile/LanguageSelection';
+import AuthorizedPickupList from '../screens/AddAuthorization/AuthorizedPickupList';
+import AddAuthorization from '../screens/AddAuthorization/AddAuthorization';
+import AuthPickupDetails from '../screens/AddAuthorization/AuthPickupDetails';
 
 const Stack = createStackNavigator();
 
@@ -56,21 +58,7 @@ const StackNavigator = () => {
           ),
         })}
       />
-      <Stack.Screen
-        name="AuthPickupDetails"
-        component={AuthPickupDetails}
-        options={({route, navigation}) => ({
-          headerShown: true,
 
-          header: () => (
-            <CustomHeader
-              name={route.name}
-              screen={'AuthPickupDetails'}
-              navigation={navigation}
-            />
-          ),
-        })}
-      />
       <Stack.Screen
         name="EditAuthorizedPickup"
         component={EditAuthorizedPickup}
@@ -171,6 +159,51 @@ const StackNavigator = () => {
             <CustomHeader
               name={route.name}
               screen={'LanguageSelection'}
+              navigation={navigation}
+            />
+          ),
+        })}
+      />
+      <Stack.Screen
+        name="AuthorizedPickupList"
+        component={AuthorizedPickupList}
+        options={({route, navigation}) => ({
+          headerShown: true,
+
+          header: () => (
+            <CustomHeader
+              name={route.name}
+              screen={'AuthorizedPickupList'}
+              navigation={navigation}
+            />
+          ),
+        })}
+      />
+      <Stack.Screen
+        name="AddAuthorization"
+        component={AddAuthorization}
+        options={({route, navigation}) => ({
+          headerShown: true,
+
+          header: () => (
+            <CustomHeader
+              name={route.name}
+              screen={'AddAuthorization'}
+              navigation={navigation}
+            />
+          ),
+        })}
+      />
+      <Stack.Screen
+        name="AuthPickupDetails"
+        component={AuthPickupDetails}
+        options={({route, navigation}) => ({
+          headerShown: true,
+
+          header: () => (
+            <CustomHeader
+              name={route.name}
+              screen={'AuthPickupDetails'}
               navigation={navigation}
             />
           ),

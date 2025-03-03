@@ -19,7 +19,9 @@ const CustomOptionsModal = ({
       animationType="fade"
       transparent={true}
       visible={visible}
-      onRequestClose={onClose}>
+      onRequestClose={onClose}
+      
+      >
       <TouchableOpacity
         style={styles.overlay}
         onPress={onClose}
@@ -51,22 +53,19 @@ const CustomOptionsModal = ({
 
 const styles = StyleSheet.create({
   overlay: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    alignSelf: 'flex-end',
+    alignItems: 'flex-end',
     marginRight: 30,
-    marginTop: 60,
+    marginTop: 170,
   },
   modalContainer: {
     backgroundColor: '#fff',
     borderRadius: 8,
-    width: 200,
-    paddingVertical: 10,
+    width: 110,
+    paddingVertical: 4,
     elevation: 5,
   },
   option: {
-    paddingVertical: 12,
+    paddingVertical: 8,
     paddingHorizontal: 20,
   },
   optionText: {

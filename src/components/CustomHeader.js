@@ -14,8 +14,6 @@ const CustomHeader = ({screen, name, navigation}) => {
         return {title: 'Notifications', button: false};
       case 'ProfileScreen':
         return {title: 'Profile', button: false};
-      case 'AddAuthorization':
-        return {title: 'Add Authorization', button: true};
       case 'ProfileDetail':
         return {title: 'Profile', button: true};
       case 'UpdatePassword':
@@ -28,6 +26,8 @@ const CustomHeader = ({screen, name, navigation}) => {
         return {title: 'Pickup Details', button: true};
       case 'EditAuthorizedPickup':
         return {title: 'Edit Authorized Pickup', button: true};
+      case 'AddAuthorization':
+        return {title: 'Authorized Pickup Details', button: true};
       default:
         return {title: '', button: false};
     }
@@ -72,6 +72,9 @@ const CustomHeader = ({screen, name, navigation}) => {
       case 'UpdatePassword':
       case 'LanguageSelection':
       case 'AuthorizedPickupList':
+      case 'AddAuthorization':
+      case 'EditAuthorizedPickup':
+      case 'AuthPickupDetails':
         return (
           <View
             style={

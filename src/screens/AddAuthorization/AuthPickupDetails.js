@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useState} from 'react';
 import {
   View,
   Image,
@@ -6,35 +6,87 @@ import {
   TouchableOpacity,
   ScrollView,
 } from 'react-native';
-import Heading from '../../components/Heading';
+import Clipboard from '@react-native-clipboard/clipboard';
 import SubHeading from '../../components/SubHeading';
 import CustomButton from '../../components/CustomButton';
-import CustomLink from '../../components/CustomLink';
-
+import ShimmerPlaceholder from 'react-native-shimmer-placeholder';
+import Svg, {Path, Circle} from 'react-native-svg';
+const ViewIcon = props => (
+  <Svg
+    xmlns="http://www.w3.org/2000/svg"
+    width={24}
+    height={25}
+    fill="none"
+    {...props}>
+    <Path
+      stroke="#6C757D"
+      strokeWidth={1.5}
+      d="M3.2 13.211a1.634 1.634 0 0 1 0-1.569A10.019 10.019 0 0 1 12 6.427c3.797 0 7.1 2.108 8.8 5.215.267.49.267 1.08 0 1.57a10.019 10.019 0 0 1-8.8 5.215c-3.797 0-7.1-2.108-8.8-5.216Z"
+    />
+    <Circle cx={12} cy={12.427} r={3} stroke="#6C757D" strokeWidth={1.5} />
+  </Svg>
+);
+const Edit = props => (
+  <Svg
+    xmlns="http://www.w3.org/2000/svg"
+    width={20}
+    height={20}
+    fill="none"
+    {...props}>
+    <Path
+      fill="#6C757D"
+      fillRule="evenodd"
+      d="m6.562 12.67.596-2.784c.087-.387.282-.741.564-1.021l5.447-5.398a3.03 3.03 0 0 1 2.09-.907 2.23 2.23 0 0 1 1.593.637 2.638 2.638 0 0 1-.27 3.683l-5.447 5.448c-.28.28-.634.476-1.02.563l-2.785.596h-.156a.62.62 0 0 1-.612-.816ZM8.587 9.74a.817.817 0 0 0-.228.408l-.4 1.903 1.902-.408a.816.816 0 0 0 .409-.229l5.447-5.447a1.437 1.437 0 0 0 .27-1.96 1.005 1.005 0 0 0-.728-.278 1.789 1.789 0 0 0-1.225.555L8.587 9.74Z"
+      clipRule="evenodd"
+    />
+    <Path
+      fill="#6C757D"
+      d="M16.46 9.126a.62.62 0 0 0-.613.613v4.647a2.45 2.45 0 0 1-2.45 2.49H5.615a2.5 2.5 0 0 1-2.45-2.49v-7.75a2.49 2.49 0 0 1 2.49-2.45h4.647a.612.612 0 1 0 0-1.226H5.615a3.716 3.716 0 0 0-3.716 3.675v7.75a3.716 3.716 0 0 0 3.716 3.717h7.75a3.716 3.716 0 0 0 3.707-3.716V9.739a.62.62 0 0 0-.612-.613Z"
+    />
+  </Svg>
+);
+const MinusIcon = props => (
+  <Svg
+    xmlns="http://www.w3.org/2000/svg"
+    width={18}
+    height={18}
+    fill="none"
+    {...props}>
+    <Path
+      fill="#D83A3C"
+      fillRule="evenodd"
+      d="M8.496 0h1.008A8.496 8.496 0 0 1 18 8.496v1.008A8.496 8.496 0 0 1 9.504 18H8.496A8.496 8.496 0 0 1 0 9.504V8.496A8.496 8.496 0 0 1 8.496 0ZM5.4 9.675h7.2a.675.675 0 1 0 0-1.35H5.4a.675.675 0 0 0 0 1.35Z"
+      clipRule="evenodd"
+    />
+  </Svg>
+);
 const AuthPickupDetails = ({style, pickupData = {}}) => {
+  const [isLoading, setIsLoading] = useState(true);
   const defaultPickupData = {
     name: 'Khalid al-Jameel',
     relation: 'Uncle',
     idNumber: '545135',
-    cellNo: '02 Jan 2024',
+    cellNo: '123-456-7890',
     vehicleNo: 'SA-5715B',
     profileImage:
-      'https://dashboard.codeparrot.ai/api/image/Z7iqnlCHtJJZ6v_B/profile-20.png',
+      'https://res.cloudinary.com/dgv3dpaa8/image/upload/v1740655477/Profile_Image_2_xqxfag.png',
     assignedKids: [
       {
         name: 'Jabir bin Hayan',
         image:
-          'https://dashboard.codeparrot.ai/api/image/Z7iqnlCHtJJZ6v_B/kid-1-im.png',
+          'https://res.cloudinary.com/dgv3dpaa8/image/upload/v1740655379/Profile_Image_1_qpmrhe.png',
       },
       {
         name: 'Ali bin Abi Talib',
         image:
-          'https://dashboard.codeparrot.ai/api/image/Z7iqnlCHtJJZ6v_B/kid-2-im.png',
+          'https://res.cloudinary.com/dgv3dpaa8/image/upload/v1740655477/Profile_Image_2_xqxfag.png',
       },
     ],
     ...pickupData,
   };
-
+  const handleCopy = () => {
+    Clipboard.setStrings([defaultPickupData.idNumber]);
+  };
   return (
     <ScrollView
       style={[styles.container, style]}
@@ -66,12 +118,7 @@ const AuthPickupDetails = ({style, pickupData = {}}) => {
             style={styles.detailsTitle}
           />
           <TouchableOpacity style={styles.editButton}>
-            <Image
-              source={{
-                uri: 'https://dashboard.codeparrot.ai/api/image/Z7iqnlCHtJJZ6v_B/edit-edi.png',
-              }}
-              style={styles.editIcon}
-            />
+            <Edit />
           </TouchableOpacity>
         </View>
 
@@ -120,31 +167,24 @@ const AuthPickupDetails = ({style, pickupData = {}}) => {
       </View>
 
       {/* Assigned Kids Section */}
+      <SubHeading text={'Assigned Kids'} style={styles.assignedKidsTitle} />
       <View style={styles.assignedKidsContainer}>
-        <SubHeading text="Assigned Kids" style={styles.assignedKidsTitle} />
-        <View style={styles.kidsRow}>
-          {defaultPickupData.assignedKids.map((kid, index) => (
-            <View key={index} style={styles.kidCard}>
-              <TouchableOpacity style={styles.removeKidButton}>
-                <Image
-                  source={{
-                    uri: 'https://dashboard.codeparrot.ai/api/image/Z7iqnlCHtJJZ6v_B/interfac-4.png',
-                  }}
-                  style={styles.removeIcon}
-                />
-              </TouchableOpacity>
-              <Image source={{uri: kid.image}} style={styles.kidImage} />
-              <SubHeading text={kid.name} style={styles.kidName} />
-            </View>
-          ))}
-        </View>
+        {defaultPickupData.assignedKids.map((kid, index) => (
+          <View key={index} style={styles.kidCard}>
+            <TouchableOpacity style={styles.removeKidButton}>
+              <MinusIcon />
+            </TouchableOpacity>
+            <Image source={{uri: kid.image}} style={styles.kidImage} />
+            <SubHeading text={kid.name} style={styles.kidName} />
+          </View>
+        ))}
       </View>
 
       <View style={styles.qrContainer}>
         <View style={styles.qrContent}>
           <Image
             source={{
-              uri: 'https://dashboard.codeparrot.ai/api/image/Z7iqnlCHtJJZ6v_B/qr.png',
+              uri: 'https://res.cloudinary.com/dgv3dpaa8/image/upload/v1740981881/b93cae454b6717460aabf5f106fafcd9_j2pn4u.png',
             }}
             style={styles.qrCode}
           />
@@ -153,27 +193,32 @@ const AuthPickupDetails = ({style, pickupData = {}}) => {
             title="Copy"
             touchStyle={styles.copyButton}
             textStyle={styles.copyButtonText}
+            onPress={handleCopy}
           />
         </View>
         <View style={styles.shareContainer}>
-          <CustomButton
-            title="Share"
-            touchStyle={styles.shareButton}
-            textStyle={styles.shareText}
-          />
-          <CustomButton
-            title="Save"
-            touchStyle={styles.saveButton}
-            textStyle={styles.saveButtonText}
-          />
-          <TouchableOpacity style={styles.viewButton}>
-            <Image
-              source={{
-                uri: 'https://dashboard.codeparrot.ai/api/image/Z7iqnlCHtJJZ6v_B/iconex-l.png',
-              }}
-              style={styles.viewIcon}
+          {/* Shimmer Effect */}
+          {isLoading && (
+            <ShimmerPlaceholder
+              style={styles.shimmerBox}
+              shimmerColors={['#f6f7f8', '#edeef1', '#f6f7f8']}
             />
-          </TouchableOpacity>
+          )}
+          <View style={styles.shareOptions}>
+            <CustomButton
+              title="Share"
+              touchStyle={styles.shareButton}
+              textStyle={styles.shareText}
+            />
+            <CustomButton
+              title="Save"
+              touchStyle={styles.saveButton}
+              textStyle={styles.saveButtonText}
+            />
+            <TouchableOpacity style={styles.viewButton}>
+              <ViewIcon />
+            </TouchableOpacity>
+          </View>
         </View>
       </View>
     </ScrollView>
@@ -187,48 +232,19 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#fff',
     width: '100%',
-    borderRadius: 20,
-    padding: 10,
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: 10,
     paddingHorizontal: 20,
-    backgroundColor: '#fff',
-    borderBottomWidth: 1,
-    borderBottomColor: '#e3e3e3',
-  },
-  backButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  backIcon: {
-    width: 7,
-    height: 12,
-  },
-  backText: {
-    marginLeft: 13,
-    fontFamily: 'Outfit',
-    fontSize: 14,
-    fontWeight: '500',
-    color: '#212529',
-    letterSpacing: 0.14,
-  },
-  headerTitle: {
-    flex: 1,
-    textAlign: 'center',
-    fontFamily: 'Outfit',
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#212529',
   },
   profileContainer: {
     flexDirection: 'row',
-    padding: 12,
-    backgroundColor: '#fff',
+    padding: 10,
+    backgroundColor: '#FFFFFF',
     borderRadius: 8,
-    marginVertical: 10,
+    marginVertical: 5,
+    shadowColor: '#676767',
+    shadowOffset: {width: 0, height: 2},
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 1,
   },
   profileImage: {
     width: 50,
@@ -247,7 +263,7 @@ const styles = StyleSheet.create({
   },
   profileRelation: {
     fontFamily: 'Outfit',
-    fontSize: 14,
+    marginVertical: 5,
     fontWeight: '400',
     color: '#6c757d',
     marginTop: 5,
@@ -256,7 +272,11 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     borderRadius: 12,
     padding: 12,
-    marginVertical: 10,
+    shadowColor: '#676767',
+    shadowOffset: {width: 0, height: 2},
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 1,
   },
   detailsHeader: {
     flexDirection: 'row',
@@ -268,8 +288,8 @@ const styles = StyleSheet.create({
   },
   detailsTitle: {
     fontFamily: 'Outfit',
-    fontSize: 18,
-    fontWeight: '600',
+    fontSize: 16,
+    fontWeight: '900',
     color: '#212529',
   },
   editButton: {
@@ -282,22 +302,23 @@ const styles = StyleSheet.create({
     height: 19.6,
   },
   detailsContent: {
-    marginTop: 12,
+    marginTop: 5,
   },
   detailsRow: {
+    marginVertical: 6,
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginBottom: 12,
+    marginBottom: 6,
   },
   detailsColumn: {
     flex: 1,
   },
   label: {
     fontFamily: 'Outfit',
-    fontSize: 14,
-    fontWeight: '500',
+    marginVertical: 2,
+    fontWeight: '700',
     color: '#212529',
-    marginBottom: 8,
+    marginBottom: 2,
   },
   value: {
     fontFamily: 'Outfit',
@@ -306,14 +327,22 @@ const styles = StyleSheet.create({
     color: '#6c757d',
   },
   assignedKidsContainer: {
-    marginVertical: 10,
+    marginTop: 2,
+    marginBottom: 10,
+    flexDirection: 'row',
+    padding: 10,
+    marginBottom: 10,
+    backgroundColor: '#f8f8f9',
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#e3e3e3',
   },
   assignedKidsTitle: {
     fontFamily: 'Outfit',
-    fontSize: 14,
-    fontWeight: '500',
+    fontSize: 16,
+    fontWeight: '700',
     color: '#212529',
-    marginBottom: 6,
+    marginTop: 15,
   },
   kidsRow: {
     flexDirection: 'row',
@@ -347,32 +376,43 @@ const styles = StyleSheet.create({
     borderRadius: 8,
   },
   kidName: {
-    fontFamily: 'Montserrat',
+    fontFamily: 'Outfit',
     fontSize: 14,
     fontWeight: '600',
     color: '#212529',
     textAlign: 'center',
-    marginTop: 6,
+    qrContainer: {
+      flexDirection: 'row',
+    },
   },
   qrContainer: {
+    alignItems: 'center',
+    flex: 1,
     flexDirection: 'row',
+    gap: 8,
+  },
+  kidName: {
+    fontFamily: 'Outfit',
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#212529',
+    textAlign: 'center',
+  },
+  qrContent: {
+    width: '37%',
+    alignItems: 'center',
     backgroundColor: '#f8f8f9',
     padding: 8,
     borderRadius: 5,
     borderWidth: 1,
     borderColor: '#e3e3e3',
-    marginVertical: 10,
-  },
-  qrContent: {
-    alignItems: 'center',
-    flex: 1,
   },
   qrCode: {
-    width: 99,
-    height: 99,
+    width: 100,
+    height: 100,
   },
   qrText: {
-    fontFamily: 'Montserrat',
+    fontFamily: 'Outfit',
     fontSize: 12,
     fontWeight: '600',
     color: '#212529',
@@ -392,9 +432,17 @@ const styles = StyleSheet.create({
     lineHeight: 28,
   },
   shareContainer: {
+    width: '60%',
+    backgroundColor: '#f8f8f9',
+    padding: 8,
+    borderRadius: 5,
+    borderWidth: 1,
+    borderColor: '#e3e3e3',
+    alignItems: 'center',
+  },
+  shareOptions: {
     flexDirection: 'row',
-    alignItems: 'flex-end',
-    marginLeft: 10,
+    gap: 7,
   },
   shareButton: {
     flexDirection: 'row',
@@ -404,13 +452,11 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#f8ac16',
     paddingVertical: 4,
-    paddingHorizontal: 22,
-    marginRight: 6,
+    paddingHorizontal: 18,
   },
   shareIcon: {
     width: 20,
     height: 20,
-    marginRight: 8,
   },
   shareText: {
     fontFamily: 'Outfit',
@@ -419,12 +465,20 @@ const styles = StyleSheet.create({
     color: '#f8ac16',
     lineHeight: 28,
   },
+  shimmerBox: {
+    width: '100%',
+    height: 120,
+    marginBottom: 10,
+    alignSelf: 'center',
+    borderColor: '#707070',
+    borderWidth: 1,
+  },
+
   saveButton: {
     backgroundColor: '#f8ac16',
     borderRadius: 6,
     paddingVertical: 4,
-    paddingHorizontal: 22,
-    marginRight: 6,
+    paddingHorizontal: 18,
   },
   saveButtonText: {
     fontFamily: 'Outfit',
