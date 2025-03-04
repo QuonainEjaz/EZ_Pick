@@ -1,19 +1,44 @@
-import React, { useCallback, useMemo, useState } from 'react';
-import { View, ScrollView, TouchableOpacity, StyleSheet, FlatList, Alert, Image, Modal } from 'react-native';
+import React, {useCallback, useMemo, useState} from 'react';
+import {
+  View,
+  ScrollView,
+  TouchableOpacity,
+  StyleSheet,
+  FlatList,
+  Alert,
+  Image,
+  Modal,
+} from 'react-native';
 import SubHeading from '../../components/SubHeading';
 import Heading from '../../components/Heading';
-import { useSelector } from 'react-redux';
 import ArrowRight from '../../assets/Icons/svg/ArrowRight';
-import { ProfileScreenIcons } from '../../assets/Icons/svg/ProfileScreenIcons';
+import {ProfileScreenIcons} from '../../assets/Icons/svg/ProfileScreenIcons';
 import ReactNativeBiometrics from 'react-native-biometrics';
 import CustomToggleSwitch from '../../components/CustomToggleSwitch';
-import LogoutConfirmation from './LogoutConfirmation'; // Assuming this component is in the same directory
+import LogoutConfirmation from './LogoutConfirmation';
+import axios from 'axios';
 
-const Profile = ({ navigation }) => {
+const Profile = ({navigation}) => {
   const [toggleSwitchValue, setToggleSwitchValue] = useState(false);
-  const [isModalVisible, setIsModalVisible] = useState(false);  // Modal visibility state
-  const students = useSelector(state => state.students.students);
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [students, setStudents] = useState(false);
+  const fetchStudents = async () => {
+    try {
+      const response = await axios.get(
+        'https://backendtest.ezpick.org/students',
+      );
+      console.log('API Response:', response.data.students);
 
+      if (response.data.success) {
+        setStudents(response.data.students);
+      } else {
+        console.error('Failed to fetch students:', response.data.message);
+      }
+    } catch (error) {
+      console.error('Error fetching students:', error);
+    }
+  };
+  fetchStudents();
   const pages = useMemo(
     () => [
       {
@@ -47,11 +72,11 @@ const Profile = ({ navigation }) => {
 
   const handleEnableSmartLogin = useCallback(async () => {
     try {
-      const { available, biometryType } =
+      const {available, biometryType} =
         await ReactNativeBiometrics.isSensorAvailable();
 
       if (available) {
-        const { success, error } = await ReactNativeBiometrics.simplePrompt({
+        const {success, error} = await ReactNativeBiometrics.simplePrompt({
           promptMessage: 'Login using fingerprint or face recognition',
         });
 
@@ -103,8 +128,7 @@ const Profile = ({ navigation }) => {
       showsVerticalScrollIndicator={false}
       contentInsetAdjustmentBehavior="automatic"
       style={styles.container}
-      contentContainerStyle={styles.contentContainer}
-    >
+      contentContainerStyle={styles.contentContainer}>
       <Heading
         title="Children"
         textstyle={styles.sectionTitle}
@@ -112,12 +136,14 @@ const Profile = ({ navigation }) => {
       />
       <FlatList
         data={students}
-        renderItem={({ item, index }) => (
+        renderItem={({item, index}) => (
           <ListItem
             item={item}
             index={index}
             navigation={navigation}
-            handleEnableSmartLogin={toggleSwitchValue ? handleEnableSmartLogin : null}
+            handleEnableSmartLogin={
+              toggleSwitchValue ? handleEnableSmartLogin : null
+            }
             toggleSwitchValue={toggleSwitchValue}
             onToggleSwitch={onToggleSwitch}
           />
@@ -133,9 +159,11 @@ const Profile = ({ navigation }) => {
       />
       <FlatList
         data={pages}
-        renderItem={({ item, index }) =>
+        renderItem={({item, index}) =>
           item.title === 'Logout' ? (
-            <TouchableOpacity style={styles.listItem} onPress={handleLogoutPress}>
+            <TouchableOpacity
+              style={styles.listItem}
+              onPress={handleLogoutPress}>
               {item.icon && ProfileScreenIcons[item.icon] && (
                 <ProfileScreenIcons.LogoutIcon />
               )}
@@ -168,8 +196,7 @@ const Profile = ({ navigation }) => {
         transparent={true}
         visible={isModalVisible}
         animationType="fade"
-        onRequestClose={handleCancelLogout}
-      >
+        onRequestClose={handleCancelLogout}>
         <View style={styles.modalOverlay}>
           <LogoutConfirmation
             onLogout={handleConfirmLogout}
@@ -202,7 +229,7 @@ const ListItem = ({
       handleEnableSmartLogin();
     } else {
       if (!isPage) {
-        navigation.navigate('ProfileDetail', { student: item });
+        navigation.navigate('ProfileDetail', {student: item});
       }
       if (isPage) {
         navigation.navigate(item.screen);
@@ -214,10 +241,11 @@ const ListItem = ({
     <TouchableOpacity
       key={index}
       style={styles.listItem}
-      onPress={() => handlePress(item)}
-    >
+      onPress={() => handlePress(item)}>
       {isPage && IconComponent && <IconComponent />}
-      {isPage ? null : <Image source={{ uri: item.image }} style={styles.profileImage} />}
+      {isPage ? null : (
+        <Image source={{uri: item?.profileUrl}} style={styles.profileImage} />
+      )}
       <View style={styles.listItemContent}>
         <SubHeading
           text={isPage ? item.title : item.name}

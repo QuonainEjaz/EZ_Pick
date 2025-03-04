@@ -6,12 +6,12 @@ import EditImage from '../../assets/Icons/svg/EditImage';
 
 const ProfileDetail = ({route}) => {
   const {student} = route.params;
-  const {image, name, arabicName, studentId, grade, gender, email} = student;
+  const {profileUrl, name, nameAr, id, grade, gender, parent} = student;
 
   return (
     <View style={styles.container}>
       <View style={styles.profileImageContainer}>
-        <Image source={{uri: image}} resizeMode="cover" style={styles.profileImage} />
+        <Image source={{uri: profileUrl}} resizeMode="cover" style={styles.profileImage} />
         <TouchableOpacity style={styles.editButton}>
           <EditImage />
         </TouchableOpacity>
@@ -32,18 +32,18 @@ const ProfileDetail = ({route}) => {
             </View>
             <View style={styles.column}>
               <SubHeading text="Arabic Name" style={styles.label} />
-              <SubHeading text={arabicName} style={styles.value} />
+              <SubHeading text={nameAr} style={styles.value} />
             </View>
           </View>
 
           <View style={styles.row}>
             <View style={styles.column}>
               <SubHeading text="Student ID" style={styles.label} />
-              <SubHeading text={studentId} style={styles.value} />
+              <SubHeading text={id} style={styles.value} />
             </View>
             <View style={styles.column}>
               <SubHeading text="Grade" style={styles.label} />
-              <SubHeading text={grade} style={styles.value} />
+              <SubHeading text={grade.grade} style={styles.value} />
             </View>
           </View>
 
@@ -54,7 +54,7 @@ const ProfileDetail = ({route}) => {
             </View>
             <View style={styles.column}>
               <SubHeading text="Student Email" style={styles.label} />
-              <SubHeading text={email} style={styles.value} />
+              <SubHeading text={parent.parentEmail} style={styles.value} />
             </View>
           </View>
         </View>

@@ -1,17 +1,18 @@
-import React, { useState } from 'react';
-import { View, StyleSheet, FlatList } from 'react-native';
-import { useDispatch, useSelector, shallowEqual } from 'react-redux';
+import React, {useState} from 'react';
+import {View, StyleSheet, FlatList} from 'react-native';
+import {useDispatch, useSelector, shallowEqual} from 'react-redux';
 import StudentUploadCard from './StudentUploadCard';
 import Heading from '../../components/Heading';
 import CustomDoubleButton from './CustomDoubleButton';
 import PhotoSelectionModal from '../../components/PhotoSelectionModal';
-import { launchCamera, launchImageLibrary } from 'react-native-image-picker';
-import { setStudents } from '../../store/App/action';
+import {launchCamera, launchImageLibrary} from 'react-native-image-picker';
+import {setStudents} from '../../store/App/action';
 
-const StudentUploadScreen = ({ navigation }) => {
+const StudentUploadScreen = ({navigation}) => {
   const dispatch = useDispatch();
   const students = useSelector(state => state.students.students, shallowEqual);
-  const [isPhotoSelectionModalVisible, setIsPhotoSelectionModalVisible] = useState(false);
+  const [isPhotoSelectionModalVisible, setIsPhotoSelectionModalVisible] =
+    useState(false);
   const [selectedStudent, setSelectedStudent] = useState(null);
   const [updatedImage, setUpdatedImage] = useState(null);
 
@@ -65,7 +66,7 @@ const StudentUploadScreen = ({ navigation }) => {
     if (updatedImage && selectedStudent) {
       const updatedStudent = {
         ...selectedStudent,
-        image: updatedImage,
+        profileUrl : updatedImage,
       };
       const updatedStudents = students.map(student =>
         student.id === updatedStudent.id ? updatedStudent : student,
@@ -88,7 +89,7 @@ const StudentUploadScreen = ({ navigation }) => {
         <FlatList
           showsVerticalScrollIndicator={false}
           data={students}
-          renderItem={({ item }) => (
+          renderItem={({item}) => (
             <StudentUploadCard
               key={item.id}
               student={item}

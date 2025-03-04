@@ -12,7 +12,7 @@ const StudentUploadCard = ({ student, onPress,image }) => {
         <View style={styles.detailsContainer}>
           <Text style={styles.name}>{student.name}</Text>
           <Text style={styles.grade}>Grade {student.grade}</Text>
-          <Text style={styles.pickupTime}>Today's Pick up time: {student.pickupTime}</Text>
+          {/* <Text style={styles.pickupTime}>Today's Pick up time: {student.pickupTime}</Text> */}
         </View>
       </View>
       <CustomButton title="Upload Picture" touchStyle={styles.uploadButton} textStyle={styles.uploadButtonText} onPress={onPress} />
