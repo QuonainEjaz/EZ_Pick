@@ -142,7 +142,7 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 14,
     fontWeight: '700',
-    color: '##212529',
+    color: '#212529',
   },
   value: {
     fontFamily: 'Outfit',
