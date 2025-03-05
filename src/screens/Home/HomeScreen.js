@@ -2,15 +2,31 @@ import React, {useEffect, useState} from 'react';
 import {useSelector, useDispatch} from 'react-redux';
 import {CommonActions} from '@react-navigation/native';
 import {toggleFirstLoad} from '../../store/App/action';
-import axios from 'axios'; // Import axios for API requests
+import {setStudents} from '../../store/App/action';
+import axios from 'axios';
 
 const HomeScreen = ({navigation}) => {
   const dispatch = useDispatch();
   const isFirstLoad = useSelector(state => state.students.isFirstLoad);
-  const students = useSelector(state => state.students.students);
+  useEffect(() => {
+    fetchStudents();
+  }, []);
+  const fetchStudents = async () => {
+    try {
+      const response = await axios.get(
+        'https://backendtest.ezpick.org/students',
+      );
+      console.log('API Response:', response.data.students);
 
-  const [loading, setLoading] = useState(false);
-
+      if (response.data.success) {
+        dispatch(setStudents(response.data.students));
+      } else {
+        console.error('Failed to fetch students:', response.data.message);
+      }
+    } catch (error) {
+      console.error('Error fetching students:', error);
+    }
+  };
   useEffect(() => {
     const unsubscribe = navigation.addListener('focus', () => {
       console.log('isFirstLoad:', isFirstLoad);

@@ -1,5 +1,12 @@
 import React, {useState, useEffect, useMemo} from 'react';
-import {View, Text, Image,TouchableOpacity, StyleSheet, Dimensions} from 'react-native';
+import {
+  View,
+  Text,
+  Image,
+  TouchableOpacity,
+  StyleSheet,
+  Dimensions,
+} from 'react-native';
 import Heading from '../../components/Heading';
 import CustomModal from '../../components/CustomModal';
 import CustomButton from '../../components/CustomButton';
@@ -11,13 +18,13 @@ const {width, height} = Dimensions.get('window');
 const StudentCard = ({student}) => {
   const [modalVisible, setModalVisible] = useState(false);
   const [status, setStatus] = useState(student.range);
-
+  const [timer, setTimer] = useState(2990880);
   const totalTimeInSeconds = useMemo(() => {
-    const hoursInSeconds = parseInt(student.timer.hours, 10) * 3600;
-    const minutesInSeconds = parseInt(student.timer.minutes, 10) * 60;
-    const secondsInSeconds = parseInt(student.timer.seconds, 10);
+    const hoursInSeconds = parseInt(timer.hours, 10) * 3600;
+    const minutesInSeconds = parseInt(timer.minutes, 10) * 60;
+    const secondsInSeconds = parseInt(timer.seconds, 10);
     return hoursInSeconds + minutesInSeconds + secondsInSeconds;
-  }, [student.timer]);
+  }, [timer]);
 
   const [timeLeft, setTimeLeft] = useState(totalTimeInSeconds);
 
@@ -185,7 +192,7 @@ const StudentCard = ({student}) => {
 
       <TouchableOpacity style={styles.infoContainer}>
         <Image
-          source={{uri: student.image}}
+          source={{uri: student.profileUrl}}
           style={styles.image}
           resizeMode="cover"
         />
@@ -195,15 +202,17 @@ const StudentCard = ({student}) => {
             textstyle={styles.name}
             boxStyle={styles.nameBox}
           />
-          <Text style={styles.grade}>{`Grade ${student.grade}`}</Text>
+          <Text style={styles.grade}>{student.grade.grade}</Text>
           <View style={styles.pickupTimeContainer}>
             <Text
               style={
                 styles.pickupTime
-              }>{`Today's Pick up time: ${student.pickupTime}`}</Text>
+              }>{`Today's Pick up time: ${student.createdAt}`}</Text>
           </View>
         </View>
-        <TouchableOpacity style={styles.exportContainer}><Export/></TouchableOpacity>
+        <TouchableOpacity style={styles.exportContainer}>
+          <Export />
+        </TouchableOpacity>
       </TouchableOpacity>
       <CustomButton
         title={config.buttonText}

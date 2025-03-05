@@ -16,29 +16,13 @@ import {ProfileScreenIcons} from '../../assets/Icons/svg/ProfileScreenIcons';
 import ReactNativeBiometrics from 'react-native-biometrics';
 import CustomToggleSwitch from '../../components/CustomToggleSwitch';
 import LogoutConfirmation from './LogoutConfirmation';
-import axios from 'axios';
+import {useSelector, useDispatch} from 'react-redux';
+import {setStudents} from '../../store/App/action';
 
 const Profile = ({navigation}) => {
   const [toggleSwitchValue, setToggleSwitchValue] = useState(false);
   const [isModalVisible, setIsModalVisible] = useState(false);
-  const [students, setStudents] = useState(false);
-  const fetchStudents = async () => {
-    try {
-      const response = await axios.get(
-        'https://backendtest.ezpick.org/students',
-      );
-      console.log('API Response:', response.data.students);
-
-      if (response.data.success) {
-        setStudents(response.data.students);
-      } else {
-        console.error('Failed to fetch students:', response.data.message);
-      }
-    } catch (error) {
-      console.error('Error fetching students:', error);
-    }
-  };
-  fetchStudents();
+  const students = useSelector(state => state.students.students);
   const pages = useMemo(
     () => [
       {
