@@ -6,8 +6,14 @@ export const setStudents = students => {
   };
 };
 
+
 export const toggleFirstLoad = () => {
   return {
     type: 'TOGGLE_FIRST_LOAD',
+  };
+};
+export const setToken = () => {
+  return {
+    type: 'Set_TOKEN',
   };
 };

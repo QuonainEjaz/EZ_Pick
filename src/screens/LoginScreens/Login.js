@@ -1,8 +1,10 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, Dimensions, Alert } from 'react-native';
-import { Formik } from 'formik';
+import React, {useState, useMemo} from 'react';
+import {View, Text, StyleSheet, Dimensions, Alert} from 'react-native';
+import {useSelector, useDispatch} from 'react-redux';
+import {setToken} from '../../store/App/action';
+import {Formik} from 'formik';
 import * as Yup from 'yup';
-import axios from 'axios'; 
+import axios from 'axios';
 import CustomToggleButton from '../../components/CustomToggleButton';
 import Heading from '../../components/Heading';
 import SubHeading from '../../components/SubHeading';
@@ -10,77 +12,87 @@ import InputField from '../../components/InputFeild';
 import CustomLink from '../../components/CustomLink';
 import CustomButton from '../../components/CustomButton';
 
-// Validation schema using Yup
+/*
 const validationSchema = Yup.object().shape({
   username: Yup.string()
-    .email('Invalid email address') // Checks for valid email format
-    .matches(/^\S*$/, 'Username cannot contain spaces') // Checks if username has spaces
+    .email('Invalid email address')
+    .matches(/^\S*$/, 'Username cannot contain spaces')
     .required('Username is required'),
   password: Yup.string()
-    .min(8, 'Password must be at least 8 characters long') // Checks for minimum length
+    .min(8, 'Password must be at least 8 characters long')
     .required('Password is required'),
 });
+*/
 
-const Login = ({ navigation }) => {
-  const { width, height } = Dimensions.get('window');
-  const [isLoading, setIsLoading] = useState(false); // Track loading state
+const Login = ({navigation}) => {
+  const {width, height} = Dimensions.get('window');
+  const [isLoading, setIsLoading] = useState(false);
+  const dispatch = useDispatch();
 
-  const handleLanguageChange = language => {
-    console.log('Selected Language:', language);
-  };
+  const handleLogin = async values => {
+    setIsLoading(true);
 
-  const handleLogin = async (values) => {
-    setIsLoading(true); // Start loading
-  
     try {
-      const response = await axios.get('https://fronttest.ezpick.org/login', {
-        username: values.username,
-        password: values.password,
-      });
-  
-      // Check the response (you can adjust this based on your API's response)
-      if (response.status === 200) {
-        console.log('Login Success:', response.data);
-        navigation.navigate('TabNavigator');
-      } else {
-        Alert.alert('Error', 'Invalid credentials or something went wrong');
-      }
+      // const response = await axios.post(
+      //   'https://backendtest.ezpick.org/clients/login',
+      //   {
+      //     email: values.username,
+      //     password: values.password,
+      //   },
+      // );
+      // if (response.status === 200) {
+      //   console.log('Login Success:', response.data);
+      //   dispatch(setToken(response.data.token));
+      //   navigation.navigate('TabNavigator');
+      // } else {
+      //   Alert.alert('Error', 'Invalid credentials or something went wrong');
+      // }
+      // Directly navigate to TabNavigator for debugging purposes
+      navigation.navigate('TabNavigator');
     } catch (error) {
-      if (error.response) {
-        console.error('Login Error:', error.response.status, error.response.data);
-        Alert.alert('Error', `Server responded with: ${error.response.status}`);
-      } else {
-        console.error('Login Error:', error.message);
-        Alert.alert('Error', 'Network issue, please try again.');
-      }
+      // const errorMessage =
+      //   error.response?.data?.message ||
+      //   error.message ||
+      //   'Network issue, please try again.';
+      // console.error('Login Error:', error);
+      // Alert.alert('Error', errorMessage);
+    } finally {
+      setIsLoading(false);
     }
   };
+
+  const inputFieldStyle = useMemo(
+    () => ({
+      label: {fontSize: 14, fontWeight: 'bold', marginBottom: 10},
+      input: {
+        paddingVertical: 12,
+        borderWidth: 1,
+        borderColor: '#E3E3E3',
+        color: 'black',
+      },
+    }),
+    [],
+  );
 
   return (
     <View style={styles.container}>
       <CustomToggleButton
-        onToggle={handleLanguageChange}
-        customStyle={{ width: width * 0.4, alignSelf: 'flex-end' }}
+        onToggle={language => console.log('Selected Language:', language)}
+        customStyle={{width: width * 0.4, alignSelf: 'flex-end'}}
       />
-      <View style={[styles.viewContainer, { width: width * 0.9 }]}>
+      <View style={[styles.viewContainer, {width: width * 0.9}]}>
         <Heading boxStyle={styles.heading} title="Welcome to EZpick" />
         <SubHeading
           text="Lorem ipsum dolor sit amet consectetur. Elit malesuada massa sit sagittis."
           boxStyle={styles.heading}
-          style={{
-            fontSize: 14,
-            textAlign: 'start',
-            color: '#6C757D',
-            marginBottom: '5%',
-          }}
+          style={styles.subHeading}
         />
 
         {/* Formik Form */}
         <Formik
-          initialValues={{ username: '', password: '' }}
-          validationSchema={validationSchema}
-          onSubmit={handleLogin} // Call handleLogin on form submission
-        >
+          initialValues={{username: '', password: ''}}
+          // validationSchema={validationSchema}
+          onSubmit={handleLogin}>
           {({
             values,
             handleChange,
@@ -97,22 +109,16 @@ const Login = ({ navigation }) => {
                 value={values.username}
                 onChangeText={handleChange('username')}
                 onBlur={handleBlur('username')}
-                style={{
-                  label: { fontSize: 14, fontWeight: 'bold', marginBottom: 10 },
-                  input: {
-                    paddingVertical: 12,
-                    borderWidth: 1,
-                    borderColor: '#E3E3E3',
-                    color: '#333',
-                  },
-                }}
+                style={inputFieldStyle}
                 keyboardType="email-address"
                 secureTextEntry={false}
                 multiline={false}
               />
+              {/*
               {touched.username && errors.username && (
                 <Text style={styles.errorText}>{errors.username}</Text>
               )}
+              */}
 
               <InputField
                 label="Password"
@@ -121,38 +127,29 @@ const Login = ({ navigation }) => {
                 value={values.password}
                 onChangeText={handleChange('password')}
                 onBlur={handleBlur('password')}
-                style={{
-                  label: { fontSize: 14, fontWeight: 'bold', marginBottom: 10 },
-                  input: {
-                    paddingVertical: 12,
-                    borderWidth: 1,
-                    borderColor: '#E3E3E3',
-                  },
-                }}
-                keyboardType="default"
+                style={inputFieldStyle}
+                keyboardType="password"
                 secureTextEntry={true}
                 multiline={false}
               />
+              {/*
               {touched.password && errors.password && (
                 <Text style={styles.errorText}>{errors.password}</Text>
               )}
+              */}
 
               <CustomLink
                 label="Forget Password?"
                 onPress={() => {
                   navigation.navigate('Forget_Password');
                 }}
-                style={{
-                  alignSelf: 'flex-end',
-                  marginTop: -15,
-                  marginBottom: 40,
-                }}
+                style={styles.linkStyle}
               />
               <CustomButton
-                title={isLoading ? 'Loading...' : 'Login'}
-                onPress={handleSubmit} // Trigger form submission
-                touchStyle={{ width: width * 0.9, height: height * 0.06 }}
-                disabled={isLoading} // Disable button when loading
+                title={'Login'}
+                onPress={handleSubmit}
+                touchStyle={{width: width * 0.9, height: height * 0.06}}
+                disabled={isLoading}
               />
             </>
           )}
@@ -170,7 +167,6 @@ const styles = StyleSheet.create({
     paddingVertical: 50,
     backgroundColor: '#FFFFFF',
   },
-  toggleButton: {},
   viewContainer: {
     flex: 1,
     padding: 1,
@@ -180,9 +176,11 @@ const styles = StyleSheet.create({
     alignItems: 'flex-start',
     marginBottom: 10,
   },
-  text: {
-    fontSize: 20,
-    color: '#333',
+  subHeading: {
+    fontSize: 14,
+    textAlign: 'start',
+    color: '#6C757D',
+    marginBottom: '5%',
   },
   errorText: {
     color: 'red',
@@ -190,6 +188,10 @@ const styles = StyleSheet.create({
     marginTop: -15,
     marginBottom: 15,
   },
+  linkStyle: {
+    alignSelf: 'flex-end',
+    marginTop: -15,
+    marginBottom: 40,
+  },
 });
-
 export default Login;

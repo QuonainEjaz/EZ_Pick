@@ -137,7 +137,7 @@ const HistoryScreen = ({ navigation }) => {
             name={item.name}
             dateTime={[item.date, ', ', item.pickupTime]}
             status={item.status}
-            imageSource={item.image}
+            imageSource={item?.image}
             onPress={() =>
               navigation.navigate('PickupDetails', { student: item })
             }

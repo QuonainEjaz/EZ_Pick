@@ -1,4 +1,4 @@
-import React, {useState, useEffect, useMemo} from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import {
   View,
   Text,
@@ -6,23 +6,77 @@ import {
   TouchableOpacity,
   StyleSheet,
   Dimensions,
+  PermissionsAndroid,
+  Platform,
 } from 'react-native';
+import Geolocation from 'react-native-geolocation-service';
+import { getDistance } from 'geolib';
 import Heading from '../../components/Heading';
 import CustomModal from '../../components/CustomModal';
 import CustomButton from '../../components/CustomButton';
 import Success from '../../assets/Icons/svg/Successfull';
 import Export from '../../assets/Icons/svg/Export';
 
-const {width, height} = Dimensions.get('window');
+const { width, height } = Dimensions.get('window');
 
-const StudentCard = ({student}) => {
+// School coordinates (replace with your school's actual coordinates)
+const SCHOOL_LOCATION = {
+  latitude: 24.7136, // Example latitude
+  longitude: 46.6753, // Example longitude
+};
+
+const StudentCard = ({ student }) => {
   const [modalVisible, setModalVisible] = useState(false);
   const [status, setStatus] = useState(student.range);
-  const [timer, setTimer] = useState(2990880);
+  const [timer, setTimer] = useState(5);
+  const [parentLocation, setParentLocation] = useState(null);
+
+  // Fetch parent's location
+  useEffect(() => {
+    const fetchLocation = async () => {
+      if (Platform.OS === 'android') {
+        const granted = await PermissionsAndroid.request(
+          PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
+        );
+        if (granted !== PermissionsAndroid.RESULTS.GRANTED) {
+          console.log('Location permission denied');
+          return;
+        }
+      }
+
+      Geolocation.getCurrentPosition(
+        position => {
+          const { latitude, longitude } = position.coords;
+          setParentLocation({ latitude, longitude });
+        },
+        error => {
+          console.log('Error fetching location:', error);
+        },
+        { enableHighAccuracy: true, timeout: 15000, maximumAge: 10000 },
+      );
+    };
+
+    fetchLocation();
+  }, []);
+
+  // Calculate distance and set range
+  useEffect(() => {
+    if (parentLocation) {
+      const distance = getDistance(parentLocation, SCHOOL_LOCATION); // Distance in meters
+      const isInRange = distance <= 50000000; // 0.5 km = 500 meters
+
+      if (isInRange) {
+        setStatus('in_range');
+      } else {
+        setStatus('out_of_range');
+      }
+    }
+  }, [parentLocation]);
+
   const totalTimeInSeconds = useMemo(() => {
-    const hoursInSeconds = parseInt(timer.hours, 10) * 3600;
-    const minutesInSeconds = parseInt(timer.minutes, 10) * 60;
-    const secondsInSeconds = parseInt(timer.seconds, 10);
+    const hoursInSeconds = parseInt(timer, 10) * 3600;
+    const minutesInSeconds = parseInt(timer, 10) * 60;
+    const secondsInSeconds = parseInt(timer, 10);
     return hoursInSeconds + minutesInSeconds + secondsInSeconds;
   }, [timer]);
 
@@ -53,15 +107,15 @@ const StudentCard = ({student}) => {
       out_of_range: {
         text: 'You are out of range:',
         buttonText: 'Pickup Request',
-        textStyle: {color: '#212529'},
-        buttonTextStyle: {color: '#F8AC1650'},
-        buttonTouchStyle: {borderWidth: 1, borderColor: '#F8AC1650'},
+        textStyle: { color: '#212529' },
+        buttonTextStyle: { color: '#F8AC1650' },
+        buttonTouchStyle: { borderWidth: 1, borderColor: '#F8AC1650' },
         disabled: false,
       },
       in_range: {
         text: `You are in School's range:`,
         buttonText: 'Pickup Request',
-        textStyle: {color: '#212529', fontSize: width * 0.032},
+        textStyle: { color: '#212529', fontSize: width * 0.032 },
         buttonTextStyle: null,
         buttonTouchStyle: null,
         disabled: false,
@@ -69,7 +123,7 @@ const StudentCard = ({student}) => {
       ready_to_pickup: {
         text: 'READY TO PICKUP!',
         buttonText: 'Pickup Request',
-        textStyle: {color: '#F8AC16'},
+        textStyle: { color: '#F8AC16' },
         buttonTextStyle: null,
         buttonTouchStyle: null,
         disabled: false,
@@ -77,27 +131,27 @@ const StudentCard = ({student}) => {
       request_sent: {
         text: 'REQUEST SENT SUCCESSFULLY',
         buttonText: 'Confirm Pickup',
-        textStyle: {color: '#F8AC16', fontSize: width * 0.034},
-        buttonTextStyle: {color: '#FFFFFF', fontWeight: 'bold'},
-        buttonTouchStyle: {backgroundColor: '#F8AC16'},
+        textStyle: { color: '#F8AC16', fontSize: width * 0.034 },
+        buttonTextStyle: { color: '#FFFFFF', fontWeight: 'bold' },
+        buttonTouchStyle: { backgroundColor: '#F8AC16' },
         disabled: false,
       },
       request_accepted: {
         text: 'REQUEST ACCEPTED',
         buttonText: 'Confirm Pickup',
-        textStyle: {color: '#F8AC16'},
-        buttonTextStyle: {color: '#FFFFFF'},
-        buttonTouchStyle: {backgroundColor: '#F8AC16'},
+        textStyle: { color: '#F8AC16' },
+        buttonTextStyle: { color: '#FFFFFF' },
+        buttonTouchStyle: { backgroundColor: '#F8AC16' },
         disabled: false,
-        cardStyle: {backgroundColor: '#FEF8EB'},
-        headerStyle: {backgroundColor: '#FEEFD2', borderColor: '#F8AC16'},
+        cardStyle: { backgroundColor: '#FEF8EB' },
+        headerStyle: { backgroundColor: '#FEEFD2', borderColor: '#F8AC16' },
       },
       pickup_successful: {
         text: 'PICKUP SUCCESSFULLY!',
         buttonText: 'Confirm Pickup',
-        textStyle: {color: '#F8AC16'},
-        buttonTextStyle: {color: '#FFFFFF'},
-        buttonTouchStyle: {backgroundColor: '#F8AC1650', borderWidth: 0},
+        textStyle: { color: '#F8AC16' },
+        buttonTextStyle: { color: '#FFFFFF' },
+        buttonTouchStyle: { backgroundColor: '#F8AC1650', borderWidth: 0 },
         disabled: true,
       },
     }),
@@ -192,7 +246,7 @@ const StudentCard = ({student}) => {
 
       <TouchableOpacity style={styles.infoContainer}>
         <Image
-          source={{uri: student.profileUrl}}
+          source={{uri: student?.profileUrl}}
           style={styles.image}
           resizeMode="cover"
         />
@@ -202,7 +256,7 @@ const StudentCard = ({student}) => {
             textstyle={styles.name}
             boxStyle={styles.nameBox}
           />
-          <Text style={styles.grade}>{student.grade.grade}</Text>
+          <Text style={styles.grade}>{student?.grade.grade}</Text>
           <View style={styles.pickupTimeContainer}>
             <Text
               style={

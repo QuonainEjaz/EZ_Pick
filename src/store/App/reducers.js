@@ -1,8 +1,9 @@
-import { NotificationScreenIcons } from '../../assets/Icons/svg/NotificationScreenIcons';
+import {NotificationScreenIcons} from '../../assets/Icons/svg/NotificationScreenIcons';
 
 const initialState = {
   isFirstLoad: true,
   students: [],
+  token: null,
   notifications: {
     TODAY: [
       {
@@ -41,6 +42,14 @@ const initialState = {
       },
     ],
   },
+  range: {
+    1 : 'pickup_successful',
+    2: 'out_of_range',
+    3: 'request_accepted',
+    4: 'ready_to_pickup',
+    5: 'request_sent',
+    6: 'in_range',
+  }
 };
 
 const studentsReducer = (state = initialState, action) => {
@@ -55,7 +64,11 @@ const studentsReducer = (state = initialState, action) => {
         ...state,
         students: action.payload,
       };
-
+    case 'SET_TOKEN':
+      return {
+        ...state,
+        token: action.payload,
+      };
     default:
       return state;
   }

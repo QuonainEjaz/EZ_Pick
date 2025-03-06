@@ -8,6 +8,7 @@ import axios from 'axios';
 const HomeScreen = ({navigation}) => {
   const dispatch = useDispatch();
   const isFirstLoad = useSelector(state => state.students.isFirstLoad);
+  const token = useSelector(state => state.students.token);
   useEffect(() => {
     fetchStudents();
   }, []);
@@ -15,6 +16,12 @@ const HomeScreen = ({navigation}) => {
     try {
       const response = await axios.get(
         'https://backendtest.ezpick.org/students',
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+        },
       );
       console.log('API Response:', response.data.students);
 

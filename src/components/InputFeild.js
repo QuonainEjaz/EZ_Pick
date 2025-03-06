@@ -77,7 +77,7 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     padding: 10,
     fontSize: 14,
-    color: '#E3E3E3',
+    color: '#333',
     backgroundColor: '#F8F8F9',
   },
   inputContainer: {

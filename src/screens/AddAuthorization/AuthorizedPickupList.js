@@ -73,7 +73,7 @@ const AuthorizedPickupList = ({ navigation }) => {
   const renderPickupItem = ({ item }) => (
     <View style={styles.pickupItem}>
       <Image
-        source={{ uri: item.image }}
+        source={{ uri: item?.image }}
         style={styles.profileImage}
         defaultSource={require('../../assets/pics/EmailPic.png')}
         resizeMode="cover"
