@@ -8,6 +8,7 @@ import SubHeading from '../../components/SubHeading';
 import InputField from '../../components/InputFeild';
 import CustomButton from '../../components/CustomButton';
 import CustomAlert from '../../components/CustomAlert';
+import { useSelector } from 'react-redux';
 
 const validationSchema = Yup.object({
   username: Yup.string()
@@ -19,11 +20,12 @@ const validationSchema = Yup.object({
 const Forget_Password = ({navigation}) => {
   const {width, height} = Dimensions.get('window');
   const [modalVisible, setModalVisible] = useState(false);
+  const baseUrl = useSelector(state => state.students.baseUrl);
 
   const handleSubmit = async (values, actions) => {
     try {
       const response = await fetch(
-        'https://backendtest.ezpick.org/clients/forgotPassword',
+        `${baseUrl}/parents/forgot-password`,
         {
           method: 'POST',
           headers: {
@@ -42,12 +44,14 @@ const Forget_Password = ({navigation}) => {
       } else {
         actions.setFieldError('username', 'Failed to send reset link');
       }
-    } catch (error) {
+    } 
+    catch (error) {
       actions.setFieldError(
         'username',
         'Something went wrong, try again later',
       );
-    } finally {
+    } 
+    finally {
       actions.setSubmitting(false);
     }
   };
@@ -151,7 +155,6 @@ const styles = StyleSheet.create({
     color: 'red',
     fontSize: 12,
     marginTop: -15,
-    marginBottom: 15,
   },
 });
 

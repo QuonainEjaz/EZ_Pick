@@ -18,7 +18,7 @@ const CustomModal = ({
   width
 }) => {
   return (
-    <Modal transparent visible={visible} animationType="slide">
+    <Modal transparent visible={visible} animationType="slide" onRequestClose={onClose}>
       <View style={styles.overlay}>
         <View style={styles.modalContainer}>
           {imageSource && <Image source={imageSource} style={styles.image} />}

@@ -1,18 +1,74 @@
-import React from 'react';
+import React, {useState} from 'react';
 import {View, Image, TouchableOpacity, StyleSheet} from 'react-native';
 import Heading from '../../components/Heading';
 import SubHeading from '../../components/SubHeading';
 import EditImage from '../../assets/Icons/svg/EditImage';
+import {useSelector, useDispatch} from 'react-redux';
+import PhotoSelectionModal from '../../components/PhotoSelectionModal';
+import {launchCamera, launchImageLibrary} from 'react-native-image-picker';
+import {UPDATE_STUDENT_ProfileUrl} from '../../store/App/action';
 
 const ProfileDetail = ({route}) => {
+  const dispatch = useDispatch();
   const {student} = route.params;
-  const {profileUrl, name, nameAr, id, grade, gender, parent} = student;
+  const {profileUrl, name, nameAr, id, grade, gender} = student;
+  const parent = useSelector(state => state.students.parent);
+  const [isPhotoSelectionModalVisible, setIsPhotoSelectionModalVisible] =
+    useState(false);
 
+    const handleTakePhoto = () => {
+      launchCamera(
+        {
+          mediaType: 'photo',
+          quality: 1,
+          saveToPhotos: true,
+        },
+        response => {
+          if (response.didCancel) {
+            console.log('User cancelled image picker for uploading a photo');
+          } else if (response.errorCode) {
+            console.log('ImagePicker Error: ', response.errorMessage);
+          } else {
+            const photoUri = response.assets[0].uri;
+            dispatch(UPDATE_STUDENT_ProfileUrl({ studentId: id, profileUrl: photoUri }));
+          }
+        },
+      );
+      setIsPhotoSelectionModalVisible(false);
+    };
+    
+    const handleUploadPhoto = () => {
+      launchImageLibrary(
+        {
+          mediaType: 'photo',
+          quality: 1,
+        },
+        response => {
+          if (response.didCancel) {
+            console.log('User cancelled image picker');
+          } else if (response.errorCode) {
+            console.log('ImagePicker Error: ', response.errorMessage);
+          } else {
+            const photoUri = response.assets[0].uri;
+            dispatch(UPDATE_STUDENT_ProfileUrl({ studentId: id, profileUrl: photoUri }));
+          }
+        },
+      );
+      setIsPhotoSelectionModalVisible(false);
+    };
   return (
     <View style={styles.container}>
       <View style={styles.profileImageContainer}>
-        <Image source={{uri: profileUrl}} resizeMode="cover" style={styles.profileImage} />
-        <TouchableOpacity style={styles.editButton}>
+        <Image
+          source={{uri: profileUrl}}
+          resizeMode="cover"
+          style={styles.profileImage}
+        />
+        <TouchableOpacity
+          style={styles.editButton}
+          onPress={() => {
+            setIsPhotoSelectionModalVisible(true);
+          }}>
           <EditImage />
         </TouchableOpacity>
       </View>
@@ -43,7 +99,7 @@ const ProfileDetail = ({route}) => {
             </View>
             <View style={styles.column}>
               <SubHeading text="Grade" style={styles.label} />
-              <SubHeading text={grade.grade} style={styles.value} />
+              <SubHeading text={grade?.name} style={styles.value} />
             </View>
           </View>
 
@@ -54,11 +110,17 @@ const ProfileDetail = ({route}) => {
             </View>
             <View style={styles.column}>
               <SubHeading text="Student Email" style={styles.label} />
-              <SubHeading text={parent.parentEmail} style={styles.value} />
+              <SubHeading text={parent?.email} style={styles.value} />
             </View>
           </View>
         </View>
       </View>
+      <PhotoSelectionModal
+        onClose={() => setIsPhotoSelectionModalVisible(false)}
+        visible={isPhotoSelectionModalVisible}
+        onTakePhoto={handleTakePhoto}
+        onUploadPhoto={handleUploadPhoto}
+      />
     </View>
   );
 };
@@ -150,4 +212,3 @@ const styles = StyleSheet.create({
     fontWeight: '400',
   },
 });
-

@@ -135,9 +135,9 @@ const HistoryScreen = ({ navigation }) => {
         renderItem={({ item }) => (
           <UserInfoCard
             name={item.name}
-            dateTime={[item.date, ', ', item.pickupTime]}
-            status={item.status}
-            imageSource={item?.image}
+            dateTime={[item?.date, ', ', item?.pickupTime]}
+            status={item?.status}
+            imageSource={item?.profileUrl || 'https://res.cloudinary.com/dgv3dpaa8/image/upload/v1740655653/Profile_Image_5_at2qw9.png'}
             onPress={() =>
               navigation.navigate('PickupDetails', { student: item })
             }

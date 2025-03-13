@@ -1,269 +1,194 @@
-import React, {useCallback, useMemo, useState} from 'react';
+import React, {useState, useMemo, useCallback} from 'react';
 import {
   View,
-  ScrollView,
   TouchableOpacity,
-  StyleSheet,
   FlatList,
   Alert,
   Image,
   Modal,
+  StyleSheet,
 } from 'react-native';
-import SubHeading from '../../components/SubHeading';
-import Heading from '../../components/Heading';
-import ArrowRight from '../../assets/Icons/svg/ArrowRight';
-import {ProfileScreenIcons} from '../../assets/Icons/svg/ProfileScreenIcons';
+import {useSelector, useDispatch} from 'react-redux';
 import ReactNativeBiometrics from 'react-native-biometrics';
+import {setSmartLogin, setStudents} from '../../store/App/action';
+import Heading from '../../components/Heading';
+import SubHeading from '../../components/SubHeading';
 import CustomToggleSwitch from '../../components/CustomToggleSwitch';
 import LogoutConfirmation from './LogoutConfirmation';
-import {useSelector, useDispatch} from 'react-redux';
-import {setStudents} from '../../store/App/action';
+import ArrowRight from '../../assets/Icons/svg/ArrowRight';
+import {ProfileScreenIcons} from '../../assets/Icons/svg/ProfileScreenIcons';
 
 const Profile = ({navigation}) => {
-  const [toggleSwitchValue, setToggleSwitchValue] = useState(false);
-  const [isModalVisible, setIsModalVisible] = useState(false);
+  const dispatch = useDispatch();
+  const smartLoginEnabled = useSelector(
+    state => state.students.smartLoginEnabled,
+  );
   const students = useSelector(state => state.students.students);
+  const [toggleSwitchValue, setToggleSwitchValue] = useState(smartLoginEnabled);
+  const [isModalVisible, setIsModalVisible] = useState(false);
+
   const pages = useMemo(
     () => [
-      {
-        title: 'Authorized Pickup',
-        icon: 'AuthorizedPickupIcon',
-        screen: 'Add',
-      },
+      {title: 'Authorized Pickup', icon: 'AuthorizedPickupIcon', screen: 'Add'},
       {
         title: 'Update Password',
         icon: 'UpdatePasswordIcon',
         screen: 'UpdatePassword',
       },
-      {
-        title: 'Enable Smart Login',
-        icon: 'EnableSmartLoginIcon',
-        screen: 'AuthorizedPickupList',
-      },
-      {
-        title: 'Language',
-        icon: 'LanguageIcon',
-        screen: 'LanguageSelection',
-      },
-      {
-        title: 'Logout',
-        icon: 'LogoutIcon',
-        screen: 'Login',
-      },
+      {title: 'Enable Smart Login', icon: 'EnableSmartLoginIcon'},
+      {title: 'Language', icon: 'LanguageIcon', screen: 'LanguageSelection'},
+      {title: 'Logout', icon: 'LogoutIcon'},
     ],
     [],
   );
 
-  const handleEnableSmartLogin = useCallback(async () => {
+  const handleEnableSmartLogin = async () => {
     try {
-      const {available, biometryType} =
-        await ReactNativeBiometrics.isSensorAvailable();
+      const {available} = await ReactNativeBiometrics.isSensorAvailable();
+      if (!available) {
+        setToggleSwitchValue(false);
+        dispatch(setSmartLogin(false));
+        return Alert.alert('Biometric authentication not available');
+      }
+      const {success} = await ReactNativeBiometrics.simplePrompt({
+        promptMessage: 'Login using fingerprint or face recognition',
+      });
 
-      if (available) {
-        const {success, error} = await ReactNativeBiometrics.simplePrompt({
-          promptMessage: 'Login using fingerprint or face recognition',
-        });
-
-        if (success) {
-          Alert.alert('Authentication Successful');
-        } else {
-          Alert.alert('Authentication Failed');
-        }
+      if (success) {
+        dispatch(setSmartLogin(true));
+        Alert.alert('Smart Login Enabled Successfully');
       } else {
-        Alert.alert(
-          'Biometric authentication is not available on this device.',
-        );
+        setToggleSwitchValue(false);
+        dispatch(setSmartLogin(false));
       }
     } catch (error) {
-      console.error('Error during biometric authentication', error);
       Alert.alert('Error', error.message);
     }
+  };
+
+  const onToggleSwitch = useCallback(value => {
+    setToggleSwitchValue(value);
+    dispatch(setSmartLogin(value));
+    if (value) handleEnableSmartLogin();
   }, []);
 
-  const onToggleSwitch = useCallback(
-    value => {
-      setToggleSwitchValue(value);
-      if (value) {
-        handleEnableSmartLogin();
-      }
-    },
-    [handleEnableSmartLogin],
-  );
-
-  // Show Modal when Logout button is clicked
-  const handleLogoutPress = () => {
-    setIsModalVisible(true);
-  };
-
-  // Handle Cancel logout action
-  const handleCancelLogout = () => {
-    setIsModalVisible(false); // Close the modal
-  };
-
-  // Handle Confirm logout action (Logout logic can be added here)
-  const handleConfirmLogout = () => {
+  const handleLogout = () => {
     setIsModalVisible(false);
-    // Add logout logic here (e.g., clearing session, navigating to login page)
-    navigation.navigate('Login'); // Example: Navigate to login screen
+    dispatch(setSmartLogin(false));
+    dispatch(setStudents([]));
+    navigation.navigate('Login');
   };
+
+  const combinedData = useMemo(() => {
+    if (students.length === 0) {
+      return [
+        { type: 'HEADER', title: 'Children', isEmpty: true }, 
+        { type: 'EMPTY' }, 
+        { type: 'HEADER', title: 'Other Pages' },
+        ...pages.map(page => ({ type: 'PAGE', data: page })),
+      ];
+    }
+  
+    return [
+      { type: 'HEADER', title: 'Children' },
+      ...students.map(student => ({ type: 'STUDENT', data: student })),
+      { type: 'HEADER', title: 'Other Pages' },
+      ...pages.map(page => ({ type: 'PAGE', data: page })),
+    ];
+  }, [students, pages]);
+
+  const renderItem = ({ item }) => {
+    if (item.type === 'HEADER') {
+      return (
+        <View>
+          <Heading
+            title={item.title}
+            textstyle={styles.sectionTitle}
+            boxStyle={styles.sectionTitleBox}
+          />
+        </View>
+      );
+    }
+  
+    if (item.type === 'EMPTY') {
+      return <SubHeading text="No children found" style={styles.emptyText} />;
+    }
+  
+    const isPage = item.type === 'PAGE';
+    const isLogout = isPage && item.data.title === 'Logout';
+    const IconComponent = isPage ? ProfileScreenIcons[item.data.icon] : null;
+  
+    return (
+      <TouchableOpacity
+        style={styles.listItem}
+        onPress={() => {
+          if (isLogout) return setIsModalVisible(true);
+          if (isPage && item.data.screen)
+            return navigation.navigate(item.data.screen);
+          if (isPage && item.data.title === 'Enable Smart Login')
+            return handleEnableSmartLogin();
+          navigation.navigate('ProfileDetail', { student: item.data });
+        }}>
+        <View
+          style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'flex-start',
+            gap: 20,
+          }}>
+          {IconComponent && <IconComponent />}
+          {!isPage && item.data.profileUrl && (
+            <Image source={{ uri: item.data.profileUrl }} style={styles.profileImage} />
+          )}
+          <SubHeading
+            text={isPage ? item.data.title : item.data.name}
+            style={styles.profileName}
+          />
+        </View>
+        {item.data?.title === 'Enable Smart Login' ? (
+          <CustomToggleSwitch value={toggleSwitchValue} onToggle={onToggleSwitch} />
+        ) : (
+          <ArrowRight />
+        )}
+      </TouchableOpacity>
+    );
+  };
+  
 
   return (
-    <ScrollView
-      showsVerticalScrollIndicator={false}
-      contentInsetAdjustmentBehavior="automatic"
-      style={styles.container}
-      contentContainerStyle={styles.contentContainer}>
-      <Heading
-        title="Children"
-        textstyle={styles.sectionTitle}
-        boxStyle={styles.sectionTitleBox}
-      />
+    <View style={styles.container}>
       <FlatList
-        data={students}
-        renderItem={({item, index}) => (
-          <ListItem
-            item={item}
-            index={index}
-            navigation={navigation}
-            handleEnableSmartLogin={
-              toggleSwitchValue ? handleEnableSmartLogin : null
-            }
-            toggleSwitchValue={toggleSwitchValue}
-            onToggleSwitch={onToggleSwitch}
-          />
-        )}
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.listContentContainer}
-      />
-
-      <Heading
-        title="Other Pages"
-        textstyle={styles.sectionTitle}
-        boxStyle={styles.sectionTitleBox}
-      />
-      <FlatList
-        data={pages}
-        renderItem={({item, index}) =>
-          item.title === 'Logout' ? (
-            <TouchableOpacity
-              style={styles.listItem}
-              onPress={handleLogoutPress}>
-              {item.icon && ProfileScreenIcons[item.icon] && (
-                <ProfileScreenIcons.LogoutIcon />
-              )}
-              <View style={styles.listItemContent}>
-                <SubHeading
-                  text={item.title}
-                  boxStyle={styles.profileNameBox}
-                  style={styles.profileName}
-                />
-              </View>
-              <ArrowRight style={styles.arrowIcon} />
-            </TouchableOpacity>
-          ) : (
-            <ListItem
-              item={item}
-              index={index}
-              navigation={navigation}
-              isPage={true}
-              handleEnableSmartLogin={handleEnableSmartLogin}
-              toggleSwitchValue={toggleSwitchValue}
-              setToggleSwitchValue={setToggleSwitchValue}
-              onToggleSwitch={onToggleSwitch}
-            />
-          )
+        data={combinedData}
+        renderItem={renderItem}
+        keyExtractor={(_, index) => index.toString()}
+        ListEmptyComponent={
+          <SubHeading text="No children found" style={styles.emptyText} />
         }
-        keyExtractor={item => item.title}
-        contentContainerStyle={styles.listContentContainer}
+        contentContainerStyle={styles.contentContainer}
+        showsVerticalScrollIndicator={false}
       />
       <Modal
-        transparent={true}
+        transparent
         visible={isModalVisible}
         animationType="fade"
-        onRequestClose={handleCancelLogout}>
+        onRequestClose={() => setIsModalVisible(false)}>
         <View style={styles.modalOverlay}>
           <LogoutConfirmation
-            onLogout={handleConfirmLogout}
-            onCancel={handleCancelLogout}
+            onLogout={handleLogout}
+            onCancel={() => setIsModalVisible(false)}
           />
         </View>
       </Modal>
-    </ScrollView>
-  );
-};
-
-const ListItem = ({
-  item,
-  index,
-  navigation,
-  isPage = false,
-  handleEnableSmartLogin,
-  toggleSwitchValue,
-  setToggleSwitchValue,
-  onToggleSwitch,
-}) => {
-  const IconComponent = isPage ? ProfileScreenIcons[item.icon] : null;
-  const handlePress = item => {
-    if (item.title === 'Enable Smart Login') {
-      if (toggleSwitchValue) {
-        setToggleSwitchValue(false);
-        return;
-      }
-      setToggleSwitchValue(true);
-      handleEnableSmartLogin();
-    } else {
-      if (!isPage) {
-        navigation.navigate('ProfileDetail', {student: item});
-      }
-      if (isPage) {
-        navigation.navigate(item.screen);
-      }
-    }
-  };
-
-  return (
-    <TouchableOpacity
-      key={index}
-      style={styles.listItem}
-      onPress={() => handlePress(item)}>
-      {isPage && IconComponent && <IconComponent />}
-      {isPage ? null : (
-        <Image source={{uri: item?.profileUrl}} style={styles.profileImage} />
-      )}
-      <View style={styles.listItemContent}>
-        <SubHeading
-          text={isPage ? item.title : item.name}
-          boxStyle={styles.profileNameBox}
-          style={styles.profileName}
-        />
-      </View>
-      {item.title === 'Enable Smart Login' ? (
-        <CustomToggleSwitch
-          value={toggleSwitchValue}
-          onToggle={onToggleSwitch}
-        />
-      ) : (
-        <ArrowRight style={styles.arrowIcon} />
-      )}
-    </TouchableOpacity>
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    maxWidth: 440,
-    backgroundColor: '#FFFFFF',
-    paddingHorizontal: 20,
-  },
-  sectionTitleBox: {
-    alignItems: 'flex-start',
-  },
+  container: {flex: 1, backgroundColor: '#fff', paddingHorizontal: 20},
+  sectionTitleBox: {alignItems: 'flex-start'},
   sectionTitle: {
-    fontFamily: 'Outfit',
     fontSize: 16,
     fontWeight: '700',
-    letterSpacing: 0.08,
     color: '#212529',
     marginVertical: 12,
   },
@@ -276,39 +201,22 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     marginBottom: 8,
   },
-  listItemContent: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    flex: 1,
-    marginLeft: 15,
-  },
-  profileImage: {
-    width: 37,
-    height: 37,
-    borderRadius: 4,
-  },
+  profileImage: {width: 37, height: 37, borderRadius: 4},
   profileName: {
-    fontFamily: 'Outfit',
     fontSize: 16,
     fontWeight: '400',
-    letterSpacing: 0.16,
     color: '#6c757d',
-  },
-  profileNameBox: {
-    flex: 1,
     alignSelf: 'flex-start',
-  },
-  arrowIcon: {
-    width: 20,
-    height: 20,
+    flexShrink: 1,
   },
   modalOverlay: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    backgroundColor: 'rgba(0,0,0,0.5)',
   },
+  emptyText: {color: '#6c757d', textAlign: 'center', marginVertical: 20},
 });
 
 export default Profile;
+

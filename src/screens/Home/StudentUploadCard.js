@@ -1,21 +1,44 @@
 import React from 'react';
-import { View, Text, Image, StyleSheet, Dimensions } from 'react-native';
+import {View, Text, Image, StyleSheet, Dimensions} from 'react-native';
 import CustomButton from '../../components/CustomButton';
 
-const { width } = Dimensions.get('window');
+const {width} = Dimensions.get('window');
 
-const StudentUploadCard = ({ student, onPress,image }) => {
+const StudentUploadCard = ({student, onPress, image}) => {
+  const pickupTime = student?.grade?.offTime;
+  const convertTo12HourFormat = pickupTime => {
+    const [hours, minutes] = pickupTime.split(':');
+    const date = new Date();
+    date.setHours(hours);
+    date.setMinutes(minutes);
+
+    // Use toLocaleTimeString to format the time with AM/PM
+    const formattedTime = date.toLocaleTimeString([], {
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: true,
+    });
+    return formattedTime;
+  };
   return (
     <View style={styles.card}>
       <View style={styles.infoContainer}>
-        <Image source={{ uri: image }} style={styles.image} resizeMode="cover" />
+        <Image source={{uri: image}} style={styles.image} resizeMode="cover" />
         <View style={styles.detailsContainer}>
           <Text style={styles.name}>{student.name}</Text>
-          <Text style={styles.grade}>Grade {student.grade}</Text>
-          {/* <Text style={styles.pickupTime}>Today's Pick up time: {student.pickupTime}</Text> */}
+          <Text style={styles.grade}>Grade {student?.grade?.name}</Text>
+          <Text
+            style={
+              styles.pickupTime
+            }>{`Today's Pick up time: ${convertTo12HourFormat(pickupTime)}`}</Text>
         </View>
       </View>
-      <CustomButton title="Upload Picture" touchStyle={styles.uploadButton} textStyle={styles.uploadButtonText} onPress={onPress} />
+      <CustomButton
+        title="Upload Picture"
+        touchStyle={styles.uploadButton}
+        textStyle={styles.uploadButtonText}
+        onPress={onPress}
+      />
     </View>
   );
 };
@@ -26,7 +49,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     padding: width * 0.04,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
+    shadowOffset: {width: 0, height: 2},
     shadowOpacity: 0.1,
     shadowRadius: 8,
     elevation: 1,

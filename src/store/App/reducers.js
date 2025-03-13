@@ -1,55 +1,24 @@
 import {NotificationScreenIcons} from '../../assets/Icons/svg/NotificationScreenIcons';
 
 const initialState = {
+  selectedLanguage: 'English',
   isFirstLoad: true,
+  baseUrl: 'https://backendtest.ezpick.org',
+  loginData: {},
+  parent: {},
   students: [],
+  schools: [],
   token: null,
-  notifications: {
-    TODAY: [
-      {
-        icon: <NotificationScreenIcons.WalletMinusIcon />,
-        title: "Hey, the pickup's off!",
-        description: 'Lorem ipsum dolor sit amet',
-      },
-      {
-        icon: <NotificationScreenIcons.WalletMinusIcon />,
-        title: 'Awesome! Your pickup is all set!',
-        description: 'Lorem ipsum dolor sit amet',
-      },
-    ],
-    YESTERDAY: [
-      {
-        icon: <NotificationScreenIcons.AddSquareIcon />,
-        title: "Here's what we've got for pickups today!",
-        description: 'Lorem ipsum dolor sit amet',
-      },
-      {
-        icon: <NotificationScreenIcons.WalletMinusIcon />,
-        title: 'Great news! Your pickup is confirmed!',
-        description: 'Lorem ipsum dolor sit amet',
-      },
-    ],
-    'October 2, 2024': [
-      {
-        icon: <NotificationScreenIcons.AddSquareIcon />,
-        title: "Check out today's pickup lineup!",
-        description: 'Lorem ipsum dolor sit amet',
-      },
-      {
-        icon: <NotificationScreenIcons.FrameIcon />,
-        title: "You're all set up with your account!",
-        description: 'Lorem ipsum dolor sit amet',
-      },
-    ],
-  },
+  smartLoginEnabled: false,
+  notifications: {},
   range: {
-    1 : 'pickup_successful',
+    1: 'pickup_successful',
     2: 'out_of_range',
     3: 'request_accepted',
     4: 'ready_to_pickup',
     5: 'request_sent',
     6: 'in_range',
-  }
+  },
 };
 
 const studentsReducer = (state = initialState, action) => {
@@ -58,6 +27,18 @@ const studentsReducer = (state = initialState, action) => {
       return {
         ...state,
         isFirstLoad: !state.isFirstLoad,
+      };
+    case 'SET_loginData':
+      return {
+        ...state,
+        loginData: action.payload,
+      };
+    case 'SET_SMART_LOGIN':
+      return {...state, smartLoginEnabled: action.payload};
+    case 'SET_PARENT':
+      return {
+        ...state,
+        parent: action.payload,
       };
     case 'SET_STUDENTS':
       return {
@@ -68,6 +49,30 @@ const studentsReducer = (state = initialState, action) => {
       return {
         ...state,
         token: action.payload,
+      };
+    case 'SET_SCHOOLS':
+      return {
+        ...state,
+        schools: action.payload,
+      };
+    case 'SET_LANGUAGE':
+      return {
+        ...state,
+        selectedLanguage: action.payload,
+      };
+      case 'UPDATE_STUDENT_ProfileUrl':
+        return {
+          ...state,
+          students: state.students.map(student =>
+            student.id === action.payload.studentId
+              ? { ...student, profileUrl: action.payload.profileUrl }
+              : student,
+          ),
+        };
+    case 'FETCH_NOTIFICATIONS_SUCCESS':
+      return {
+        ...state,
+        notifications: action.payload,
       };
     default:
       return state;

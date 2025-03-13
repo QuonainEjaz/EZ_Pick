@@ -1,45 +1,41 @@
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useCallback} from 'react';
 import {useSelector, useDispatch} from 'react-redux';
 import {CommonActions} from '@react-navigation/native';
-import {toggleFirstLoad} from '../../store/App/action';
-import {setStudents} from '../../store/App/action';
+import {toggleFirstLoad, setStudents, SET_PARENT} from '../../store/App/action';
 import axios from 'axios';
 
 const HomeScreen = ({navigation}) => {
   const dispatch = useDispatch();
   const isFirstLoad = useSelector(state => state.students.isFirstLoad);
-  const token = useSelector(state => state.students.token);
-  useEffect(() => {
-    fetchStudents();
-  }, []);
-  const fetchStudents = async () => {
+  const id = useSelector(state => state.students.loginData.id);
+  const baseUrl = useSelector(state => state.students.baseUrl);
+  const fetchStudents = useCallback(async () => {
     try {
       const response = await axios.get(
-        'https://backendtest.ezpick.org/students',
-        {
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${token}`,
-          },
-        },
+        `${baseUrl}/parents/1000580`,
       );
-      console.log('API Response:', response.data.students);
-
-      if (response.data.success) {
-        dispatch(setStudents(response.data.students));
+      if (response.status === 200) {
+        dispatch(SET_PARENT(response.data.parent));
+        dispatch(setStudents(response.data.parent.students));
       } else {
-        console.error('Failed to fetch students:', response.data.message);
+        console.error('Fetch Error:', response);
       }
     } catch (error) {
-      console.error('Error fetching students:', error);
+      console.error('Fetch Students Error:', error);
     }
-  };
-  useEffect(() => {
-    const unsubscribe = navigation.addListener('focus', () => {
-      console.log('isFirstLoad:', isFirstLoad);
+  }, [dispatch]);
 
+  useEffect(() => {
+    if (isFirstLoad) {
+      fetchStudents();
+      dispatch(toggleFirstLoad());
+    }
+  }, [isFirstLoad, fetchStudents, dispatch]);
+
+  useEffect(() => {
+    const handleFocus = () => {
+      console.log('isFirstLoad:', isFirstLoad);
       if (isFirstLoad) {
-        dispatch(toggleFirstLoad());
         console.log('Navigating to StudentUploadScreen');
         navigation.navigate('StudentUploadScreen');
       } else {
@@ -51,10 +47,13 @@ const HomeScreen = ({navigation}) => {
           }),
         );
       }
-    });
+    };
 
+    const unsubscribe = navigation.addListener('focus', handleFocus);
     return unsubscribe;
-  }, [navigation, isFirstLoad, dispatch]);
+  }, [navigation, isFirstLoad]);
+
+  return null;
 };
 
 export default HomeScreen;

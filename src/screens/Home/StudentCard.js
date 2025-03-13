@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, {useState, useEffect, useRef} from 'react';
 import {
   View,
   Text,
@@ -8,160 +8,239 @@ import {
   Dimensions,
   PermissionsAndroid,
   Platform,
+  Linking,
+  Alert,
 } from 'react-native';
 import Geolocation from 'react-native-geolocation-service';
-import { getDistance } from 'geolib';
+import {getDistance} from 'geolib';
 import Heading from '../../components/Heading';
 import CustomModal from '../../components/CustomModal';
 import CustomButton from '../../components/CustomButton';
 import Success from '../../assets/Icons/svg/Successfull';
 import Export from '../../assets/Icons/svg/Export';
+import {check, request, PERMISSIONS, RESULTS} from 'react-native-permissions';
 
-const { width, height } = Dimensions.get('window');
+const {width, height} = Dimensions.get('window');
 
-// School coordinates (replace with your school's actual coordinates)
-const SCHOOL_LOCATION = {
-  latitude: 24.7136, // Example latitude
-  longitude: 46.6753, // Example longitude
-};
-
-const StudentCard = ({ student }) => {
-  const [modalVisible, setModalVisible] = useState(false);
-  const [status, setStatus] = useState(student.range);
-  const [timer, setTimer] = useState(5);
+const StudentCard = ({student}) => {
+  const [locationModalVisible, setLocationModalVisible] = useState(false);
+  const [status, setStatus] = useState('out_of_range');
+  const [timer, setTimer] = useState(0);
   const [parentLocation, setParentLocation] = useState(null);
+  const [isLocationEnabled, setIsLocationEnabled] = useState(false);
+  const pickupTime = '17:45';
+  const SCHOOL_LOCATION = {
+    latitude: student?.grade?.school.lat,
+    longitude: student?.grade?.school.long,
+  };
 
-  // Fetch parent's location
+  const checkPermission = async () => {
+    console.log('Checking permissions');
+    const permissionStatus =
+      Platform.OS === 'ios'
+        ? await check(PERMISSIONS.IOS.LOCATION_WHEN_IN_USE)
+        : await check(PERMISSIONS.ANDROID.ACCESS_FINE_LOCATION);
+
+    if (permissionStatus === RESULTS.GRANTED) {
+      setIsLocationEnabled(true);
+      setStatus('in_range');
+      console.log('Location permission granted');
+    } else if (permissionStatus === RESULTS.DENIED) {
+      setIsLocationEnabled(false);
+      console.log('Location permission denied');
+    } else {
+      setIsLocationEnabled(false);
+      console.log('Location permission not granted');
+    }
+  };
+
   useEffect(() => {
-    const fetchLocation = async () => {
-      if (Platform.OS === 'android') {
-        const granted = await PermissionsAndroid.request(
-          PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
-        );
-        if (granted !== PermissionsAndroid.RESULTS.GRANTED) {
-          console.log('Location permission denied');
-          return;
-        }
-      }
+    checkPermission();
+  }, [locationModalVisible, status, isLocationEnabled]);
 
-      Geolocation.getCurrentPosition(
-        position => {
-          const { latitude, longitude } = position.coords;
-          setParentLocation({ latitude, longitude });
-        },
-        error => {
-          console.log('Error fetching location:', error);
-        },
-        { enableHighAccuracy: true, timeout: 15000, maximumAge: 10000 },
+  const convertTo12HourFormat = pickupTime => {
+    const [hours, minutes] = pickupTime.split(':');
+    const date = new Date();
+    date.setHours(hours);
+    date.setMinutes(minutes);
+
+    const formattedTime = date.toLocaleTimeString([], {
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: true,
+    });
+    return formattedTime;
+  };
+
+  const fetchLocation = async () => {
+    if (Platform.OS === 'android') {
+      const granted = await PermissionsAndroid.request(
+        PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
       );
-    };
+      if (granted !== PermissionsAndroid.RESULTS.GRANTED) {
+        console.log('Location permission denied');
+        setIsLocationEnabled(false);
+        return;
+      }
+    }
 
-    fetchLocation();
+    Geolocation.getCurrentPosition(
+      position => {
+        const {latitude, longitude} = position.coords;
+        setParentLocation({latitude, longitude});
+        setIsLocationEnabled(true);
+      },
+      error => {
+        console.log('Error fetching location:', error);
+        setIsLocationEnabled(false);
+      },
+      {enableHighAccuracy: true, timeout: 15000, maximumAge: 10000},
+    );
+  };
+
+  useEffect(() => {
+    const locationFetchTimer = setTimeout(() => {
+      fetchLocation();
+    }, 2000);
+    return () => clearTimeout(locationFetchTimer);
   }, []);
 
-  // Calculate distance and set range
+  useEffect(() => {
+    const interval = setInterval(() => {
+      fetchLocation();
+    }, 10000);
+
+    return () => clearInterval(interval);
+  }, []);
+
   useEffect(() => {
     if (parentLocation) {
-      const distance = getDistance(parentLocation, SCHOOL_LOCATION); // Distance in meters
-      const isInRange = distance <= 50000000; // 0.5 km = 500 meters
-
-      if (isInRange) {
-        setStatus('in_range');
-      } else {
+      const distance = getDistance(parentLocation, SCHOOL_LOCATION);
+      const isInRange = distance <= 1000000000;
+      if (!isInRange) {
         setStatus('out_of_range');
       }
     }
   }, [parentLocation]);
 
-  const totalTimeInSeconds = useMemo(() => {
-    const hoursInSeconds = parseInt(timer, 10) * 3600;
-    const minutesInSeconds = parseInt(timer, 10) * 60;
-    const secondsInSeconds = parseInt(timer, 10);
-    return hoursInSeconds + minutesInSeconds + secondsInSeconds;
-  }, [timer]);
+  const openGoogleMaps = () => {
+    if (parentLocation) {
+      const {latitude, longitude} = parentLocation;
+      const schoolLatitude = SCHOOL_LOCATION.latitude;
+      const schoolLongitude = SCHOOL_LOCATION.longitude;
 
-  const [timeLeft, setTimeLeft] = useState(totalTimeInSeconds);
+      const url = `https://www.google.com/maps/dir/?api=1&origin=${latitude},${longitude}&destination=${schoolLatitude},${schoolLongitude}&travelmode=driving`;
+
+      console.log('Google Maps URL:', url);
+      Linking.openURL(url)
+        .then(() => {
+          console.log('Google Maps opened successfully');
+        })
+        .catch(err => {
+          console.error('Error opening Google Maps:', err);
+        });
+    } else {
+      console.error('Parent location is not available');
+    }
+  };
+
+  const calculateTimer = () => {
+    const now = new Date();
+    const [pickupHours, pickupMinutes] = pickupTime.split(':');
+    const pickupDate = new Date();
+    pickupDate.setHours(pickupHours, pickupMinutes, 0, 0);
+    const timeDifference = pickupDate - now;
+    return Math.max(timeDifference / 1000, 0);
+  };
 
   useEffect(() => {
-    if (timeLeft > 0) {
-      const timer = setInterval(() => {
-        setTimeLeft(prevTime => prevTime - 1);
-      }, 1000);
-      return () => clearInterval(timer);
-    } else {
-      setStatus(student.range);
+    if (status === 'in_range' || status === 'out_of_range') {
+      const remainingTime = calculateTimer();
+      setTimer(remainingTime);
     }
-  }, [timeLeft, student.range]);
+  }, [status]);
 
-  const time = useMemo(
-    () => ({
-      hours: Math.floor(timeLeft / 3600),
-      minutes: Math.floor((timeLeft % 3600) / 60),
-      seconds: timeLeft % 60,
-    }),
-    [timeLeft],
-  );
+  useEffect(() => {
+    let interval;
+    if (timer > 0) {
+      interval = setInterval(() => {
+        setTimer(prevTimer => prevTimer - 1);
+      }, 1000);
+    }
 
-  const statusConfig = useMemo(
-    () => ({
-      out_of_range: {
-        text: 'You are out of range:',
-        buttonText: 'Pickup Request',
-        textStyle: { color: '#212529' },
-        buttonTextStyle: { color: '#F8AC1650' },
-        buttonTouchStyle: { borderWidth: 1, borderColor: '#F8AC1650' },
-        disabled: false,
-      },
-      in_range: {
-        text: `You are in School's range:`,
-        buttonText: 'Pickup Request',
-        textStyle: { color: '#212529', fontSize: width * 0.032 },
-        buttonTextStyle: null,
-        buttonTouchStyle: null,
-        disabled: false,
-      },
-      ready_to_pickup: {
-        text: 'READY TO PICKUP!',
-        buttonText: 'Pickup Request',
-        textStyle: { color: '#F8AC16' },
-        buttonTextStyle: null,
-        buttonTouchStyle: null,
-        disabled: false,
-      },
-      request_sent: {
-        text: 'REQUEST SENT SUCCESSFULLY',
-        buttonText: 'Confirm Pickup',
-        textStyle: { color: '#F8AC16', fontSize: width * 0.034 },
-        buttonTextStyle: { color: '#FFFFFF', fontWeight: 'bold' },
-        buttonTouchStyle: { backgroundColor: '#F8AC16' },
-        disabled: false,
-      },
-      request_accepted: {
-        text: 'REQUEST ACCEPTED',
-        buttonText: 'Confirm Pickup',
-        textStyle: { color: '#F8AC16' },
-        buttonTextStyle: { color: '#FFFFFF' },
-        buttonTouchStyle: { backgroundColor: '#F8AC16' },
-        disabled: false,
-        cardStyle: { backgroundColor: '#FEF8EB' },
-        headerStyle: { backgroundColor: '#FEEFD2', borderColor: '#F8AC16' },
-      },
-      pickup_successful: {
-        text: 'PICKUP SUCCESSFULLY!',
-        buttonText: 'Confirm Pickup',
-        textStyle: { color: '#F8AC16' },
-        buttonTextStyle: { color: '#FFFFFF' },
-        buttonTouchStyle: { backgroundColor: '#F8AC1650', borderWidth: 0 },
-        disabled: true,
-      },
-    }),
-    [],
-  );
+    return () => clearInterval(interval);
+  }, [timer]);
+
+  const time = {
+    hours: Math.floor(timer / 3600),
+    minutes: Math.floor((timer % 3600) / 60),
+    seconds: (timer % 60).toFixed(0),
+  };
+
+  const statusConfig = {
+    out_of_range: {
+      text: 'You are out of range:',
+      buttonText: 'Pickup Request',
+      textStyle: {color: '#212529'},
+      buttonTextStyle: {color: '#F8AC1650'},
+      buttonTouchStyle: {borderWidth: 1, borderColor: '#F8AC1650'},
+      disabled: false,
+    },
+    in_range: {
+      text: `You are in School's range:`,
+      buttonText: 'Pickup Request',
+      textStyle: {color: '#212529', fontSize: width * 0.032},
+      buttonTextStyle: null,
+      buttonTouchStyle: null,
+      disabled: false,
+    },
+    ready_to_pickup: {
+      text: 'READY TO PICKUP!',
+      buttonText: 'Pickup Request',
+      textStyle: {color: '#F8AC16'},
+      buttonTextStyle: null,
+      buttonTouchStyle: null,
+      disabled: false,
+    },
+    request_sent: {
+      text: 'REQUEST SENT SUCCESSFULLY',
+      buttonText: 'Confirm Pickup',
+      textStyle: {color: '#F8AC16', fontSize: width * 0.034},
+      buttonTextStyle: {color: '#FFFFFF', fontWeight: 'bold'},
+      buttonTouchStyle: {backgroundColor: '#F8AC16'},
+      disabled: false,
+    },
+    request_accepted: {
+      text: 'REQUEST ACCEPTED',
+      buttonText: 'Confirm Pickup',
+      textStyle: {color: '#F8AC16'},
+      buttonTextStyle: {color: '#FFFFFF'},
+      buttonTouchStyle: {backgroundColor: '#F8AC16'},
+      disabled: false,
+      cardStyle: {backgroundColor: '#FEF8EB'},
+      headerStyle: {backgroundColor: '#FEEFD2', borderColor: '#F8AC16'},
+    },
+    pickup_successful: {
+      text: 'PICKUP SUCCESSFULLY!',
+      buttonText: 'Confirm Pickup',
+      textStyle: {color: '#F8AC16'},
+      buttonTextStyle: {color: '#FFFFFF'},
+      buttonTouchStyle: {backgroundColor: '#F8AC1650', borderWidth: 0},
+      disabled: true,
+    },
+  };
 
   const renderModal = () => {
     const modalConfig = {
+      in_range: {
+        title: student.name,
+        description:
+          "Your request for pick-up of your child has been accepted. Please wait patiently. If they're late, feel free to submit another request.",
+        primaryButtonText: 'Ok, Got it',
+        primaryButtonAction: () => setStatus('ready_to_pickup'),
+      },
       ready_to_pickup: {
-        title: 'Jabir bin Hayan Albarsi',
+        title: student.name,
         description:
           "Your request for pick-up of your child has been accepted. Please wait patiently. If they're late, feel free to submit another request.",
         primaryButtonText: 'Ok, Got it',
@@ -172,7 +251,10 @@ const StudentCard = ({ student }) => {
         description:
           "By turning on location, will allow us to accurately track your child's pickup location and notify you when they are on their way to be picked up or have been dropped off. This will help ensure a safe and efficient pickup process.",
         primaryButtonText: 'Go to Settings',
-        primaryButtonAction: () => console.log('Settings Pressed'),
+        primaryButtonAction: () => {
+          Linking.openSettings();
+          checkPermission();
+        },
       },
       request_accepted: {
         title: 'Confirmation!',
@@ -191,8 +273,8 @@ const StudentCard = ({ student }) => {
     };
     return modalConfig[status] ? (
       <CustomModal
-        visible={modalVisible}
-        onClose={() => setModalVisible(false)}
+        visible={locationModalVisible}
+        onClose={() => setLocationModalVisible(false)}
         {...modalConfig[status]}
       />
     ) : null;
@@ -200,6 +282,7 @@ const StudentCard = ({ student }) => {
 
   const config = statusConfig[status] || {};
 
+  
   return (
     <View style={{...styles.card, ...config.cardStyle}}>
       <View
@@ -246,7 +329,11 @@ const StudentCard = ({ student }) => {
 
       <TouchableOpacity style={styles.infoContainer}>
         <Image
-          source={{uri: student?.profileUrl}}
+          source={{
+            uri:
+              student?.profileUrl ||
+              'https://res.cloudinary.com/dgv3dpaa8/image/upload/v1740655653/Profile_Image_5_at2qw9.png',
+          }}
           style={styles.image}
           resizeMode="cover"
         />
@@ -256,23 +343,36 @@ const StudentCard = ({ student }) => {
             textstyle={styles.name}
             boxStyle={styles.nameBox}
           />
-          <Text style={styles.grade}>{student?.grade.grade}</Text>
+          <Text style={styles.grade}>{student?.grade?.name}</Text>
           <View style={styles.pickupTimeContainer}>
             <Text
               style={
                 styles.pickupTime
-              }>{`Today's Pick up time: ${student.createdAt}`}</Text>
+              }>{`Today's Pick up time: ${convertTo12HourFormat(
+              pickupTime,
+            )}`}</Text>
           </View>
         </View>
-        <TouchableOpacity style={styles.exportContainer}>
+        <TouchableOpacity
+          style={styles.exportContainer}
+          onPress={openGoogleMaps}>
           <Export />
         </TouchableOpacity>
       </TouchableOpacity>
       <CustomButton
         title={config.buttonText}
         onPress={() => {
-          console.log('Button pressed');
-          setModalVisible(prev => !prev);
+          if (status === 'out_of_range') {
+            if (!isLocationEnabled) {
+              setLocationModalVisible(true);
+            } else {
+              console.log('Button pressed');
+              setLocationModalVisible(true);
+            }
+          }
+          else if(status === 'in_range' || status === 'ready_to_pickup') {
+            setLocationModalVisible(true);
+          }
         }}
         touchStyle={[styles.button, config.buttonTouchStyle]}
         textStyle={[styles.buttonText, config.buttonTextStyle]}

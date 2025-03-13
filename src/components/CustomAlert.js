@@ -4,7 +4,7 @@ import CustomButton from './CustomButton';
 import Heading from './Heading';
 import SubHeading from './SubHeading';
 
-const CustomAlert = ({visible, onClose, label, message, buttonText}) => {
+const CustomAlert = ({visible, onClose, label, message, buttonText, image, svg=null}) => {
   return (
     <Modal
       animationType="fade"
@@ -13,10 +13,13 @@ const CustomAlert = ({visible, onClose, label, message, buttonText}) => {
       onRequestClose={onClose}>
       <View style={styles.overlay}>
         <View style={styles.modalContainer}>
-          <Image
-            source={require('../assets/pics/EmailPic.png')}
-            style={styles.image}
-          />
+          {svg}
+          {image == 'noImage' ? null : (
+            <Image
+              source={require('../assets/pics/EmailPic.png')}
+              style={styles.image}
+            />
+          )}
           <Heading title={label} textstyle={styles.title} />
           <SubHeading text={message} style={styles.message} />
           <CustomButton

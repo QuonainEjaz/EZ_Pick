@@ -1,11 +1,16 @@
 import React, { useState } from 'react';
 import { View, StyleSheet } from 'react-native';
 import CustomSelectButton from '../../components/CustomSelectButton';
+import { useSelector, useDispatch } from 'react-redux';
 import Heading from '../../components/Heading';
 import SubHeading from '../../components/SubHeading';
-import CustomButton from '../../components/CustomButton'; // Import CustomButton
+import CustomButton from '../../components/CustomButton'; 
+import { setLanguage } from '../../store/App/action';
 
-const LanguageSelection = ({ defaultLanguage = 'English', navigation }) => {
+
+const LanguageSelection = ({navigation }) => {
+  const dispatch = useDispatch();
+  const defaultLanguage = useSelector((state) => state.students.selectedLanguage);
   const [selectedLanguage, setSelectedLanguage] = useState(defaultLanguage);
 
   const languages = [
@@ -19,6 +24,7 @@ const LanguageSelection = ({ defaultLanguage = 'English', navigation }) => {
 
   const handleDone = () => {
     console.log('Selected language:', selectedLanguage);
+    dispatch(setLanguage(selectedLanguage));
     navigation.goBack();
   };
 

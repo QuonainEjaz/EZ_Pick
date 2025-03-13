@@ -1,7 +1,7 @@
-import React, {useState, useMemo} from 'react';
+import React, {useState, useMemo, useEffect} from 'react';
 import {View, Text, StyleSheet, Dimensions, Alert} from 'react-native';
 import {useSelector, useDispatch} from 'react-redux';
-import {setToken} from '../../store/App/action';
+import {SET_loginData, setToken} from '../../store/App/action';
 import {Formik} from 'formik';
 import * as Yup from 'yup';
 import axios from 'axios';
@@ -11,6 +11,7 @@ import SubHeading from '../../components/SubHeading';
 import InputField from '../../components/InputFeild';
 import CustomLink from '../../components/CustomLink';
 import CustomButton from '../../components/CustomButton';
+import ReactNativeBiometrics from 'react-native-biometrics';
 
 /*
 const validationSchema = Yup.object().shape({
@@ -28,21 +29,38 @@ const Login = ({navigation}) => {
   const {width, height} = Dimensions.get('window');
   const [isLoading, setIsLoading] = useState(false);
   const dispatch = useDispatch();
+  const smartLoginEnabled = useSelector(state => state.students.smartLoginEnabled);
+  useEffect(() => {
+    const checkSmartLogin = async () => {
+      if (smartLoginEnabled) {
+        const { success } = await ReactNativeBiometrics.simplePrompt({
+          promptMessage: 'Login using fingerprint or face recognition',
+        });
 
+        if (success) {
+          navigation.navigate('TabNavigator'); 
+        }
+      }
+    };
+
+    checkSmartLogin();
+  }, []);
   const handleLogin = async values => {
     setIsLoading(true);
 
     try {
       // const response = await axios.post(
-      //   'https://backendtest.ezpick.org/clients/login',
+      //   'https://backendtest.ezpick.org/parents/loginByEmail',
       //   {
       //     email: values.username,
       //     password: values.password,
       //   },
       // );
       // if (response.status === 200) {
-      //   console.log('Login Success:', response.data);
+      //   console.log('Login Success');
       //   dispatch(setToken(response.data.token));
+      //   dispatch(SET_loginData(response.data.data));
+      //   // console.log(response.data.data);
       //   navigation.navigate('TabNavigator');
       // } else {
       //   Alert.alert('Error', 'Invalid credentials or something went wrong');
