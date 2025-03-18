@@ -1,6 +1,14 @@
-pluginManagement { includeBuild("../node_modules/@react-native/gradle-plugin") }
+pluginManagement {
+    repositories {
+        google()
+        mavenCentral()
+        gradlePluginPortal()
+    }
+    includeBuild("../node_modules/@react-native/gradle-plugin") // Ensure this is present
+}
 plugins { id("com.facebook.react.settings") }
 extensions.configure(com.facebook.react.ReactSettingsExtension){ ex -> ex.autolinkLibrariesFromCommand() }
 rootProject.name = 'EZpick'
 include ':app'
 includeBuild('../node_modules/@react-native/gradle-plugin')
+// apply from: file("../node_modules/@react-native/gradle-plugin/settings.gradle")

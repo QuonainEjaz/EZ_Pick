@@ -1,14 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { View, SectionList, RefreshControl, StyleSheet,Image} from 'react-native';
+import { View, SectionList, RefreshControl, StyleSheet, Image, ActivityIndicator } from 'react-native';
 import { useSelector, useDispatch } from 'react-redux';
 import { parseISO, isToday, isYesterday, format } from 'date-fns';
 import Heading from '../../components/Heading';
 import SubHeading from '../../components/SubHeading';
 import { Set_Notifications } from '../../store/App/action';
-import NotificationScreenIcons from '../../assets/Icons/svg/NotificationScreenIcons';     
 
-const fetchNotifications = async (dispatch, baseUrl, userId, setRefreshing) => {
+const fetchNotifications = async (dispatch, baseUrl, userId, setLoading, setRefreshing) => {
+  setLoading(true);
   setRefreshing(true);
   try {
     const { data } = await axios.get(`${baseUrl}/notifications/parents/${userId}`);
@@ -17,6 +17,7 @@ const fetchNotifications = async (dispatch, baseUrl, userId, setRefreshing) => {
     console.error('Error fetching notifications:', error);
     dispatch(Set_Notifications([]));
   } finally {
+    setLoading(false);
     setRefreshing(false);
   }
 };
@@ -50,27 +51,33 @@ const NotificationItem = ({ imageUrl, title, message }) => (
 const NotificationList = () => {
   const dispatch = useDispatch();
   const baseUrl = useSelector((state) => state.students.baseUrl);
-  const userId = 1000842;
+  const userId = 1000560;
   const notifications = useSelector((state) => state.students.notifications) || [];
+  
+  const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
 
   useEffect(() => {
-    fetchNotifications(dispatch, baseUrl, userId, setRefreshing);
+    fetchNotifications(dispatch, baseUrl, userId, setLoading, setRefreshing);
   }, [dispatch, baseUrl, userId]);
 
   const sections = Object.entries(processNotifications(notifications)).map(([title, data]) => ({ title, data }));
 
   return (
     <View style={styles.container}>
-      <SectionList
-        showsVerticalScrollIndicator={false}
-        sections={sections}
-        keyExtractor={(item, index) => item.id?.toString() || index.toString()}
-        renderItem={({ item }) => <NotificationItem {...item} />}
-        renderSectionHeader={({ section: { title } }) => <SubHeading text={title} style={styles.dateText} />}
-        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => fetchNotifications(dispatch, baseUrl, userId, setRefreshing)} />}
-        ListEmptyComponent={<View style={styles.emptyContainer}><SubHeading text="No notifications found" style={styles.emptyText} /></View>}
-      />
+      {loading ? (
+        <ActivityIndicator size="large" color="#F8AC16" style={styles.loader} />
+      ) : (
+        <SectionList
+          showsVerticalScrollIndicator={false}
+          sections={sections}
+          keyExtractor={(item, index) => item.id?.toString() || index.toString()}
+          renderItem={({ item }) => <NotificationItem {...item} />}
+          renderSectionHeader={({ section: { title } }) => <SubHeading text={title} style={styles.dateText} />}
+          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => fetchNotifications(dispatch, baseUrl, userId, setLoading, setRefreshing)} />}
+          ListEmptyComponent={<View style={styles.emptyContainer}><SubHeading text="No notifications found" style={styles.emptyText} /></View>}
+        />
+      )}
     </View>
   );
 };
@@ -79,6 +86,7 @@ export default NotificationList;
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#F8F9FA', padding: 20 },
+  loader: { flex: 1, justifyContent: 'center', alignItems: 'center' },
   dateText: { fontSize: 14, fontWeight: '700', color: '#6F767E', marginBottom: 5 },
   notificationItem: { flexDirection: 'row', backgroundColor: '#fff', borderRadius: 8, padding: 12, marginBottom: 10, borderWidth: 1, borderColor: '#f8f8f9' },
   iconContainer: { width: 50, height: 50, backgroundColor: '#FEF6E6', borderRadius: 12, justifyContent: 'center', alignItems: 'center' },

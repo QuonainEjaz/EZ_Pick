@@ -6,6 +6,7 @@ const initialState = {
   baseUrl: 'https://backendtest.ezpick.org',
   loginData: {},
   parent: {},
+  guardian: [],
   students: [],
   schools: [],
   token: null,
@@ -40,6 +41,12 @@ const studentsReducer = (state = initialState, action) => {
         ...state,
         parent: action.payload,
       };
+      case 'SET_GUARDIAN':
+      return {
+        ...state,
+        guardian: action.payload,
+        loading: false,
+      }
     case 'SET_STUDENTS':
       return {
         ...state,

@@ -1,148 +1,223 @@
-import React, { useEffect, useState, useRef } from 'react';
-import { View, FlatList, StyleSheet, TouchableOpacity, Modal, Text, TouchableHighlight, Dimensions } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import {
+  View,
+  FlatList,
+  StyleSheet,
+  TouchableOpacity,
+  Text,
+  Dimensions,
+  ActivityIndicator,
+  RefreshControl,
+} from 'react-native';
+import axios from 'axios';
+import {
+  format,
+  subDays,
+  subMonths,
+  subYears,
+  startOfYear,
+  endOfYear,
+} from 'date-fns';
+import { useDispatch, useSelector } from 'react-redux';
 import Heading from '../../components/Heading';
 import CustomButton from '../../components/CustomButton';
 import UserInfoCard from '../../components/HistoryScreenComponents/UserInfoCard';
-import { useDispatch, useSelector } from 'react-redux';
 import ArrowDown from '../../assets/Icons/svg/ArrowDown';
+
+const baseUrl = 'https://backendtest.ezpick.org';
+
+const HistoryFilters = {
+  today: {
+    name: 'Today',
+    dateFrom: () => format(new Date(), 'yyyy-MM-dd'),
+    dateTo: () => format(new Date(), 'yyyy-MM-dd'),
+  },
+  yesterday: {
+    name: 'Yesterday',
+    dateFrom: () => format(subDays(new Date(), 1), 'yyyy-MM-dd'),
+    dateTo: () => format(subDays(new Date(), 1), 'yyyy-MM-dd'),
+  },
+  last_week: {
+    name: 'Last Week',
+    dateFrom: () => format(subDays(new Date(), 7), 'yyyy-MM-dd'),
+    dateTo: () => format(new Date(), 'yyyy-MM-dd'),
+  },
+  last_month: {
+    name: 'Last Month',
+    dateFrom: () => format(subMonths(new Date(), 1), 'yyyy-MM-dd'),
+    dateTo: () => format(new Date(), 'yyyy-MM-dd'),
+  },
+  last_year: {
+    name: 'Last Year',
+    dateFrom: () =>
+      format(startOfYear(subYears(new Date(), 1)), 'yyyy-MM-dd'),
+    dateTo: () => format(endOfYear(subYears(new Date(), 1)), 'yyyy-MM-dd'),
+  },
+  all_time: {
+    name: 'All Time',
+    dateFrom: () => '2023-02-23', // Earliest possible date
+    dateTo: () => format(new Date(), 'yyyy-MM-dd'),
+  },
+};
 
 const HistoryScreen = ({ navigation }) => {
   const dispatch = useDispatch();
-  const students = useSelector(state => state.students.students);
-  const [selectedFilter, setSelectedFilter] = useState('All Time');
-  const [filteredStudents, setFilteredStudents] = useState(students);
-  const [modalVisible, setModalVisible] = useState(false);
-  const filterButtonRef = useRef(null);  // To reference the filter button for width calculation
+  const parent = useSelector(state => state.students.parent);
+  const [historys, setHistorys] = useState([]);
+  const [selectedFilter, setSelectedFilter] = useState('all_time');
+  const [refreshing, setRefreshing] = useState(false);
+  const [loading, setLoading] = useState(false);
 
-  // Function to parse the date string into a Date object
-  const parseDate = (dateString) => {
-    const [day, month, year] = dateString.split(' ');
-    const monthIndex = new Date(`${month} 1, 2021`).getMonth(); // Get month index
-    return new Date(year, monthIndex, day); // Return Date object
-  };
-
-  // Function to get the start and end dates for last week
-  const getLastWeekRange = () => {
-    const today = new Date();
-    const startOfWeek = today.getDate() - today.getDay() - 7; // Start of last week
-    const endOfWeek = startOfWeek + 6; // End of last week
-    const startDate = new Date(today.setDate(startOfWeek));
-    const endDate = new Date(today.setDate(endOfWeek));
-
-    return { startDate, endDate };
-  };
-
-  // Function to filter students by selected filter
-  const filterStudents = () => {
-    let filtered = students;
-
-    if (selectedFilter === 'Last Week') {
-      const { startDate, endDate } = getLastWeekRange();
-      filtered = students.filter(student => {
-        const studentDate = parseDate(student.date);
-        return studentDate >= startDate && studentDate <= endDate;
-      });
-    } else if (selectedFilter === 'Last Month') {
-      const today = new Date();
-      const startDate = new Date(today.setMonth(today.getMonth() - 1)); // 1 month ago
-      filtered = students.filter(student => {
-        const studentDate = parseDate(student.date);
-        return studentDate >= startDate;
-      });
-    } else if (selectedFilter === 'All Time') {
-      filtered = students; // No filtering
-    }
-
-    setFilteredStudents(filtered);
-  };
-
-  // Run the filter function when the selectedFilter changes
-  useEffect(() => {
-    filterStudents();
-  }, [selectedFilter, students]);
-
-  // Get the width of the filter button dynamically
+  // For dropdown positioning and width
   const [filterButtonWidth, setFilterButtonWidth] = useState(0);
+  const [filterDropdownVisible, setFilterDropdownVisible] = useState(false);
+
+  const loginUserId = parent?.id;
+  const loginUserRole = parent?.role || 'parent';
+
+  const getHistory = async () => {
+    try {
+      let url = `${baseUrl}/requests/guards/1004993?dateFrom=${HistoryFilters[
+        selectedFilter
+      ].dateFrom()}&dateTo=${HistoryFilters[selectedFilter].dateTo()}`;
+
+      // if (loginUserRole !== 'guards') {
+      //   const studentId = parent?.students?.[0]?.id;
+      //   url = `${baseUrl}/requests/student/${studentId}?dateFrom=${HistoryFilters[selectedFilter].dateFrom()}&dateTo=${HistoryFilters[selectedFilter].dateTo()}`;
+      // }
+
+      const response = await axios.get(url);
+      if (response.data.success) {
+        console.log('History:', response.data.requests);
+        setHistorys(response.data.requests || []);
+      }
+    } catch (error) {
+      console.error('Error fetching history:', error);
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
+  };
+
+  useEffect(() => {
+    setLoading(true);
+    getHistory();
+  }, [selectedFilter]);
+
+  const onRefresh = () => {
+    setRefreshing(true);
+    getHistory();
+  };
+
+  // Capture filter button width (and height if needed)
   const onLayout = event => {
     const { width } = event.nativeEvent.layout;
-    setFilterButtonWidth(width); // Set width of filter button
+    setFilterButtonWidth(width);
   };
+
+  // When an option is selected from the dropdown
+  const onSelectFilter = key => {
+    setSelectedFilter(key);
+    setFilterDropdownVisible(false);
+  };
+
+  // Order of options to display in the dropdown
+  const filterOrder = [
+    'today',
+    'yesterday',
+    'last_week',
+    'last_month',
+    'last_year',
+    'all_time',
+  ];
 
   return (
     <View style={styles.container}>
-      {/* Header Section */}
       <View style={styles.header}>
         <Heading title="History" textstyle={styles.heading} />
-        <TouchableOpacity
-          style={[styles.filterTouch, { flexDirection: 'row', alignItems: 'center' }]}
-          onPress={() => setModalVisible(true)}  // Open modal when filter button is pressed
-          onLayout={onLayout}  // Capture the filter button's layout
-        >
-          <CustomButton
-            title={selectedFilter}
-            touchStyle={styles.filterButton}
-            textStyle={styles.filterText}
-            disabled={true}
-          />
-          <ArrowDown />
-        </TouchableOpacity>
+        {/* Wrap the filter button in a relative container */}
+        <View style={styles.dropdownContainer}>
+          <TouchableOpacity
+            style={styles.filterTouch}
+            onPress={() => setFilterDropdownVisible(!filterDropdownVisible)}
+            onLayout={onLayout}>
+            <CustomButton
+              title={HistoryFilters[selectedFilter].name}
+              touchStyle={styles.filterButton}
+              textStyle={styles.filterText}
+              disabled={true}
+            />
+            <ArrowDown />
+          </TouchableOpacity>
+          {filterDropdownVisible && (
+            <View style={[styles.dropdown, { width: filterButtonWidth }]}>
+              {filterOrder.map(key => (
+                <TouchableOpacity
+                  key={key}
+                  style={styles.dropdownItem}
+                  onPress={() => onSelectFilter(key)}>
+                  <Text style={styles.dropdownText}>
+                    {HistoryFilters[key].name}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+          )}
+        </View>
       </View>
 
-      {/* Modal for selecting filter */}
-      <Modal
-        animationType="slide"
-        transparent={true}
-        visible={modalVisible}
-        onRequestClose={() => setModalVisible(false)}  // Close modal when back button is pressed
-      >
-        <View style={styles.modalContainer}>
-          <View style={[styles.modalContent, { width: filterButtonWidth * 1.2 }]}>
-            <Text style={styles.modalTitle}>Select Filter</Text>
-            <TouchableHighlight
-              style={styles.modalOption}
-              onPress={() => {
-                setSelectedFilter('Last Week');
-                setModalVisible(false);
-              }}
-            >
-              <Text style={styles.modalText}>Last Week</Text>
-            </TouchableHighlight>
-            <TouchableHighlight
-              style={styles.modalOption}
-              onPress={() => {
-                setSelectedFilter('Last Month');
-                setModalVisible(false);
-              }}
-            >
-              <Text style={styles.modalText}>Last Month</Text>
-            </TouchableHighlight>
-            <TouchableHighlight
-              style={styles.modalOption}
-              onPress={() => {
-                setSelectedFilter('All Time');
-                setModalVisible(false);
-              }}
-            >
-              <Text style={styles.modalText}>All Time</Text>
-            </TouchableHighlight>
-          </View>
-        </View>
-      </Modal>
+      {loading && (
+        <ActivityIndicator size="large" color="#F8AC16" style={styles.loader} />
+      )}
 
       <FlatList
-        data={filteredStudents}
-        keyExtractor={item => item.id}
-        renderItem={({ item }) => (
-          <UserInfoCard
-            name={item.name}
-            dateTime={[item?.date, ', ', item?.pickupTime]}
-            status={item?.status}
-            imageSource={item?.profileUrl || 'https://res.cloudinary.com/dgv3dpaa8/image/upload/v1740655653/Profile_Image_5_at2qw9.png'}
-            onPress={() =>
-              navigation.navigate('PickupDetails', { student: item })
-            }
-          />
-        )}
+        showsVerticalScrollIndicator={false}
+        data={historys}
+        keyExtractor={item => item.id.toString()}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }
+        renderItem={({ item }) => {
+          const createdAt = new Date(item.createdAt);
+          return (
+            <UserInfoCard
+              name={item.student?.name}
+              role={loginUserRole === 'guards' ? 'Parent' : 'Guardian'}
+              dateTime={[
+                format(createdAt, 'dd MMM yyyy'),
+                ', ',
+                format(createdAt, 'hh:mm a'),
+              ]}
+              status={'Picked'}
+              imageSource={
+                item.student?.profileUrl ||
+                'https://res.cloudinary.com/dgv3dpaa8/image/upload/v1742117856/personPlaceholder_vjtdyo.png'
+              }
+              onPress={() =>
+                navigation.navigate('PickupDetails', {
+                  request: item,
+                  imageSource:
+                    item.student?.profileUrl ||
+                    'https://res.cloudinary.com/dgv3dpaa8/image/upload/v1742117856/personPlaceholder_vjtdyo.png',
+                  pickupTime: [
+                    format(createdAt, 'dd MMM yyyy'),
+                    ', ',
+                    format(createdAt, 'hh:mm a'),
+                  ],
+                  status: 'Picked',
+                  name: item.student?.name,
+                  id: item.student.id,
+                  grade: item.student.gradeId,
+                  requestBy: item.pickUpGuardian,
+                  date: format(createdAt, 'dd MMM yyyy'),
+                  requestTime: format(new Date(item.requestTime), 'hh:mm a'),
+                  responseTime: format(new Date(item.approveTime), 'hh:mm a'),
+                  confirmTime: format(new Date(item.confirmTime), 'hh:mm a'),
+                })
+              }
+            />
+          );
+        }}
         contentContainerStyle={styles.listContainer}
       />
     </View>
@@ -167,52 +242,51 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#212529',
   },
-  filterButton: {
-    backgroundColor: '#EFEFEF',
-    borderRadius: 8,
+  dropdownContainer: {
+    position: 'relative',
   },
   filterTouch: {
+    flexDirection: 'row',
+    alignItems: 'center',
     backgroundColor: '#EFEFEF',
     paddingVertical: 10,
-    paddingHorizontal: 5,
+    paddingHorizontal: 15,
+    borderRadius: 8,
+  },
+  filterButton: {
+    backgroundColor: '#EFEFEF',
     borderRadius: 8,
   },
   filterText: {
     fontSize: 12,
     color: '#6C757D',
   },
-  listContainer: {
-    flex: 1,
-    gap: 10,
-    backgroundColor: '#F8F9FA',
-  },
-  modalContainer: {
-    flex: 1,
+  dropdown: {
     position: 'absolute',
-    top: 130,
-    right: 10,
-    bottom: 0,
-  },
-  modalContent: {
+    top: '100%',
+    left: 0,
     backgroundColor: 'white',
-    padding: 10,
-    borderRadius: 10,
-    width: '100%',  
+    borderRadius: 8,
+    marginTop: 5,
+    borderWidth: 1,
+    borderColor: '#ddd',
+    zIndex: 1000,
+    elevation: 5,
   },
-  modalTitle: {
-    fontSize: 14,
-    fontWeight: 'bold',
-    color: '#333',
+  dropdownItem: {
+    paddingVertical: 10,
+    paddingHorizontal: 10,
   },
-  modalOption: {
-    padding: 10,
-    borderRadius: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: '#ddd',
-  },
-  modalText: {
+  dropdownText: {
     fontSize: 12,
     color: '#333',
+  },
+  listContainer: {
+    gap: 10,
+    paddingBottom: 20,
+  },
+  loader: {
+    marginVertical: 20,
   },
 });
 

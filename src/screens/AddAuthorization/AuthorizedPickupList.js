@@ -6,13 +6,15 @@ import {
   TouchableOpacity,
   StyleSheet,
   Text,
+  ActivityIndicator,
+  RefreshControl,
 } from 'react-native';
 import Heading from '../../components/Heading';
 import SubHeading from '../../components/SubHeading';
 import CustomButton from '../../components/CustomButton';
 import CustomOptionsModal from '../../components/AuthScreenComponents/CustomOptionsModal';
 import AuthConfirmationModal from '../../components/AuthConfirmationModal';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import Svg, { Circle, Rect } from 'react-native-svg';
 
 const OptionButton = (props) => (
@@ -51,10 +53,35 @@ const OptionButton = (props) => (
 );
 
 const AuthorizedPickupList = ({ navigation }) => {
-  const students = useSelector((state) => state.students.students);
+  const dispatch = useDispatch();
+  const guardians = useSelector((state) => state.students.guardians);
+  const [loading, setLoading] = React.useState(true);
+  const [isRefreshing, setIsRefreshing] = React.useState(false);
   const [selectedItemId, setSelectedItemId] = React.useState(null);
   const [modalVisible, setModalVisible] = React.useState(false);
   const [confirmationVisible, setConfirmationVisible] = React.useState(false);
+
+  const fetchGuardians = async () => {
+    try {
+      const response = await fetch('https://backendtest.ezpick.org/parents/assistant/1004993');
+      const data = await response.json();
+      dispatch({ type: 'SET_GUARDIAN', payload: data });
+    } catch (error) {
+      console.error('Error fetching guardians:', error);
+    } finally {
+      setLoading(false);
+      setIsRefreshing(false);
+    }
+  };
+
+  React.useEffect(() => {
+    fetchGuardians();
+  }, []);
+
+  const handleRefresh = () => {
+    setIsRefreshing(true);
+    fetchGuardians();
+  };
 
   const handleDelete = () => {
     console.log('Deleted');
@@ -135,6 +162,14 @@ const AuthorizedPickupList = ({ navigation }) => {
     </View>
   );
 
+  if (loading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="#F8AC16" />
+      </View>
+    );
+  }
+
   return (
     <View style={styles.container}>
       <Heading
@@ -143,10 +178,20 @@ const AuthorizedPickupList = ({ navigation }) => {
         textstyle={styles.headerTitleText}
       />
       <FlatList
-        data={students}
+        data={guardians}
         renderItem={renderPickupItem}
         keyExtractor={(item) => item.id.toString()}
         contentContainerStyle={styles.scrollView}
+        refreshControl={
+          <RefreshControl
+            refreshing={isRefreshing}
+            onRefresh={handleRefresh}
+            tintColor="#F8AC16"
+          />
+        }
+        ListEmptyComponent={
+          <Text style={styles.emptyText}>No authorized pickups found</Text>
+        }
       />
       <CustomButton
         onPress={() => navigation.navigate('AddAuthorization')}
@@ -167,6 +212,16 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     padding: 20,
     justifyContent: 'space-between',
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  emptyText: {
+    textAlign: 'center',
+    color: '#6C757D',
+    marginTop: 20,
   },
   headerTitle: {
     alignItems: 'flex-start',

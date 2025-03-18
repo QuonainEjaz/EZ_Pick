@@ -4,6 +4,12 @@ export const SET_PARENT = parent => {
     payload: parent,
   };
 };
+export const SET_GUARDIAN = guardian => {
+  return {
+    type: 'SET_GUARDIAN',
+    payload: guardian,
+  };
+};
 export const SET_loginData = loginData => {
   return {
     type: 'SET_loginData',

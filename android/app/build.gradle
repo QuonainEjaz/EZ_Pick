@@ -74,7 +74,7 @@ def jscFlavor = 'org.webkit:android-jsc:+'
 
 android {
     ndkVersion rootProject.ext.ndkVersion
-    buildToolsVersion rootProject.ext.buildToolsVersion
+    // buildToolsVersion rootProject.ext.buildToolsVersion
     compileSdk rootProject.ext.compileSdkVersion
 
     namespace "com.ezpick"
@@ -96,6 +96,10 @@ android {
     buildTypes {
         debug {
             signingConfig signingConfigs.debug
+            debuggable true
+            minifyEnabled true  // Enable code shrinking
+            shrinkResources true  // Enable resource shrinking
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
         release {
             // Caution! In production, you need to generate your own keystore file.

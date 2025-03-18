@@ -16,7 +16,7 @@ const ProfileDetail = ({route}) => {
   const [isPhotoSelectionModalVisible, setIsPhotoSelectionModalVisible] =
     useState(false);
 
-    const handleTakePhoto = () => {
+    const handleTakePhoto = () => { 
       launchCamera(
         {
           mediaType: 'photo',

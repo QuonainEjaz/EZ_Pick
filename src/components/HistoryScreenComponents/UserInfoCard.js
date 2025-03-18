@@ -71,6 +71,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     textAlign: 'left',
     color: '#212529',
+    textTransform: 'capitalize',
   },
   subHeading: {
     fontSize: 14,
