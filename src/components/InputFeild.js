@@ -85,8 +85,8 @@ const styles = StyleSheet.create({
   },
   eyeIconContainer: {
     position: 'absolute',
-    right: 10,
-    top: '50%',
+    right: 13,
+    top: '53%',
     transform: [{translateY: -10}],
     zIndex: 1,
   },

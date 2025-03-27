@@ -3,7 +3,7 @@ import {NotificationScreenIcons} from '../../assets/Icons/svg/NotificationScreen
 const initialState = {
   selectedLanguage: 'English',
   isFirstLoad: true,
-  baseUrl: 'https://backendtest.ezpick.org',
+  baseUrl: 'https://api.ezpick.co',
   loginData: {},
   parent: {},
   guardian: [],

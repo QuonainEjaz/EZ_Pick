@@ -5,12 +5,15 @@ import {
   StyleSheet,
   TouchableOpacity,
   ScrollView,
+  ActivityIndicator,
 } from 'react-native';
 import Clipboard from '@react-native-clipboard/clipboard';
 import SubHeading from '../../components/SubHeading';
 import CustomButton from '../../components/CustomButton';
-import ShimmerPlaceholder from 'react-native-shimmer-placeholder';
 import Svg, {Path, Circle} from 'react-native-svg';
+import axios from 'axios';
+import {useSelector} from 'react-redux';
+import ShimmerSkeleton from '../../components/ShimmerEffect';
 const ViewIcon = props => (
   <Svg
     xmlns="http://www.w3.org/2000/svg"
@@ -60,34 +63,75 @@ const MinusIcon = props => (
     />
   </Svg>
 );
-const AuthPickupDetails = ({style, pickupData = {}}) => {
+const AuthPickupDetails = ({route, navigation, style}) => {
+  const baseUrl = useSelector(state => state.students.baseUrl);
   const [isLoading, setIsLoading] = useState(true);
-  const defaultPickupData = {
-    name: 'Khalid al-Jameel',
-    relation: 'Uncle',
-    idNumber: '545135',
-    cellNo: '123-456-7890',
-    vehicleNo: 'SA-5715B',
-    profileImage:
-      'https://res.cloudinary.com/dgv3dpaa8/image/upload/v1740655477/Profile_Image_2_xqxfag.png',
-    assignedKids: [
-      {
-        name: 'Jabir bin Hayan',
-        image:
-          'https://res.cloudinary.com/dgv3dpaa8/image/upload/v1740655379/Profile_Image_1_qpmrhe.png',
-      },
-      {
-        name: 'Ali bin Abi Talib',
-        image:
-          'https://res.cloudinary.com/dgv3dpaa8/image/upload/v1740655477/Profile_Image_2_xqxfag.png',
-      },
-    ],
-    ...pickupData,
+  const [shimmerLoading, setShimmerLoading] = useState(true);
+  var {item} = route.params;
+  const stripQuotes = val => {
+    if (typeof val !== 'string') return val;
+    return val.replace(/^"|"$/g, '');
+  };
+  const pickedItem = {
+    name: stripQuotes(item.name) || '.......',
+    role: stripQuotes(item.role) || 'N /A',
+    nationalId: stripQuotes(item.nationalId) || 'N /A',
+    phoneNo: stripQuotes(item.phoneNo) || 'N /A',
+    vehicleNo: stripQuotes(item.vehicleNo) || 'N /A',
+    profileUrl:
+      stripQuotes(item.profileUrl) ||
+      'https://res.cloudinary.com/dgv3dpaa8/image/upload/v1742117856/personPlaceholder_vjtdyo.png',
+  };
+  const [assignedKids, setAssignedKids] = useState([null]);
+  const fetchGuardian = async () => {
+    setIsLoading(true);
+    try {
+      const response = await axios.get(`${baseUrl}/parents/${item.id}`);
+      if (response.status === 200) {
+        setAssignedKids(response.data.parent.students);
+      } else {
+        console.error('Fetch Error:', response);
+      }
+    } catch (error) {
+      console.error('Fetch Students Error:', error);
+    }
+    setIsLoading(false);
+  };
+  React.useEffect(() => {
+    fetchGuardian();
+  }, []);
+  const removeKids = async (clientId,
+    parentId,
+    name,
+    vehicleNo,
+    role,
+    roleAr,
+    nationalId,
+    phoneNo,
+    students,
+    selectedImage)=> {
+    try{
+      const response = await axios.put(`${baseUrl}/parents/updateGuardian`,);
+      if (response.status === 200) {
+        Alert.alert('Success', 'Kid removed successfully');
+        setAssignedKids([]);
+      } else {
+        console.error('Fetch Error:', response);
+      }
+    }
+    catch (error) {
+      console.error('Fetch Students Error:', error);
+    }
+  };
+  const removeKidButton = () => {
+    removeKids();
   };
   const handleCopy = () => {
     Clipboard.setStrings([defaultPickupData.idNumber]);
   };
-  return (
+  return isLoading ? (
+    <ActivityIndicator size="larger" color="#F8AC16" style={styles.loader} />
+  ) : (
     <ScrollView
       style={[styles.container, style]}
       contentContainerStyle={styles.contentContainer}
@@ -95,22 +139,19 @@ const AuthPickupDetails = ({style, pickupData = {}}) => {
       {/* Profile Section */}
       <View style={styles.profileContainer}>
         <Image
-          source={{uri: defaultPickupData.profileImage}}
+          source={{
+            uri: pickedItem?.profileUrl,
+          }}
           style={styles.profileImage}
         />
         <View style={styles.profileInfo}>
-          <SubHeading
-            text={defaultPickupData.name}
-            style={styles.profileName}
-          />
-          <SubHeading
-            text={defaultPickupData.relation}
-            style={styles.profileRelation}
-          />
+          <SubHeading text={pickedItem?.name} style={styles.profileName} />
+          <SubHeading text={pickedItem?.role} style={styles.profileRelation} />
         </View>
       </View>
 
       {/* Details Section */}
+
       <View style={styles.detailsContainer}>
         <View style={styles.detailsHeader}>
           <SubHeading
@@ -126,41 +167,29 @@ const AuthPickupDetails = ({style, pickupData = {}}) => {
           <View style={styles.detailsRow}>
             <View style={styles.detailsColumn}>
               <SubHeading text="Relation" style={styles.label} />
-              <SubHeading
-                text={defaultPickupData.relation}
-                style={styles.value}
-              />
+              <SubHeading text={pickedItem?.role} style={styles.value} />
             </View>
             <View style={styles.detailsColumn}>
               <SubHeading text="Name" style={styles.label} />
-              <SubHeading text={defaultPickupData.name} style={styles.value} />
+              <SubHeading text={pickedItem?.name} style={styles.value} />
             </View>
           </View>
 
           <View style={styles.detailsRow}>
             <View style={styles.detailsColumn}>
               <SubHeading text="ID Number" style={styles.label} />
-              <SubHeading
-                text={defaultPickupData.idNumber}
-                style={styles.value}
-              />
+              <SubHeading text={pickedItem.nationalId} style={styles.value} />
             </View>
             <View style={styles.detailsColumn}>
               <SubHeading text="Cell No" style={styles.label} />
-              <SubHeading
-                text={defaultPickupData.cellNo}
-                style={styles.value}
-              />
+              <SubHeading text={pickedItem?.phoneNo} style={styles.value} />
             </View>
           </View>
 
           <View style={styles.detailsRow}>
             <View style={styles.detailsColumn}>
               <SubHeading text="Vehicle #" style={styles.label} />
-              <SubHeading
-                text={defaultPickupData.vehicleNo}
-                style={styles.value}
-              />
+              <SubHeading text={pickedItem?.vehicleNo} style={styles.value} />
             </View>
           </View>
         </View>
@@ -168,17 +197,20 @@ const AuthPickupDetails = ({style, pickupData = {}}) => {
 
       {/* Assigned Kids Section */}
       <SubHeading text={'Assigned Kids'} style={styles.assignedKidsTitle} />
-      <View style={styles.assignedKidsContainer}>
-        {defaultPickupData.assignedKids.map((kid, index) => (
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        style={styles.assignedKidsContainer}>
+        {assignedKids.map((kid, index) => (
           <View key={index} style={styles.kidCard}>
-            <TouchableOpacity style={styles.removeKidButton}>
+            <TouchableOpacity style={styles.removeKidButton} onPress={removeKidButton}>
               <MinusIcon />
             </TouchableOpacity>
-            <Image source={{uri: kid.image}} style={styles.kidImage} />
-            <SubHeading text={kid.name} style={styles.kidName} />
+            <Image source={{uri: kid?.profileUrl}} style={styles.kidImage} />
+            <SubHeading text={kid?.name} style={styles.kidName} />
           </View>
         ))}
-      </View>
+      </ScrollView>
 
       <View style={styles.qrContainer}>
         <View style={styles.qrContent}>
@@ -197,13 +229,12 @@ const AuthPickupDetails = ({style, pickupData = {}}) => {
           />
         </View>
         <View style={styles.shareContainer}>
-          {/* Shimmer Effect */}
-          {isLoading && (
-            <ShimmerPlaceholder
-              style={styles.shimmerBox}
-              shimmerColors={['#f6f7f8', '#edeef1', '#f6f7f8']}
-            />
-          )}
+          <View style={styles.shareContainerHeader}>
+            {/* Shimmer Effect */}
+            {shimmerLoading && (
+                <ShimmerSkeleton />
+            )}
+          </View>
           <View style={styles.shareOptions}>
             <CustomButton
               title="Share"
@@ -336,6 +367,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     borderWidth: 1,
     borderColor: '#e3e3e3',
+    overflow: 'hidden',
   },
   assignedKidsTitle: {
     fontFamily: 'Outfit',
@@ -465,15 +497,18 @@ const styles = StyleSheet.create({
     color: '#f8ac16',
     lineHeight: 28,
   },
-  shimmerBox: {
+  shareContainerHeader: {
     width: '100%',
-    height: 120,
+    height: 100,
     marginBottom: 10,
     alignSelf: 'center',
     borderColor: '#707070',
     borderWidth: 1,
   },
-
+  shimmerBox: {
+    width: '100%',
+    height: 20,
+  },
   saveButton: {
     backgroundColor: '#f8ac16',
     borderRadius: 6,
@@ -499,5 +534,10 @@ const styles = StyleSheet.create({
   viewIcon: {
     width: 24,
     height: 24,
+  },
+  loader: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 });

@@ -7,12 +7,12 @@ import axios from 'axios';
 const HomeScreen = ({navigation}) => {
   const dispatch = useDispatch();
   const isFirstLoad = useSelector(state => state.students.isFirstLoad);
-  const id = useSelector(state => state.students.loginData.id);
+  // const id = useSelector(state => state.students.loginData.id);
   const baseUrl = useSelector(state => state.students.baseUrl);
   const fetchStudents = useCallback(async () => {
     try {
       const response = await axios.get(
-        `${baseUrl}/parents/1000580`,
+        `${baseUrl}/parents/1000416`,
       );
       if (response.status === 200) {
         dispatch(SET_PARENT(response.data.parent));

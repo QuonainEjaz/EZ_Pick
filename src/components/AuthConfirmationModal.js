@@ -20,7 +20,11 @@ const AuthConfirmationModal = ({
       <View style={styles.overlay}>
         <View style={styles.modalContainer}>
           <View style={styles.modalContent}>
-            {imageSource && <Image source={imageSource} style={styles.image} />}
+            <View style={styles.imageContainer}>
+              {imageSource && (
+                <Image source={imageSource} style={styles.image} />
+              )}
+            </View>
             {title && <Text style={styles.title}>{title}</Text>}
           </View>
           {description && <Text style={styles.description}>{description}</Text>}
@@ -78,14 +82,22 @@ const styles = StyleSheet.create({
     gap: 10,
     marginTop: 20,
   },
+  imageContainer: {
+    width: 50,
+    height: 50,
+    borderRadius: 10,
+    // backgroundColor: '#F8AC16',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 5,
+  },
   image: {
     width: 50,
     height: 50,
     borderRadius: 10,
-    marginBottom: 5,
   },
   title: {
-    fontSize: 16,
+    fontSize: 18,
     fontWeight: 'bold',
     color: '#212529',
     marginBottom: 5,

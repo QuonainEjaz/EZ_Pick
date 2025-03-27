@@ -128,11 +128,11 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     borderWidth: 1,
     borderColor: '#ddd',
-    maxHeight: 200,
     zIndex: 1000,
   },
   item: {
-    padding: 15,
+    paddingHorizontal: 15,
+    paddingVertical: 10,
     borderBottomWidth: 1,
     borderBottomColor: '#ddd',
   },

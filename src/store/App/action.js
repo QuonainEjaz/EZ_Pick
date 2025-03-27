@@ -31,9 +31,10 @@ export const toggleFirstLoad = () => {
     type: 'TOGGLE_FIRST_LOAD',
   };
 };
-export const setToken = () => {
+export const SET_TOKEN = token => {
   return {
-    type: 'Set_TOKEN',
+    type: 'SET_TOKEN',
+    payload: token,
   };
 };
 export const setSchools = schools => {

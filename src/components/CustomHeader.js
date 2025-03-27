@@ -12,6 +12,8 @@ const CustomHeader = ({screen, name, navigation}) => {
         return {title: 'Pickup Details', button: true};
       case 'NotificationScreen':
         return {title: 'Notifications', button: false};
+      case 'NotificationDetail':
+        return {title: 'Notification Detail', button: true};
       case 'ProfileScreen':
         return {title: 'Profile', button: false};
       case 'ProfileDetail':
@@ -67,6 +69,7 @@ const CustomHeader = ({screen, name, navigation}) => {
     switch (screen) {
       case 'History':
       case 'NotificationScreen':
+      case 'NotificationDetail':
       case 'Profile':
       case 'ProfileDetail':
       case 'UpdatePassword':

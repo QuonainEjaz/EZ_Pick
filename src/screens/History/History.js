@@ -1,11 +1,10 @@
-import React, { useEffect, useState } from 'react';
+import React, {useEffect, useState} from 'react';
 import {
   View,
   FlatList,
   StyleSheet,
   TouchableOpacity,
   Text,
-  Dimensions,
   ActivityIndicator,
   RefreshControl,
 } from 'react-native';
@@ -18,13 +17,33 @@ import {
   startOfYear,
   endOfYear,
 } from 'date-fns';
-import { useDispatch, useSelector } from 'react-redux';
+import {useDispatch, useSelector} from 'react-redux';
 import Heading from '../../components/Heading';
 import CustomButton from '../../components/CustomButton';
 import UserInfoCard from '../../components/HistoryScreenComponents/UserInfoCard';
 import ArrowDown from '../../assets/Icons/svg/ArrowDown';
 
-const baseUrl = 'https://backendtest.ezpick.org';
+const HistoryStatus = {
+  REQUESTED: 0,
+  APPROVED: 1,
+  CONFIRMED: 2,
+  NOT_ARRIVED: 3,
+};
+
+const getStatusTitle = status => {
+  switch (status) {
+    case HistoryStatus.REQUESTED:
+      return 'Requested';
+    case HistoryStatus.APPROVED:
+      return 'Approved';
+    case HistoryStatus.CONFIRMED:
+      return 'Picked';
+    case HistoryStatus.NOT_ARRIVED:
+      return 'Not Arrived';
+    default:
+      return '';
+  }
+};
 
 const HistoryFilters = {
   today: {
@@ -49,8 +68,7 @@ const HistoryFilters = {
   },
   last_year: {
     name: 'Last Year',
-    dateFrom: () =>
-      format(startOfYear(subYears(new Date(), 1)), 'yyyy-MM-dd'),
+    dateFrom: () => format(startOfYear(subYears(new Date(), 1)), 'yyyy-MM-dd'),
     dateTo: () => format(endOfYear(subYears(new Date(), 1)), 'yyyy-MM-dd'),
   },
   all_time: {
@@ -60,15 +78,14 @@ const HistoryFilters = {
   },
 };
 
-const HistoryScreen = ({ navigation }) => {
+const HistoryScreen = ({navigation}) => {
   const dispatch = useDispatch();
+  const baseUrl = useSelector(state => state.students.baseUrl);
   const parent = useSelector(state => state.students.parent);
   const [historys, setHistorys] = useState([]);
   const [selectedFilter, setSelectedFilter] = useState('all_time');
   const [refreshing, setRefreshing] = useState(false);
   const [loading, setLoading] = useState(false);
-
-  // For dropdown positioning and width
   const [filterButtonWidth, setFilterButtonWidth] = useState(0);
   const [filterDropdownVisible, setFilterDropdownVisible] = useState(false);
 
@@ -77,18 +94,36 @@ const HistoryScreen = ({ navigation }) => {
 
   const getHistory = async () => {
     try {
-      let url = `${baseUrl}/requests/guards/1004993?dateFrom=${HistoryFilters[
-        selectedFilter
-      ].dateFrom()}&dateTo=${HistoryFilters[selectedFilter].dateTo()}`;
+      let url;
+      let response;
 
-      // if (loginUserRole !== 'guards') {
-      //   const studentId = parent?.students?.[0]?.id;
-      //   url = `${baseUrl}/requests/student/${studentId}?dateFrom=${HistoryFilters[selectedFilter].dateFrom()}&dateTo=${HistoryFilters[selectedFilter].dateTo()}`;
-      // }
+      if (loginUserRole === 'guards') {
+        url = `${baseUrl}/requests/guards/${loginUserId}?dateFrom=${HistoryFilters[
+          selectedFilter
+        ].dateFrom()}&dateTo=${HistoryFilters[selectedFilter].dateTo()}`;
+        response = await axios.get(url);
+      } else {
+        // Fetch data for all students
+        const studentIds = parent?.students?.map(student => student.id);
+        const requests = studentIds.map(studentId => {
+          const studentUrl = `${baseUrl}/requests/student/${studentId}?dateFrom=${HistoryFilters[
+            selectedFilter
+          ].dateFrom()}&dateTo=${HistoryFilters[selectedFilter].dateTo()}`;
+          return axios.get(studentUrl);
+        });
 
-      const response = await axios.get(url);
+        // Wait for all requests to complete
+        const results = await Promise.all(requests);
+
+        // Combine the results into a single array
+        const combinedData = results.flatMap(
+          result => result.data.requests || [],
+        );
+        setHistorys(combinedData);
+        return;
+      }
+
       if (response.data.success) {
-        console.log('History:', response.data.requests);
         setHistorys(response.data.requests || []);
       }
     } catch (error) {
@@ -109,19 +144,16 @@ const HistoryScreen = ({ navigation }) => {
     getHistory();
   };
 
-  // Capture filter button width (and height if needed)
   const onLayout = event => {
-    const { width } = event.nativeEvent.layout;
+    const {width} = event.nativeEvent.layout;
     setFilterButtonWidth(width);
   };
 
-  // When an option is selected from the dropdown
   const onSelectFilter = key => {
     setSelectedFilter(key);
     setFilterDropdownVisible(false);
   };
 
-  // Order of options to display in the dropdown
   const filterOrder = [
     'today',
     'yesterday',
@@ -135,7 +167,6 @@ const HistoryScreen = ({ navigation }) => {
     <View style={styles.container}>
       <View style={styles.header}>
         <Heading title="History" textstyle={styles.heading} />
-        {/* Wrap the filter button in a relative container */}
         <View style={styles.dropdownContainer}>
           <TouchableOpacity
             style={styles.filterTouch}
@@ -146,11 +177,12 @@ const HistoryScreen = ({ navigation }) => {
               touchStyle={styles.filterButton}
               textStyle={styles.filterText}
               disabled={true}
+              onPress={() => setFilterDropdownVisible(!filterDropdownVisible)}
             />
             <ArrowDown />
           </TouchableOpacity>
           {filterDropdownVisible && (
-            <View style={[styles.dropdown, { width: filterButtonWidth }]}>
+            <View style={[styles.dropdown, {width: filterButtonWidth}]}>
               {filterOrder.map(key => (
                 <TouchableOpacity
                   key={key}
@@ -166,60 +198,64 @@ const HistoryScreen = ({ navigation }) => {
         </View>
       </View>
 
-      {loading && (
+      {loading ? (
         <ActivityIndicator size="large" color="#F8AC16" style={styles.loader} />
+      ) : (
+        <FlatList
+          showsVerticalScrollIndicator={false}
+          data={historys}
+          keyExtractor={item => item.id.toString()}
+          refreshControl={
+            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+          }
+          renderItem={({item}) => {
+            const createdAt = new Date(item.createdAt);
+            return (
+              <UserInfoCard
+                name={item.student?.name}
+                dateTime={[
+                  format(createdAt, 'dd MMM yyyy'),
+                  ', ',
+                  format(createdAt, 'hh:mm a'),
+                ]}
+                status={getStatusTitle(item.status)}
+                imageSource={
+                  item.student?.profileUrl ||
+                  'https://res.cloudinary.com/dgv3dpaa8/image/upload/v1742117856/personPlaceholder_vjtdyo.png'
+                }
+                onPress={() =>
+                  navigation.navigate('PickupDetails', {
+                    request: item,
+                    imageSource:
+                      item.student?.profileUrl ||
+                      'https://res.cloudinary.com/dgv3dpaa8/image/upload/v1742117856/personPlaceholder_vjtdyo.png',
+                    pickupTime: [
+                      format(createdAt, 'dd MMM yyyy'),
+                      ', ',
+                      format(createdAt, 'hh:mm a'),
+                    ],
+                    status: getStatusTitle(item.status),
+                    name: item.student?.name,
+                    id: item.student.id,
+                    grade: item.student.gradeId,
+                    requestBy: item.pickUpGuardian,
+                    date: format(createdAt, 'dd MMM yyyy'),
+                    requestTime: format(new Date(item.requestTime), 'hh:mm a'),
+                    responseTime: format(new Date(item.approveTime), 'hh:mm a'),
+                    confirmTime: format(new Date(item.confirmTime), 'hh:mm a'),
+                  })
+                }
+              />
+            );
+          }}
+          contentContainerStyle={styles.listContainer}
+          ListEmptyComponent={
+            <View style={styles.emptyContainer}>
+              <Text style={styles.emptyText}>No history found</Text>
+            </View>
+          }
+        />
       )}
-
-      <FlatList
-        showsVerticalScrollIndicator={false}
-        data={historys}
-        keyExtractor={item => item.id.toString()}
-        refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-        }
-        renderItem={({ item }) => {
-          const createdAt = new Date(item.createdAt);
-          return (
-            <UserInfoCard
-              name={item.student?.name}
-              role={loginUserRole === 'guards' ? 'Parent' : 'Guardian'}
-              dateTime={[
-                format(createdAt, 'dd MMM yyyy'),
-                ', ',
-                format(createdAt, 'hh:mm a'),
-              ]}
-              status={'Picked'}
-              imageSource={
-                item.student?.profileUrl ||
-                'https://res.cloudinary.com/dgv3dpaa8/image/upload/v1742117856/personPlaceholder_vjtdyo.png'
-              }
-              onPress={() =>
-                navigation.navigate('PickupDetails', {
-                  request: item,
-                  imageSource:
-                    item.student?.profileUrl ||
-                    'https://res.cloudinary.com/dgv3dpaa8/image/upload/v1742117856/personPlaceholder_vjtdyo.png',
-                  pickupTime: [
-                    format(createdAt, 'dd MMM yyyy'),
-                    ', ',
-                    format(createdAt, 'hh:mm a'),
-                  ],
-                  status: 'Picked',
-                  name: item.student?.name,
-                  id: item.student.id,
-                  grade: item.student.gradeId,
-                  requestBy: item.pickUpGuardian,
-                  date: format(createdAt, 'dd MMM yyyy'),
-                  requestTime: format(new Date(item.requestTime), 'hh:mm a'),
-                  responseTime: format(new Date(item.approveTime), 'hh:mm a'),
-                  confirmTime: format(new Date(item.confirmTime), 'hh:mm a'),
-                })
-              }
-            />
-          );
-        }}
-        contentContainerStyle={styles.listContainer}
-      />
     </View>
   );
 };
@@ -287,6 +323,16 @@ const styles = StyleSheet.create({
   },
   loader: {
     marginVertical: 20,
+  },
+  emptyContainer: {
+    flex: 1,
+    marginVertical: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  emptyText: {
+    fontSize: 16,
+    color: '#6C757D',
   },
 });
 

@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "825436324258",
+    "project_id": "ezpick-e952d",
+    "storage_bucket": "ezpick-e952d.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:825436324258:android:caace3796f1cdd1d5272fb",
+        "android_client_info": {
+          "package_name": "com.ezpick"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDNzP_Gky0bUV4xSTKZDyaVMQUr3A7hz_M"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

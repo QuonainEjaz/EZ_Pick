@@ -19,6 +19,8 @@ import LanguageSelection from '../screens/Profile/LanguageSelection';
 import AuthorizedPickupList from '../screens/AddAuthorization/AuthorizedPickupList';
 import AddAuthorization from '../screens/AddAuthorization/AddAuthorization';
 import AuthPickupDetails from '../screens/AddAuthorization/AuthPickupDetails';
+import NotificationDetail from '../screens/Notifications/NotificationDetail';
+
 
 const Stack = createStackNavigator();
 
@@ -204,6 +206,21 @@ const StackNavigator = () => {
             <CustomHeader
               name={route.name}
               screen={'AuthPickupDetails'}
+              navigation={navigation}
+            />
+          ),
+        })}
+      />
+      <Stack.Screen
+        name="NotificationDetail"
+        component={NotificationDetail}
+        options={({route, navigation}) => ({
+          headerShown: true,
+
+          header: () => (
+            <CustomHeader
+              name={route.name}
+              screen={'NotificationDetail'}
               navigation={navigation}
             />
           ),

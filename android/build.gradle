@@ -5,9 +5,13 @@ buildscript {
         compileSdkVersion = 34
         targetSdkVersion = 34
         ndkVersion = "26.1.10909125"
+        // kotlinVersion = '1.8.0'
         kotlinVersion = "1.9.25"
     }
     repositories {
+        // maven { url 'https://maven.google.com' }
+        // maven { url 'https://pkgs.dev.azure.com/msidentity/_packaging/maven/v1' }
+        // maven { url 'https://pkgs.dev.azure.com/ms/Microsoft.Device.Display/_packaging/nuget/maven/v1' }
         mavenLocal()
         maven { url 'https://jitpack.io' }
         google()
@@ -15,10 +19,15 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:7.2.0' // or higher
+        classpath 'com.google.gms:google-services:4.3.10'
+        classpath 'com.android.tools.build:gradle:8.3.1' // AGP 8.3.1
+        // classpath 'com.android.tools.build:gradle:7.5.0' // Use AGP 7.5.0
+        // classpath 'com.android.tools.build:gradle:7.3.1' // Downgrade AGP
+        // classpath 'com.android.tools.build:gradle:7.2.0' // or higher
         // classpath("com.android.tools.build:gradle")
         classpath("com.facebook.react:react-native-gradle-plugin")
-        classpath("org.jetbrains.kotlin:kotlin-gradle-plugin")
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion"
+        // classpath("org.jetbrains.kotlin:kotlin-gradle-plugin")
     }
 }
 
@@ -27,9 +36,24 @@ apply plugin: "com.facebook.react.rootproject"
 allprojects {
     repositories {
         mavenLocal()
+        // maven { url 'https://maven.google.com' }
+        // maven { url 'https://pkgs.dev.azure.com/msidentity/_packaging/maven/v1' }
+        // maven { url 'https://pkgs.dev.azure.com/ms/Microsoft.Device.Display/_packaging/nuget/maven/v1' }
+        //  maven {
+        //     url 'https://pkgs.dev.azure.com/ms/Microsoft.Device.Display/_packaging/nuget/maven/v1'
+        // }
+        // maven {
+        //     url 'https://maven.microsoft.com/'
+        // }
         maven { url 'https://jitpack.io' }
         google()
         jcenter()
         mavenCentral()
     }
 }
+// configurations.all {
+//     resolutionStrategy {
+//         force 'com.microsoft.device.display:display-mask:<another-version-if-available>'
+//     }
+// }
+
