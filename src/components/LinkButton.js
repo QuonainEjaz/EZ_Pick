@@ -2,7 +2,7 @@ import React from 'react';
 import { TouchableOpacity, Text, View, StyleSheet } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
 
-const ButtonWithIcon = ({ label, onPress, style, iconSize }) => {
+const ButtonWithIcon = ({ label, onPress, style, iconSize, color }) => {
   return (
     <TouchableOpacity onPress={onPress} style={[styles.button, style]}>
       <View style={styles.iconContainer}>
@@ -14,14 +14,14 @@ const ButtonWithIcon = ({ label, onPress, style, iconSize }) => {
           fill="none"
         >
           <Path
-            stroke="#1C1F1E"
+            stroke= {color? color : "#1C1F1E"}
             strokeLinecap="round"
             strokeWidth={2}
             d="M5.6 10 2 5.8l3.6-4.2"
           />
         </Svg>
       </View>
-      <Text style={styles.buttonText}>{label}</Text>
+      <Text style={[styles.buttonText, { color: color || '#1C1F1E' }]}>{label}</Text>
     </TouchableOpacity>
   );
 };

@@ -43,11 +43,12 @@ const styles = StyleSheet.create({
   column1: {
     flex: 2,
     justifyContent: 'center',
-    // alignItems: 'center',
+    alignItems: 'flex-start',
   },
   column2: {
     flex: 3,
     justifyContent: 'center',
+    alignSelf: 'flex-start',
     marginTop: 5,
     padding: 10,
     gap: 7,
@@ -58,8 +59,9 @@ const styles = StyleSheet.create({
     gap: 5,
   },
   imagePlaceholder1: {
+    aspectRatio: 1,
     width: '100%',
-    height: 45,
+    height: '60%',
   },
   imagePlaceholder2: {
     width: '20%',

@@ -1,5 +1,3 @@
-import {NotificationScreenIcons} from '../../assets/Icons/svg/NotificationScreenIcons';
-
 const initialState = {
   selectedLanguage: 'English',
   isFirstLoad: true,

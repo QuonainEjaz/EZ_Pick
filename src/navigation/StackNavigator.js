@@ -12,7 +12,6 @@ import PickupDetails from '../screens/History/PickupDetails';
 import EditAuthorizedPickup from '../screens/AddAuthorization/EditAuthorizedPickup';
 import AddAuthorizedPickup from '../screens/AddAuthorization/AddAuthorization';
 import StudentPickupCard from '../screens/AddAuthorization/StudentPickupCard';
-import ShareOptions from '../screens/AddAuthorization/ShareOptions';
 import ProfileDetail from '../screens/Profile/ProfileDetail';
 import UpdatePassword from '../screens/Profile/UpdatePassword';
 import LanguageSelection from '../screens/Profile/LanguageSelection';
@@ -20,7 +19,6 @@ import AuthorizedPickupList from '../screens/AddAuthorization/AuthorizedPickupLi
 import AddAuthorization from '../screens/AddAuthorization/AddAuthorization';
 import AuthPickupDetails from '../screens/AddAuthorization/AuthPickupDetails';
 import NotificationDetail from '../screens/Notifications/NotificationDetail';
-
 
 const Stack = createStackNavigator();
 
@@ -101,21 +99,6 @@ const StackNavigator = () => {
             <CustomHeader
               name={route.name}
               screen={'StudentPickupCard'}
-              navigation={navigation}
-            />
-          ),
-        })}
-      />
-      <Stack.Screen
-        name="ShareOptions"
-        component={ShareOptions}
-        options={({route, navigation}) => ({
-          headerShown: true,
-
-          header: () => (
-            <CustomHeader
-              name={route.name}
-              screen={'ShareOptions'}
               navigation={navigation}
             />
           ),

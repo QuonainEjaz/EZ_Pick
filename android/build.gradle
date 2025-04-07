@@ -51,6 +51,15 @@ allprojects {
         mavenCentral()
     }
 }
+
+// Add configuration to resolve react-native-camera variant ambiguity
+configurations.all {
+    resolutionStrategy {
+        force 'com.facebook.react:react-native:+'
+        // Force a specific version of react-native-camera if needed
+        // force 'com.github.react-native-camera:react-native-camera:4.2.1'
+    }
+}
 // configurations.all {
 //     resolutionStrategy {
 //         force 'com.microsoft.device.display:display-mask:<another-version-if-available>'

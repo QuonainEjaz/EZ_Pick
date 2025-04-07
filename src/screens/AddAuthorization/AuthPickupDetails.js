@@ -14,6 +14,9 @@ import Svg, {Path, Circle} from 'react-native-svg';
 import axios from 'axios';
 import {useSelector} from 'react-redux';
 import ShimmerSkeleton from '../../components/ShimmerEffect';
+import ShareButton from '../../assets/Icons/svg/ShareIcon.js';
+import CustomAlert from '../../components/CustomAlert.js';
+import QRCode from 'react-native-qrcode-svg';
 const ViewIcon = props => (
   <Svg
     xmlns="http://www.w3.org/2000/svg"
@@ -66,6 +69,7 @@ const MinusIcon = props => (
 const AuthPickupDetails = ({route, navigation, style}) => {
   const baseUrl = useSelector(state => state.students.baseUrl);
   const [isLoading, setIsLoading] = useState(true);
+  const [copyAlertState, setCopyAlertState] = useState(false);
   const [shimmerLoading, setShimmerLoading] = useState(true);
   var {item} = route.params;
   const stripQuotes = val => {
@@ -99,8 +103,9 @@ const AuthPickupDetails = ({route, navigation, style}) => {
   };
   React.useEffect(() => {
     fetchGuardian();
-  }, []);
-  const removeKids = async (clientId,
+  }, [item]);
+  const removeKids = async (
+    clientId,
     parentId,
     name,
     vehicleNo,
@@ -109,17 +114,17 @@ const AuthPickupDetails = ({route, navigation, style}) => {
     nationalId,
     phoneNo,
     students,
-    selectedImage)=> {
-    try{
-      const response = await axios.put(`${baseUrl}/parents/updateGuardian`,);
+    selectedImage,
+  ) => {
+    try {
+      const response = await axios.put(`${baseUrl}/parents/updateGuardian`);
       if (response.status === 200) {
         Alert.alert('Success', 'Kid removed successfully');
         setAssignedKids([]);
       } else {
         console.error('Fetch Error:', response);
       }
-    }
-    catch (error) {
+    } catch (error) {
       console.error('Fetch Students Error:', error);
     }
   };
@@ -127,8 +132,13 @@ const AuthPickupDetails = ({route, navigation, style}) => {
     removeKids();
   };
   const handleCopy = () => {
-    Clipboard.setStrings([defaultPickupData.idNumber]);
+    if (!item.userName) return;
+    Clipboard.setString(
+      `Username: ${item.userName || ''}\nPassword: ${item.password || ''}`,
+    );
+    setCopyAlertState(true);
   };
+  const qrData = `${item.userName ?? ''}:${item.password ?? ''}`;
   return isLoading ? (
     <ActivityIndicator size="larger" color="#F8AC16" style={styles.loader} />
   ) : (
@@ -149,9 +159,7 @@ const AuthPickupDetails = ({route, navigation, style}) => {
           <SubHeading text={pickedItem?.role} style={styles.profileRelation} />
         </View>
       </View>
-
       {/* Details Section */}
-
       <View style={styles.detailsContainer}>
         <View style={styles.detailsHeader}>
           <SubHeading
@@ -194,7 +202,6 @@ const AuthPickupDetails = ({route, navigation, style}) => {
           </View>
         </View>
       </View>
-
       {/* Assigned Kids Section */}
       <SubHeading text={'Assigned Kids'} style={styles.assignedKidsTitle} />
       <ScrollView
@@ -202,8 +209,15 @@ const AuthPickupDetails = ({route, navigation, style}) => {
         showsHorizontalScrollIndicator={false}
         style={styles.assignedKidsContainer}>
         {assignedKids.map((kid, index) => (
-          <View key={index} style={styles.kidCard}>
-            <TouchableOpacity style={styles.removeKidButton} onPress={removeKidButton}>
+          <View
+            key={index}
+            style={[
+              styles.kidCard,
+              index === assignedKids.length - 1 && {marginRight: 30},
+            ]}>
+            <TouchableOpacity
+              style={styles.removeKidButton}
+              onPress={removeKidButton}>
               <MinusIcon />
             </TouchableOpacity>
             <Image source={{uri: kid?.profileUrl}} style={styles.kidImage} />
@@ -211,14 +225,13 @@ const AuthPickupDetails = ({route, navigation, style}) => {
           </View>
         ))}
       </ScrollView>
-
       <View style={styles.qrContainer}>
         <View style={styles.qrContent}>
-          <Image
-            source={{
-              uri: 'https://res.cloudinary.com/dgv3dpaa8/image/upload/v1740981881/b93cae454b6717460aabf5f106fafcd9_j2pn4u.png',
-            }}
-            style={styles.qrCode}
+          <QRCode
+            value={qrData}
+            size={90}
+            backgroundColor="white"
+            color="#000"
           />
           <SubHeading text="Scan QR Code" style={styles.qrText} />
           <CustomButton
@@ -227,26 +240,41 @@ const AuthPickupDetails = ({route, navigation, style}) => {
             textStyle={styles.copyButtonText}
             onPress={handleCopy}
           />
+          <CustomAlert
+            label="Copied to clipboard."
+            buttonText="OK"
+            image="noImage"
+            style={{
+              alert: {
+                width: '50%',
+                height: '20%',
+              },
+              button: {
+                paddingVertical: 12,
+              },
+            }}
+            visible={copyAlertState}
+            onClose={() => setCopyAlertState(false)}
+          />
         </View>
         <View style={styles.shareContainer}>
           <View style={styles.shareContainerHeader}>
             {/* Shimmer Effect */}
-            {shimmerLoading && (
-                <ShimmerSkeleton />
-            )}
+            {shimmerLoading && <ShimmerSkeleton />}
           </View>
           <View style={styles.shareOptions}>
             <CustomButton
               title="Share"
               touchStyle={styles.shareButton}
               textStyle={styles.shareText}
+              svg={<ShareButton />}
             />
             <CustomButton
               title="Save"
               touchStyle={styles.saveButton}
               textStyle={styles.saveButtonText}
             />
-            <TouchableOpacity style={styles.viewButton}>
+            <TouchableOpacity style={styles.viewButton} onPress={() => {navigation.navigate('StudentPickupCard',{item})}}>
               <ViewIcon />
             </TouchableOpacity>
           </View>
@@ -431,7 +459,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   qrContent: {
-    width: '37%',
+    width: '33%',
     alignItems: 'center',
     backgroundColor: '#f8f8f9',
     padding: 8,
@@ -440,8 +468,8 @@ const styles = StyleSheet.create({
     borderColor: '#e3e3e3',
   },
   qrCode: {
-    width: 100,
-    height: 100,
+    width: 90,
+    height: 90,
   },
   qrText: {
     fontFamily: 'Outfit',
@@ -455,6 +483,7 @@ const styles = StyleSheet.create({
     borderRadius: 6,
     paddingVertical: 4,
     paddingHorizontal: 22,
+    width: 90,
   },
   copyButtonText: {
     fontFamily: 'Outfit',
@@ -464,7 +493,8 @@ const styles = StyleSheet.create({
     lineHeight: 28,
   },
   shareContainer: {
-    width: '60%',
+    width: '64%',
+    // height: 118,
     backgroundColor: '#f8f8f9',
     padding: 8,
     borderRadius: 5,
@@ -474,7 +504,9 @@ const styles = StyleSheet.create({
   },
   shareOptions: {
     flexDirection: 'row',
-    gap: 7,
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    width: '100%',
   },
   shareButton: {
     flexDirection: 'row',
@@ -484,7 +516,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#f8ac16',
     paddingVertical: 4,
-    paddingHorizontal: 18,
+    paddingHorizontal: 10,
   },
   shareIcon: {
     width: 20,
@@ -499,7 +531,7 @@ const styles = StyleSheet.create({
   },
   shareContainerHeader: {
     width: '100%',
-    height: 100,
+    height: 108,
     marginBottom: 10,
     alignSelf: 'center',
     borderColor: '#707070',
@@ -513,7 +545,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#f8ac16',
     borderRadius: 6,
     paddingVertical: 4,
-    paddingHorizontal: 18,
+    paddingHorizontal: 22,
   },
   saveButtonText: {
     fontFamily: 'Outfit',
@@ -526,8 +558,8 @@ const styles = StyleSheet.create({
     backgroundColor: '#e3e3e3',
     borderRadius: 6,
     padding: 4,
-    width: 36,
-    height: 36,
+    width: 34,
+    height: 34,
     justifyContent: 'center',
     alignItems: 'center',
   },
