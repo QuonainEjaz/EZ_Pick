@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useEffect} from 'react';
 import {createStackNavigator} from '@react-navigation/stack';
 import SplashScreen from '../screens/splashScreen/SplashScreen';
 import SplashScreen_2 from '../screens/splashScreen/SplashScreen_2';
@@ -19,14 +19,67 @@ import AuthorizedPickupList from '../screens/AddAuthorization/AuthorizedPickupLi
 import AddAuthorization from '../screens/AddAuthorization/AddAuthorization';
 import AuthPickupDetails from '../screens/AddAuthorization/AuthPickupDetails';
 import NotificationDetail from '../screens/Notifications/NotificationDetail';
+import {useNavigationState} from '@react-navigation/native';
 
 const Stack = createStackNavigator();
 
 const StackNavigator = () => {
+  const navState = useNavigationState(state => state);
+
+  useEffect(() => {
+    const {routes = [], index} = navState || {};
+    const currentScreen = routes[index]?.name || 'Unknown';
+    const previousScreen = routes[index - 1]?.name || 'None';
+
+    console.log(
+      '===== STACK NAVIGATION HISTORY =====\n' +
+        `Current Screen: ${currentScreen}\n` +
+        `Previous Screen: ${previousScreen}\n` +
+        'Full Navigation Stack:',
+    );
+
+    // Display all screens in the navigation stack
+    routes.forEach((route, idx) => {
+      console.log(`${idx}: ${route.name}`);
+
+      // If this is the TabNavigator, show its screens
+      if (route.name === 'TabNavigator' && route.state) {
+        const tabRoutes = route.state.routes || [];
+        const tabIndex = route.state.index || 0;
+        console.log(`  Active tab: ${tabRoutes[tabIndex]?.name || 'Unknown'}`);
+
+        // Show the active screen in the current tab
+        const currentTabState = tabRoutes[tabIndex]?.state;
+        if (currentTabState) {
+          const tabScreenRoutes = currentTabState.routes || [];
+          const tabScreenIndex = currentTabState.index || 0;
+          console.log(
+            `  Active screen in ${tabRoutes[tabIndex]?.name}: ${
+              tabScreenRoutes[tabScreenIndex]?.name || 'Unknown'
+            }`,
+          );
+
+          // Show all screens in the current tab
+          console.log(`  Screens in ${tabRoutes[tabIndex]?.name}:`);
+          tabScreenRoutes.forEach((tabScreenRoute, tabScreenRouteIndex) => {
+            console.log(`    ${tabScreenRouteIndex}: ${tabScreenRoute.name}`);
+          });
+        }
+      }
+    });
+
+    console.log('=============================');
+  }, [navState]);
+
   return (
     <Stack.Navigator
       initialRouteName="SplashScreen"
-      screenOptions={{headerShown: false}}>
+      screenOptions={{
+        headerShown: false,
+        detachInactiveScreens: true,
+        animationEnabled: false,
+        gestureEnabled: false,
+      }}>
       <Stack.Screen name="SplashScreen" component={SplashScreen} />
       <Stack.Screen name="SplashScreen_2" component={SplashScreen_2} />
       <Stack.Screen name="SplashScreen_3" component={SplashScreen_3} />
@@ -41,6 +94,7 @@ const StackNavigator = () => {
           header: () => (
             <CustomHeader name={route.name} screen={'HomeScreen'} />
           ),
+          detachPreviousScreen: true,
         })}
       />
       <Stack.Screen

@@ -1,4 +1,4 @@
-import React, {useState, useMemo, useCallback} from 'react';
+import React, {useState, useMemo, useCallback, useEffect} from 'react';
 import {
   View,
   TouchableOpacity,
@@ -26,23 +26,46 @@ const Profile = ({navigation}) => {
   const students = useSelector(state => state.students.students);
   const [toggleSwitchValue, setToggleSwitchValue] = useState(smartLoginEnabled);
   const [isModalVisible, setIsModalVisible] = useState(false);
+  const loginData = useSelector(state => state.students.loginData);
+  const userRole = loginData?.role;
+  
+  // Check if role is "guard" or "guards" (case insensitive)
+  const isGuard = useMemo(() => {
+    if (!userRole) return false;
+    const role = userRole.toLowerCase().trim();
+    return role === 'guard' || role === 'guards';
+  }, [userRole]);
+  
+  console.log('User role:', userRole, 'isGuard:', isGuard);
 
   const pages = useMemo(
-    () => [
-      {title: 'Authorized Pickup', icon: 'AuthorizedPickupIcon', screen: 'Add'},
-      {
-        title: 'Update Password',
-        icon: 'UpdatePasswordIcon',
-        screen: 'UpdatePassword',
-      },
-      {title: 'Enable Smart Login', icon: 'EnableSmartLoginIcon'},
-      {title: 'Language', icon: 'LanguageIcon', screen: 'LanguageSelection'},
-      {title: 'Logout', icon: 'LogoutIcon'},
-    ],
-    [],
+    () => {
+      const defaultPages = [
+        {
+          title: 'Update Password',
+          icon: 'UpdatePasswordIcon',
+          screen: 'UpdatePassword',
+        },
+        {title: 'Enable Smart Login', icon: 'EnableSmartLoginIcon'},
+        {title: 'Language', icon: 'LanguageIcon', screen: 'LanguageSelection'},
+        {title: 'Logout', icon: 'LogoutIcon'},
+      ];
+
+      // Only add Authorized Pickup for parent users
+      if (!isGuard) {
+        defaultPages.unshift({
+          title: 'Authorized Pickup',
+          icon: 'AuthorizedPickupIcon',
+          screen: 'Add',
+        });
+      }
+
+      return defaultPages;
+    },
+    [isGuard],
   );
 
-  const handleEnableSmartLogin = async () => {
+  const handleEnableSmartLogin = useCallback(async () => {
     try {
       const {available} = await ReactNativeBiometrics.isSensorAvailable();
       if (!available) {
@@ -64,23 +87,32 @@ const Profile = ({navigation}) => {
     } catch (error) {
       Alert.alert('Error', error.message);
     }
-  };
+  }, [dispatch, setToggleSwitchValue]);
 
   const onToggleSwitch = useCallback(value => {
     setToggleSwitchValue(value);
     dispatch(setSmartLogin(value));
     if (value) handleEnableSmartLogin();
-  }, []);
+  }, [dispatch, handleEnableSmartLogin]);
 
   const handleLogout = () => {
     setIsModalVisible(false);
     dispatch(setSmartLogin(false));
     dispatch(setStudents([]));
-    navigation.navigate('Login');
+    navigation.reset({
+      index: 0,
+      routes: [{ name: 'Login' }],
+    });
   };
 
   const combinedData = useMemo(() => {
-    if (students.length === 0) {
+    // For guards, don't include headers or student items at all
+    if (isGuard) {
+      return pages.map(page => ({ type: 'PAGE', data: page }));
+    }
+
+    // For parents and other roles with no students
+    if (students?.length === 0) {
       return [
         { type: 'HEADER', title: 'Children', isEmpty: true }, 
         { type: 'EMPTY' }, 
@@ -89,16 +121,21 @@ const Profile = ({navigation}) => {
       ];
     }
   
+    // For parents and other roles with students
     return [
       { type: 'HEADER', title: 'Children' },
-      ...students.map(student => ({ type: 'STUDENT', data: student })),
+      ...(students || []).map(student => ({ type: 'STUDENT', data: student })),
       { type: 'HEADER', title: 'Other Pages' },
       ...pages.map(page => ({ type: 'PAGE', data: page })),
     ];
-  }, [students, pages]);
+  }, [students, pages, isGuard]);
 
   const renderItem = ({ item }) => {
+    // For guards, we only have PAGE items in the data array
     if (item.type === 'HEADER') {
+      // Skip rendering headers for guards (as a safety check)
+      if (isGuard) return null;
+      
       return (
         <View>
           <Heading
@@ -111,8 +148,14 @@ const Profile = ({navigation}) => {
     }
   
     if (item.type === 'EMPTY') {
+      // Skip rendering empty state for guards
+      if (isGuard) return null;
+      
       return <SubHeading text="No children found" style={styles.emptyText} />;
     }
+    
+    // Skip rendering students for guards
+    if (item.type === 'STUDENT' && isGuard) return null;
   
     const isPage = item.type === 'PAGE';
     const isLogout = isPage && item.data.title === 'Logout';
@@ -153,10 +196,25 @@ const Profile = ({navigation}) => {
       </TouchableOpacity>
     );
   };
-  
+
+  // Create a container style that has additional top padding only for guards
+  const containerStyle = useMemo(() => {
+    return [
+      styles.container,
+      isGuard && { paddingTop: 25 } // Apply additional top padding only for guards
+    ];
+  }, [isGuard]);
+
+  // Create a content container style with additional padding only for guards
+  const contentStyle = useMemo(() => {
+    return [
+      styles.contentContainer,
+      isGuard && { paddingTop: 15 } // Apply additional top padding only for guards
+    ];
+  }, [isGuard]);
 
   return (
-    <View style={styles.container}>
+    <View style={containerStyle}>
       <FlatList
         data={combinedData}
         renderItem={renderItem}
@@ -164,7 +222,7 @@ const Profile = ({navigation}) => {
         ListEmptyComponent={
           <SubHeading text="No children found" style={styles.emptyText} />
         }
-        contentContainerStyle={styles.contentContainer}
+        contentContainerStyle={contentStyle}
         showsVerticalScrollIndicator={false}
       />
       <Modal
@@ -184,7 +242,14 @@ const Profile = ({navigation}) => {
 };
 
 const styles = StyleSheet.create({
-  container: {flex: 1, backgroundColor: '#fff', paddingHorizontal: 20},
+  container: {
+    flex: 1, 
+    backgroundColor: '#fff', 
+    paddingHorizontal: 20
+  },
+  contentContainer: {
+    // No default top padding - will be added conditionally
+  },
   sectionTitleBox: {alignItems: 'flex-start'},
   sectionTitle: {
     fontSize: 16,

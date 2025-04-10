@@ -20,6 +20,8 @@ import HistoryStack from './HistoryStack';
 import NotificationsStack from './NotificationsStack';
 import ProfileStack from './ProfileStack';
 import AddAuthorizationStack from './AddAuthorizationStack';
+import { useSelector } from 'react-redux';
+
 const Tab = createBottomTabNavigator();
 
 const TabIcon = ({focused, FocusedIcon, Icon}) => {
@@ -27,6 +29,9 @@ const TabIcon = ({focused, FocusedIcon, Icon}) => {
 };
 
 const TabNavigator = () => {
+  const loginData = useSelector(state => state.students.loginData);
+  const isParent = loginData?.role === 'parent';
+
   return (
     <Tab.Navigator
       initialRouteName="Home"
@@ -72,32 +77,39 @@ const TabNavigator = () => {
           ),
         }}
       />
-      <Tab.Screen
-        name="Add"
-        component={AddAuthorizationStack}
-        options={{
-          tabBarIcon: ({focused}) => (
-            <TabIcon
-              focused={focused}
-              FocusedIcon={<FocusedAddIcon />}
-              Icon={<AddIcon />}
-            />
-          ),
-        }}
-      />
-      <Tab.Screen
-        name="Notification"
-        component={NotificationsStack}
-        options={{
-          tabBarIcon: ({focused}) => (
-            <TabIcon
-              focused={focused}
-              FocusedIcon={<FocusedNotificationIcon />}
-              Icon={<NotificationIcon />}
-            />
-          ),
-        }}
-      />
+      
+      {isParent && (
+        <Tab.Screen
+          name="Add"
+          component={AddAuthorizationStack}
+          options={{
+            tabBarIcon: ({focused}) => (
+              <TabIcon
+                focused={focused}
+                FocusedIcon={<FocusedAddIcon />}
+                Icon={<AddIcon />}
+              />
+            ),
+          }}
+        />
+      )}
+      
+      {isParent && (
+        <Tab.Screen
+          name="Notification"
+          component={NotificationsStack}
+          options={{
+            tabBarIcon: ({focused}) => (
+              <TabIcon
+                focused={focused}
+                FocusedIcon={<FocusedNotificationIcon />}
+                Icon={<NotificationIcon />}
+              />
+            ),
+          }}
+        />
+      )}
+      
       <Tab.Screen
         name="Profile"
         component={ProfileStack}

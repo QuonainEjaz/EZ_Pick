@@ -34,6 +34,7 @@ import {
 } from '@react-native-google-signin/google-signin';
 import FirebaseApp from '@react-native-firebase/app';
 import {Camera, useCameraDevice, useCameraPermission, useCameraFormat} from 'react-native-vision-camera';
+import {CommonActions} from '@react-navigation/native';
 // import {check, request, PERMISSIONS, RESULTS} from 'react-native-permissions';
 // import {PublicClientApplication} from 'react-native-msal';
 // const msalConfig = {
@@ -119,8 +120,7 @@ const Login = ({navigation}) => {
         }
       };
 
-      // Initial delay before first attempt
-      retryTimer = setTimeout(initializeCamera, 1000); // Increased initial delay
+      retryTimer = setTimeout(initializeCamera, 1000);
     } else {
       setIsCameraReady(false);
       setRetryCount(0);
@@ -135,11 +135,9 @@ const Login = ({navigation}) => {
   }, [showScanner, retryCount]);
 
   const handleCameraError = (error) => {
-    // Only log the error, don't show it to the user unless all retries are exhausted
     console.log('Camera initialization attempt:', retryCount + 1);
     
     if (retryCount < MAX_RETRIES) {
-      // Retry in background
       setRetryCount(prev => prev + 1);
       setTimeout(() => {
         setIsCameraReady(true);
@@ -153,20 +151,43 @@ const Login = ({navigation}) => {
     setIsLoading(true);
 
     try {
+      // Check if input is email or username
+      const isEmail = values.username.includes('@');
+      const endpoint = isEmail 
+        ? 'https://api.ezpick.co/parents/loginByEmail'
+        : 'https://api.ezpick.co/parents/loginByUsername';
+      
       const response = await axios.post(
-        'https://backendtest.ezpick.org/parents/loginByEmail',
+        endpoint,
         {
-          email: values.username,
+          email: isEmail ? values.username : undefined,
+          username: isEmail ? undefined : values.username,
           password: values.password,
         },
       );
+      
       if (response.status === 200) {
         console.log('Login Success');
+        // Dispatch both actions before navigation
         dispatch(SET_TOKEN(response.data.token));
-        console.log(response.data.token);
         dispatch(SET_loginData(response.data.data));
-        // console.log(response.data.data);
-        navigation.navigate('TabNavigator');
+        
+        // Wait for state updates to complete
+        await new Promise(resolve => setTimeout(resolve, 300));
+        
+        // Navigate to TabNavigator to allow data fetching in HomeScreen
+        navigation.dispatch(
+          CommonActions.reset({
+            index: 0,
+            routes: [{ 
+              name: 'TabNavigator',
+              state: {
+                routes: [{ name: 'Home' }],
+                index: 0
+              }
+            }],
+          })
+        );
       } else {
         Alert.alert('Error', 'Invalid credentials or something went wrong');
       }
@@ -262,29 +283,20 @@ const Login = ({navigation}) => {
           codeScanner={{
             codeTypes: ['qr'],
             onCodeScanned: (codes) => {
-              try {
-                if (!codes || !Array.isArray(codes)) {
-                  console.log('No valid codes detected');
-                  return;
+              if (!codes || !Array.isArray(codes)) return;
+              
+              const validCodes = codes.filter(code => code && code.value);
+              if (validCodes.length > 0) {
+                const qrData = validCodes[0].value;
+                console.log('QR Code detected:', qrData);
+                
+                const [username, password] = qrData.split(':');
+                if (username && password) {
+                  setShowScanner(false);
+                  handleLogin({ username, password });
+                } else {
+                  Alert.alert('Invalid QR Code', 'The QR code format is invalid. Expected format: username:password');
                 }
-
-                const validCodes = codes.filter(code => code && code.value);
-                if (validCodes.length > 0) {
-                  const qrData = validCodes[0].value;
-                  console.log('QR Code detected:', qrData);
-                  
-                  // Handle format: "studentId:password"
-                  const [studentId, password] = qrData.split(':');
-                  if (studentId && password) {
-                    setShowScanner(false);
-                    handleLogin({ username: studentId, password });
-                  } else {
-                    Alert.alert('Invalid QR Code', 'The QR code format is invalid. Expected format: studentId:password');
-                  }
-                }
-              } catch (error) {
-                console.error('Error processing QR code:', error);
-                Alert.alert('Error', 'Failed to process QR code');
               }
             },
           }}

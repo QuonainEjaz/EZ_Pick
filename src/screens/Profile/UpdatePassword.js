@@ -27,12 +27,12 @@ const passwordValidationSchema = Yup.object().shape({
 const UpdatePassword = () => {
   const [modalVisible, setModalVisible] = useState(false);
   const baseUrl = useSelector(state => state.students.baseUrl);
-  const id = useSelector(state => state.students.parent.id);
+  const id = useSelector(state => state.students.parent?.id);
 
   const handleUpdatePassword = async (values, resetForm) => {
     try {
       const response = await axios.patch(`${baseUrl}/parents/update-password`, {
-        id: 1000001, // Replace with dynamic user ID
+        id: id || 1000001, // Use dynamic ID if available, fallback to default
         oldPassword: values.currentPassword,
         newPassword: values.newPassword,
       });
@@ -132,9 +132,11 @@ const UpdatePassword = () => {
                 visible={modalVisible}
                 onClose={() => setModalVisible(false)}
                 label="Password Updated!"
+                message="Your password has been updated successfully."
                 buttonText="Ok, Got it"
-                image={'noImage'}
+                image="noImage"
                 svg={<Approved size={60} />}
+                style={{}} // Provide an empty style object
               />
             </>
           )}

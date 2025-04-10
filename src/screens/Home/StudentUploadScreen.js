@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from 'react';
+import React, {useState, useEffect, useRef, useMemo} from 'react';
 import {
   View,
   Text,
@@ -6,6 +6,7 @@ import {
   StyleSheet,
   FlatList,
   Dimensions,
+  Alert,
 } from 'react-native';
 import {useDispatch, useSelector, shallowEqual} from 'react-redux';
 import Heading from '../../components/Heading';
@@ -13,25 +14,50 @@ import CustomDoubleButton from './CustomDoubleButton';
 import PhotoSelectionModal from '../../components/PhotoSelectionModal';
 import CustomButton from '../../components/CustomButton';
 import {launchCamera, launchImageLibrary} from 'react-native-image-picker';
-import {setStudents} from '../../store/App/action';
+import {setStudents, toggleFirstLoad} from '../../store/App/action';
+import {CommonActions} from '@react-navigation/native';
 
 const {width} = Dimensions.get('window');
 
 const StudentUploadScreen = ({navigation}) => {
   const dispatch = useDispatch();
   const students = useSelector(state => state.students.students, shallowEqual);
+  const hasNavigated = useRef(false);
+
+  console.log('StudentUploadScreen rendered with students:', students);
 
   // Filter students with no profile picture (profileUrl is null)
-  const studentsWithoutProfilePic = students.filter(
-    student => student.profileUrl === null,
-  );
+  const studentsWithoutProfilePic = useMemo(() => {
+    return students?.filter(student => student?.profileUrl === null) || [];
+  }, [students]);
+
+  console.log('Students without profile pic:', studentsWithoutProfilePic.length);
 
   // Navigate directly if no student is found with a null profile picture
   useEffect(() => {
-    if (studentsWithoutProfilePic.length === 0) {
-      navigation.navigate('TabNavigator');
+    console.log('StudentUploadScreen navigation effect triggered');
+    console.log('hasNavigated:', hasNavigated.current);
+    console.log('studentsWithoutProfilePic:', studentsWithoutProfilePic.length);
+    
+    if (studentsWithoutProfilePic.length === 0 && !hasNavigated.current) {
+      console.log('No students need profile pictures, navigating to TabNavigator');
+      hasNavigated.current = true;
+      
+      // Set isFirstLoad to false before navigation
+      dispatch(toggleFirstLoad(false));
+      
+      navigation.dispatch(
+        CommonActions.reset({
+          index: 0,
+          routes: [{ name: 'TabNavigator' }],
+        })
+      );
     }
-  }, [studentsWithoutProfilePic, navigation]);
+    
+    return () => {
+      console.log('StudentUploadScreen navigation effect cleanup');
+    };
+  }, [studentsWithoutProfilePic, navigation, dispatch]);
 
   const [isPhotoSelectionModalVisible, setIsPhotoSelectionModalVisible] =
     useState(false);
@@ -64,6 +90,23 @@ const StudentUploadScreen = ({navigation}) => {
     setIsPhotoSelectionModalVisible(false);
   };
 
+  const navigateToTabNavigator = () => {
+    if (hasNavigated.current) return;
+    
+    console.log('Navigating to TabNavigator from StudentUploadScreen');
+    hasNavigated.current = true;
+    
+    // Set isFirstLoad to false before navigation
+    dispatch(toggleFirstLoad(false));
+    
+    navigation.dispatch(
+      CommonActions.reset({
+        index: 0,
+        routes: [{ name: 'TabNavigator' }],
+      })
+    );
+  };
+
   const handleSavePhoto = () => {
     if (updatedImage && selectedStudent) {
       const updatedStudent = {...selectedStudent, profileUrl: updatedImage};
@@ -71,9 +114,14 @@ const StudentUploadScreen = ({navigation}) => {
         student.id === updatedStudent.id ? updatedStudent : student,
       );
       dispatch(setStudents(updatedStudents));
+      console.log('Student photo updated');
     }
     setIsPhotoSelectionModalVisible(false);
-    navigation.navigate('TabNavigator');
+    navigateToTabNavigator();
+  };
+
+  const handleUploadLater = () => {
+    navigateToTabNavigator();
   };
 
   return (
@@ -101,7 +149,7 @@ const StudentUploadScreen = ({navigation}) => {
         keyExtractor={item => item.id.toString()}
       />
       <CustomDoubleButton
-        onUploadLater={() => navigation.navigate('TabNavigator')}
+        onUploadLater={handleUploadLater}
         onSave={handleSavePhoto}
       />
       <PhotoSelectionModal
@@ -117,6 +165,8 @@ const StudentUploadScreen = ({navigation}) => {
 const StudentUploadCard = ({student, onPress, image}) => {
   const pickupTime = student?.grade?.offTime;
   const convertTo12HourFormat = pickupTime => {
+    if (!pickupTime) return 'N/A';
+    
     const [hours, minutes] = pickupTime.split(':');
     const date = new Date();
     date.setHours(hours);
@@ -131,10 +181,18 @@ const StudentUploadCard = ({student, onPress, image}) => {
   return (
     <View style={styles.card}>
       <View style={styles.infoContainer}>
-        <Image source={{uri: image}} style={styles.image} resizeMode="cover" />
+        {image ? (
+          <Image 
+            source={{uri: image}} 
+            style={styles.image} 
+            resizeMode="cover" 
+          />
+        ) : (
+          <View style={[styles.image, {backgroundColor: '#E3E3E3'}]} />
+        )}
         <View style={styles.detailsContainer}>
-          <Text style={styles.name}>{student.name}</Text>
-          <Text style={styles.grade}>{student?.grade?.name}</Text>
+          <Text style={styles.name}>{student.name || 'Student'}</Text>
+          <Text style={styles.grade}>{student?.grade?.name || 'Grade not set'}</Text>
           <Text style={styles.pickupTime}>
             {`Today's Pick up time: ${convertTo12HourFormat(pickupTime)}`}
           </Text>
