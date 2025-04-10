@@ -60,3 +60,10 @@ export const UPDATE_STUDENT_ProfileUrl = ({ studentId, profileUrl }) => ({
   type: 'UPDATE_STUDENT_ProfileUrl',
   payload: { studentId, profileUrl },
 });
+
+export const setScannedUserId = userId => {
+  return {
+    type: 'SET_SCANNED_USER_ID',
+    payload: userId,
+  };
+};

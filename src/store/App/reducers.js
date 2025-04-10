@@ -10,6 +10,7 @@ const initialState = {
   token: null,
   smartLoginEnabled: false,
   notifications: {},
+  scannedUserId: null,
   range: {
     1: 'pickup_successful',
     2: 'out_of_range',
@@ -74,6 +75,11 @@ const studentsReducer = (state = initialState, action) => {
               : student,
           ),
         };
+    case 'SET_SCANNED_USER_ID':
+      return {
+        ...state,
+        scannedUserId: action.payload,
+      };
     case 'FETCH_NOTIFICATIONS_SUCCESS':
       return {
         ...state,

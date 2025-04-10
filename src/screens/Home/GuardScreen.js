@@ -164,7 +164,7 @@ const GuardScreen = ({navigation}) => {
   return (
     <View style={styles.container}>
       {showScanner && device ? (
-        <View style={styles.container}>
+        <View style={styles.cameraContainer}>
           <Camera
             style={StyleSheet.absoluteFill}
             device={device}
@@ -207,6 +207,14 @@ const styles = StyleSheet.create({
     padding: 10,
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  cameraContainer: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    zIndex: 1,
   },
   content: {
     flex: 0.35,
