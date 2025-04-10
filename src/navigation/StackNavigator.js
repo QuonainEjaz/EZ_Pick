@@ -7,6 +7,7 @@ import Login from '../screens/LoginScreens/Login';
 import Forget_Password from '../screens/LoginScreens/Forget_Password';
 import TabNavigator from './TabNavigator';
 import StudentUploadScreen from '../screens/Home/StudentUploadScreen';
+import GuardScreen from '../screens/Home/GuardScreen';
 import CustomHeader from '../components/CustomHeader';
 import PickupDetails from '../screens/History/PickupDetails';
 import EditAuthorizedPickup from '../screens/AddAuthorization/EditAuthorizedPickup';
@@ -98,11 +99,23 @@ const StackNavigator = () => {
         })}
       />
       <Stack.Screen
+        name="GuardScreen"
+        component={GuardScreen}
+        options={{
+          headerShown: true,
+          header: () => (
+            <CustomHeader
+              name="GuardScreen"
+              screen={'HomeScreen'}
+            />
+          ),
+        }}
+      />
+      <Stack.Screen
         name="PickupDetails"
         component={PickupDetails}
         options={({route, navigation}) => ({
           headerShown: true,
-
           header: () => (
             <CustomHeader
               name={route.name}
@@ -112,7 +125,6 @@ const StackNavigator = () => {
           ),
         })}
       />
-
       <Stack.Screen
         name="EditAuthorizedPickup"
         component={EditAuthorizedPickup}

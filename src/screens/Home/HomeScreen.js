@@ -3,7 +3,7 @@ import {useSelector, useDispatch} from 'react-redux';
 import {CommonActions} from '@react-navigation/native';
 import {toggleFirstLoad, setStudents, SET_PARENT} from '../../store/App/action';
 import axios from 'axios';
-import {Alert} from 'react-native';
+import {View, ActivityIndicator, StyleSheet} from 'react-native';
 
 const HomeScreen = ({navigation}) => {
   const dispatch = useDispatch();
@@ -27,7 +27,20 @@ const HomeScreen = ({navigation}) => {
     console.log('Handling navigation with isFirstLoad:', isFirstLoad);
     console.log('Student count:', students?.length);
     
-    if (isFirstLoad) {
+    if (loginData?.role === 'guards') {
+      // For guards, immediately navigate to GuardScreen
+      console.log('Navigating to GuardScreen');
+      // Use replace instead of navigate for smoother transition
+      navigation.replace('GuardScreen');
+      return;
+    }
+      
+    // Check if any students need profile pictures
+    const studentsWithoutProfilePic = students?.filter(student => student?.profileUrl === null) || [];
+    console.log('Students without profile pic:', studentsWithoutProfilePic.length);
+    
+    if (isFirstLoad && studentsWithoutProfilePic.length > 0) {
+      // Only go to StudentUploadScreen if there are students without profile pictures
       console.log('Navigating to StudentUploadScreen');
       navigation.dispatch(
         CommonActions.reset({
@@ -36,19 +49,36 @@ const HomeScreen = ({navigation}) => {
         })
       );
     } else {
-      console.log('Navigating to StudentListScreen');
-      navigation.dispatch(
-        CommonActions.reset({
-          index: 0,
-          routes: [{ name: 'StudentListScreen' }],
-        })
-      );
+      // If no students need profile pictures or not first load, skip to TabNavigator or StudentListScreen
+      if (isFirstLoad) {
+        // First load but no profile pics needed, go directly to TabNavigator
+        console.log('No profile pictures needed, navigating to TabNavigator');
+        dispatch(toggleFirstLoad(false)); // Set isFirstLoad to false since we're skipping StudentUploadScreen
+        navigation.dispatch(
+          CommonActions.reset({
+            index: 0,
+            routes: [{ name: 'TabNavigator' }],
+          })
+        );
+      } else {
+        // Normal navigation to StudentListScreen
+        console.log('Navigating to StudentListScreen');
+        // Use replace instead of reset for smoother transition within the stack
+        navigation.replace('StudentListScreen');
+      }
     }
-  }, [isFirstLoad, students, navigation]);
+  }, [isFirstLoad, students, navigation, loginData, dispatch]);
 
   const fetchStudents = useCallback(async () => {
     if (isFetching.current) return;
     isFetching.current = true;
+
+    // For guards, don't bother fetching student data
+    if (loginData?.role === 'guards') {
+      handleNavigation();
+      isFetching.current = false;
+      return;
+    }
 
     try {
       console.log('Fetching students data from:', `${baseUrl}/parents/${id}`);
@@ -69,19 +99,20 @@ const HomeScreen = ({navigation}) => {
         dispatch(setStudents(response.data.parent.students));
         setDataFetched(true);
         console.log('Data fetched and stored successfully');
+        
+        // Navigate immediately without delay
+        handleNavigation();
       } else {
         console.error('Fetch Error:', response);
-        Alert.alert('Error', 'Failed to fetch student data');
+        // Still navigate to avoid being stuck
+        handleNavigation();
       }
     } catch (error) {
       console.error('Fetch Students Error:', error);
       console.error('Error details:', error.response || error.message);
-      Alert.alert('Error', 'Failed to connect to the server. Please try again.');
       
       // Even if there's an error, navigate to avoid being stuck
-      if (!hasNavigated.current) {
-        handleNavigation();
-      }
+      handleNavigation();
     } finally {
       isFetching.current = false;
     }
@@ -90,28 +121,36 @@ const HomeScreen = ({navigation}) => {
   // Fetch data on component mount
   useEffect(() => {
     console.log('Fetch data useEffect triggered with id:', id);
-    if (id) {
-      fetchStudents();
-    } else {
-      console.log('No user ID available for fetching data');
-    }
-  }, [id, fetchStudents]);
-
-  // Handle navigation after data is fetched
-  useEffect(() => {
-    console.log('Navigation useEffect triggered. dataFetched:', dataFetched, 'hasNavigated:', hasNavigated.current);
     
-    if (!dataFetched || hasNavigated.current) return;
-    
-    // Using setTimeout to ensure all state updates complete
-    const timer = setTimeout(() => {
+    // For guards role, navigate immediately
+    if (loginData?.role === 'guards' && !hasNavigated.current) {
       handleNavigation();
-    }, 500);
+      return;
+    }
     
-    return () => clearTimeout(timer);
-  }, [dataFetched, handleNavigation]);
+    if (id && !hasNavigated.current) {
+      fetchStudents();
+    } else if (!hasNavigated.current) {
+      console.log('No user ID available for fetching data');
+      handleNavigation();
+    }
+  }, [id, fetchStudents, loginData, handleNavigation]);
 
-  return null;
+  // Return a loading indicator instead of null
+  return (
+    <View style={styles.container}>
+      <ActivityIndicator size="large" color="#F8AC16" />
+    </View>
+  );
 };
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#FFFFFF'
+  }
+});
 
 export default HomeScreen;

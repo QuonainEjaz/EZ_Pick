@@ -51,8 +51,9 @@ const Profile = ({navigation}) => {
         {title: 'Logout', icon: 'LogoutIcon'},
       ];
 
-      // Only add Authorized Pickup for parent users
-      if (!isGuard) {
+      // Only add Authorized Pickup for parent users specifically
+      const isParent = userRole?.toLowerCase() === 'parent';
+      if (isParent) {
         defaultPages.unshift({
           title: 'Authorized Pickup',
           icon: 'AuthorizedPickupIcon',
@@ -62,7 +63,7 @@ const Profile = ({navigation}) => {
 
       return defaultPages;
     },
-    [isGuard],
+    [userRole],
   );
 
   const handleEnableSmartLogin = useCallback(async () => {
@@ -201,7 +202,7 @@ const Profile = ({navigation}) => {
   const containerStyle = useMemo(() => {
     return [
       styles.container,
-      isGuard && { paddingTop: 25 } // Apply additional top padding only for guards
+      isGuard && { paddingTop: 10 } // Apply additional top padding only for guards
     ];
   }, [isGuard]);
 

@@ -1,6 +1,6 @@
 import React from 'react';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
-import {View, Text} from 'react-native';
+import {View, Text, Platform} from 'react-native';
 import {HomeIcon, FocusedHomeIcon} from '../assets/Icons/svg/HomeIcons';
 import {
   HistoryIcon,
@@ -49,6 +49,7 @@ const TabNavigator = () => {
           borderTopLeftRadius: 20,
           borderTopRightRadius: 20,
         },
+        animationEnabled: false,
       })}>
       <Tab.Screen
         name="Home"

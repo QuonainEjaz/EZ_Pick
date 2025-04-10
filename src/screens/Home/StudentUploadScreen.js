@@ -46,6 +46,7 @@ const StudentUploadScreen = ({navigation}) => {
       // Set isFirstLoad to false before navigation
       dispatch(toggleFirstLoad(false));
       
+      // Skip setTimeout and navigate immediately
       navigation.dispatch(
         CommonActions.reset({
           index: 0,
