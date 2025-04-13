@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import {
   PermissionsAndroid,
   Platform,
@@ -16,35 +16,42 @@ const useStudentCard = (student, token) => {
   // ------------------------- Socket & Status States -------------------------
   const [socket, setSocket] = useState(null);
   const [socketStatus, setSocketStatus] = useState('Disconnected');
+  const approvedRequests = useRef({});
   // Status can be: out_of_range, in_range, ready_to_pickup, request_sent, request_accepted, pickup_successful
   const [status, setStatus] = useState('out_of_range');
   const [timer, setTimer] = useState(0);
-  const [parentLocation, setParentLocation] = useState(null);
+  const [requestTimer, setRequestTimer] = useState(5);
+  const [requestTimerActive, setRequestTimerActive] = useState(false);
+  const [showRequestAgain, setShowRequestAgain] = useState(false);
+  const [headerCountdown, setHeaderCountdown] = useState(5); // 5 seconds
+  const [headerCountdownActive, setHeaderCountdownActive] = useState(false);
   const [isLocationEnabled, setIsLocationEnabled] = useState(false);
+  const [parentLocation, setParentLocation] = useState(null);
 
   // ------------------------- Modal States -------------------------
   const [outOfRangeModalVisible, setOutOfRangeModalVisible] = useState(false);
   const [inRangeModalVisible, setInRangeModalVisible] = useState(false);
   const [requestAcceptedModalVisible, setRequestAcceptedModalVisible] = useState(false);
+  const [pickupRequestModalVisible, setPickupRequestModalVisible] = useState(false);
 
   // ------------------------- Constants -------------------------
   const pickupTime = '17:45'; // Pickup time string (could be dynamic)
-  const SCHOOL_LOCATION = {
+  const SCHOOL_LOCATION = useMemo(() => ({
     latitude: student?.grade?.school.lat,
     longitude: student?.grade?.school.long,
-  };
+  }), [student?.grade?.school.lat, student?.grade?.school.long]);
 
   // ------------------------- SOCKET SETUP -------------------------
   // Create and configure socket connection using token.
-  const createSocket = (token) => {
+  const createSocket = useCallback((token) => {
     const sock = io(SOCKET_ENDPOINT, {
       auth: { token, role: 'CLIENT' },
-      transports: ['websocket', 'polling'],
+      transports: ['websocket'],
     });
 
     sock.on('connect', () => {
       setSocketStatus('Connected');
-      // Fetch student details on connection.
+      // Fetch student details on connection
       sendFetchStudent(sock, student.parentId);
     });
 
@@ -54,31 +61,90 @@ const useStudentCard = (student, token) => {
 
     // When a pickup request event is received
     sock.on('_parent_requests', (data) => {
-      if (data.studentId === student.id) {
-        setStatus('request_sent');
+      if (data && Array.isArray(data) && data.length > 0) {
+        const requests = data[0]?.result || [];
+        updateStudentStatuses(requests);
       }
     });
 
     // When the server approves the pickup request
     sock.on('_approved_request', (data) => {
-      if (data.studentId === student.id) {
-        setStatus('pickup_successful');
+      if (data && Array.isArray(data) && data.length > 0) {
+        const approvedStudent = data[0];
+        handleApprovedRequest(approvedStudent);
       }
     });
 
     return sock;
-  };
+  }, [student.parentId, handleApprovedRequest, updateStudentStatuses]);
 
-  // Emit _fetch_student event to fetch/update student data.
+  // Emit _fetch_student event to fetch/update student data
   const sendFetchStudent = (sock, parentId) => {
     if (sock && sock.connected) {
-      sock.emit(
-        '_fetch_student',
-        { parentId, socketId: sock.id },
-        (response) => {
-          // Handle response if needed
-        }
-      );
+      sock.emit('_fetch_student', { parentId, socketId: sock.id }, (response) => {
+        // Handle response if needed
+      });
+    }
+  };
+
+  // Update student statuses based on server response
+  const updateStudentStatuses = useCallback((requests) => {
+    const request = requests.find(r => r.studentId === student.id);
+    if (request) {
+      setStatus(request.status);
+      // Update other relevant states based on request data
+    }
+  }, [student.id, setStatus]);
+
+  // Handle approved request from server
+  const handleApprovedRequest = useCallback((approvedStudent) => {
+    if (approvedStudent.studentId === student.id) {
+      setStatus('request_accepted');
+      approvedRequests.current[approvedStudent.studentId] = approvedStudent;
+    }
+  }, [student.id, setStatus]);
+
+  // Send pickup request to server
+  const sendRequestStudent = (sock, studentId) => {
+    if (sock && sock.connected) {
+      const requestTime = new Date().toISOString();
+      const params = {
+        parentId: student.parentId || 0,
+        studentId: studentId,
+        clientId: student.clientId || 0,
+        timestamp: requestTime,
+        gradeId: student.gradeId || 0,
+        pickUpGuardian: student.pickUpGuardian || '',
+      };
+
+      sock.emit('_request_student', params, () => {
+        setStatus('request_sent');
+        // Start the 5-second countdown timer
+        setHeaderCountdown(5);
+        setHeaderCountdownActive(true);
+        setShowRequestAgain(false);
+      });
+    }
+  };
+
+  // Send confirmation of pickup to server
+  const sendConfirmRequest = (sock, studentId) => {
+    if (sock && sock.connected) {
+      const confirmTime = new Date().toISOString();
+      sock.emit('_confirm_request', {
+        studentId: studentId,
+        timestamp: confirmTime,
+        gradeId: student.gradeId || 0,
+      }, () => {
+        setStatus('pickup_successful');
+      });
+    }
+  };
+
+  // Update parent's location
+  const sendUpdateLocation = (sock, lat, lng) => {
+    if (sock && sock.connected) {
+      sock.emit('_update_location', { lat, lng });
     }
   };
 
@@ -150,19 +216,42 @@ const useStudentCard = (student, token) => {
   // ------------------------- USER ACTIONS -------------------------
   // Handle pickup request button press.
   const handlePickupRequest = () => {
+    setPickupRequestModalVisible(true);
+  };
+
+  // Handle confirmation after showing pickup request modal
+  const handlePickupRequestConfirmed = () => {
+    setPickupRequestModalVisible(false);
+    
     if (socket?.connected) {
+      // Send the request to the server
       sendRequestStudent(socket, student.id);
+      
+      // Start the 5-second countdown timer for status change
+      setRequestTimer(90);
+      setRequestTimerActive(true);
+
+      // Start the 5-minute countdown in header
+      setHeaderCountdown(90);
+      setHeaderCountdownActive(true);
+      setShowRequestAgain(false);
     } else {
       Alert.alert('Error', 'Socket not connected');
     }
   };
 
-  // Emit _request_student event.
-  const sendRequestStudent = (sock, studentId) => {
-    if (sock && sock.connected) {
-      sock.emit('_request_student', { studentId, socketId: sock.id }, (response) => {
-        // Handle response if needed
-      });
+  // Handle request again button press
+  const handleRequestAgain = () => {
+    if (socket?.connected) {
+      // Send the request to the server
+      sendRequestStudent(socket, student.id);
+      
+      // Reset and start the header countdown
+      setHeaderCountdown(300);
+      setHeaderCountdownActive(true);
+      setShowRequestAgain(false);
+    } else {
+      Alert.alert('Error', 'Socket not connected');
     }
   };
 
@@ -172,22 +261,6 @@ const useStudentCard = (student, token) => {
       sendConfirmRequest(socket, student.id);
     } else {
       Alert.alert('Error', 'Socket not connected');
-    }
-  };
-
-  // Emit _confirm_request event.
-  const sendConfirmRequest = (sock, studentId) => {
-    if (sock && sock.connected) {
-      sock.emit('_confirm_request', { studentId, socketId: sock.id }, (response) => {
-        // Handle response if needed
-      });
-    }
-  };
-
-  // Optional: Emit _update_location event if needed.
-  const sendUpdateLocation = (sock, lat, lng) => {
-    if (sock && sock.connected) {
-      sock.emit('_update_location', { lat, lng });
     }
   };
 
@@ -215,6 +288,16 @@ const useStudentCard = (student, token) => {
   const handleReadyToPickup = () => {
     setStatus('ready_to_pickup');
     setInRangeModalVisible(false);
+  };
+
+  // Format countdown time for display
+  const formatCountdownTime = (totalSeconds) => {
+    const minutes = Math.floor(totalSeconds / 60);
+    const seconds = totalSeconds % 60;
+    return {
+      minutes: minutes.toString().padStart(2, '0'),
+      seconds: seconds.toString().padStart(2, '0')
+    };
   };
 
   // ------------------------- EFFECTS -------------------------
@@ -264,7 +347,7 @@ const useStudentCard = (student, token) => {
         console.error('[Socket] Error during socket setup:', error);
       }
     }
-  }, [token, student]);
+  }, [token, student, createSocket]);
 
   // Update timer based on status changes (only update if in_range or out_of_range)
   useEffect(() => {
@@ -283,6 +366,42 @@ const useStudentCard = (student, token) => {
     }
     return () => clearInterval(interval);
   }, [timer]);
+
+  // Request countdown timer after confirmation
+  useEffect(() => {
+    let interval;
+    if (requestTimerActive && requestTimer > 0) {
+      interval = setInterval(() => {
+        setRequestTimer(prevTimer => {
+          const newTimer = prevTimer - 1;
+          if (newTimer <= 0) {
+            setRequestTimerActive(false);
+            setStatus('request_sent');
+          }
+          return newTimer;
+        });
+      }, 1000);
+    }
+    return () => clearInterval(interval);
+  }, [requestTimerActive, requestTimer]);
+
+  // Header countdown timer effect
+  useEffect(() => {
+    let interval;
+    if (headerCountdownActive && headerCountdown > 0) {
+      interval = setInterval(() => {
+        setHeaderCountdown(prevTime => {
+          const newTime = prevTime - 1;
+          if (newTime <= 0) {
+            setHeaderCountdownActive(false);
+            setShowRequestAgain(true);
+          }
+          return newTime;
+        });
+      }, 1000);
+    }
+    return () => clearInterval(interval);
+  }, [headerCountdownActive, headerCountdown]);
 
   // Build time object for display
   const time = {
@@ -351,6 +470,17 @@ const useStudentCard = (student, token) => {
     },
   };
 
+  // Update location periodically
+  useEffect(() => {
+    let interval;
+    if (parentLocation && socket?.connected) {
+      interval = setInterval(() => {
+        sendUpdateLocation(socket, parentLocation.latitude, parentLocation.longitude);
+      }, 10000); // Update every 10 seconds
+    }
+    return () => clearInterval(interval);
+  }, [parentLocation, socket]);
+
   return {
     student,
     status,
@@ -362,9 +492,13 @@ const useStudentCard = (student, token) => {
     outOfRangeModalVisible,
     inRangeModalVisible,
     requestAcceptedModalVisible,
+    pickupRequestModalVisible,
+    requestTimerActive,
+    requestTimer,
     statusConfig: statusConfig[status] || {},
     convertTo12HourFormat,
     handlePickupRequest,
+    handlePickupRequestConfirmed,
     handleConfirmPickup,
     handleOpenLocationSettings,
     handleReadyToPickup,
@@ -372,6 +506,12 @@ const useStudentCard = (student, token) => {
     setOutOfRangeModalVisible,
     setInRangeModalVisible,
     setRequestAcceptedModalVisible,
+    setPickupRequestModalVisible,
+    showRequestAgain,
+    headerCountdown,
+    headerCountdownActive,
+    formatCountdownTime,
+    handleRequestAgain,
   };
 };
 

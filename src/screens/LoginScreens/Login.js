@@ -1,4 +1,4 @@
-import React, {useState, useMemo, useEffect} from 'react';
+import React, {useState, useMemo, useEffect, useRef} from 'react';
 import {
   View,
   Text,
@@ -16,6 +16,7 @@ import {SET_loginData, SET_TOKEN} from '../../store/App/action';
 import {Formik} from 'formik';
 import * as Yup from 'yup';
 import axios from 'axios';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import CustomToggleButton from '../../components/CustomToggleButton';
 import Heading from '../../components/Heading';
 import SubHeading from '../../components/SubHeading';
@@ -51,7 +52,7 @@ import {CommonActions} from '@react-navigation/native';
 
 // const msalInstance = new PublicClientApplication(msalConfig);
 
-/*
+
 const validationSchema = Yup.object().shape({
   username: Yup.string()
     .email('Invalid email address')
@@ -61,7 +62,7 @@ const validationSchema = Yup.object().shape({
     .min(8, 'Password must be at least 8 characters long')
     .required('Password is required'),
 });
-*/
+
 
 // Ignore specific warnings that might be related to permissions
 LogBox.ignoreLogs([
@@ -84,6 +85,15 @@ const Login = ({navigation}) => {
   const smartLoginEnabled = useSelector(
     state => state.students.smartLoginEnabled,
   );
+  const [googleEmail, setGoogleEmail] = useState(null);
+  const formikRef = React.useRef(null);
+  
+  // Update username field when googleEmail changes
+  useEffect(() => {
+    if (googleEmail && formikRef.current) {
+      formikRef.current.setFieldValue('username', googleEmail);
+    }
+  }, [googleEmail]);
 
   useEffect(() => {
     const checkSmartLogin = async () => {
@@ -102,11 +112,24 @@ const Login = ({navigation}) => {
   }, [navigation, smartLoginEnabled]);
 
   useEffect(() => {
+    // Initialize Google Sign-In with proper configuration
     GoogleSignin.configure({
-      webClientId:
-        'com.googleusercontent.apps.912485674622-5ghcfmq2k4n76ejemljkdfeb9682j58r',
+      webClientId: '601738057136-78c84si77t9vi2dbudmmqt69ifkcrtsm.apps.googleusercontent.com',
       offlineAccess: true,
+      scopes: ['profile', 'email'],
+      forceCodeForRefreshToken: true, // Add this for better token refresh
     });
+    
+    // Add debug logging for development
+    if (__DEV__) {
+      console.log('Google Sign-In configured with webClientId:', 
+        '601738057136-78c84si77t9vi2dbudmmqt69ifkcrtsm.apps.googleusercontent.com');
+      
+      // Check if Play Services are available to help with debugging
+      GoogleSignin.hasPlayServices({ showPlayServicesUpdateDialog: true })
+        .then(() => console.log('Google Play Services available'))
+        .catch(error => console.error('Google Play Services error:', error));
+    }
   }, []);
 
   useEffect(() => {
@@ -224,6 +247,185 @@ const Login = ({navigation}) => {
       console.error('Error requesting camera permission:', err);
       Alert.alert('Error', 'Failed to request camera permission');
     }
+  };
+
+  /**
+   * Handles the Google Sign-In process with token verification
+   */
+  const handleGoogleSignIn = async () => {
+    try {
+      setIsLoading(true);
+      
+      // 1. Check if Play Services are available
+      await GoogleSignin.hasPlayServices({
+        showPlayServicesUpdateDialog: true,
+      });
+      console.log('Google Play Services available');
+      
+      // 2. Sign out any existing Google user first
+      try {
+        await GoogleSignin.signOut();
+        console.log('Previous Google Sign-In session cleared');
+      } catch (error) {
+        // It's OK if there was no previous session
+        console.log('No previous Google session to clear');
+      }
+      
+      // Log current Google Sign-In configuration
+      console.log('Google Sign-In config:', {
+        webClientId: '601738057136-78c84si77t9vi2dbudmmqt69ifkcrtsm.apps.googleusercontent.com',
+        offlineAccess: true,
+        scopes: ['profile', 'email']
+      });
+      
+      // 3. Trigger Google Sign-In
+      console.log('Starting Google Sign-In...');
+      const userInfo = await GoogleSignin.signIn();
+      console.log('Google Sign-In successful, user info:', userInfo);
+      
+      // 4. Get the authentication token
+      const tokens = await GoogleSignin.getTokens();
+      console.log('Google tokens retrieved:', tokens);
+      
+      if (!tokens.idToken) {
+        throw new Error('Failed to get ID token from Google Sign-In');
+      }
+      console.log('Google ID token acquired');
+      
+      // 5. Verify token with backend
+      const authResponse = await verifyGoogleToken(tokens.idToken, userInfo.user.email);
+      
+      // 6. Store auth data and navigate to home
+      await saveAuthData(authResponse.token, authResponse.data);
+      
+      console.log('Authentication successful, navigating to home');
+      navigation.dispatch(
+        CommonActions.reset({
+          index: 0,
+          routes: [{ 
+            name: 'TabNavigator',
+            state: {
+              routes: [{ name: 'Home' }],
+              index: 0
+            }
+          }],
+        })
+      );
+    } catch (error) {
+      handleGoogleSignInError(error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  /**
+   * Sends the Google ID token to the backend for verification
+   */
+  const verifyGoogleToken = async (idToken, email) => {
+    try {
+      console.log('Verifying token with backend...');
+      
+      // Try the loginByGoogle endpoint
+      try {
+        const response = await axios.post('https://api.ezpick.co/parents/loginByGoogle', {
+          token: idToken,
+          email: email
+        });
+        
+        if (response.status === 200 && response.data) {
+          console.log('Token verified successfully with loginByGoogle');
+          return response.data;
+        }
+      } catch (googleLoginError) {
+        console.log('loginByGoogle endpoint failed, trying verifyToken');
+        // If the first endpoint fails, try the verifyToken endpoint
+        const response = await axios.post('https://api.ezpick.co/parents/verifyToken', {
+          token: idToken,
+          provider: 'google'
+        });
+        
+        if (response.status === 200 && response.data) {
+          console.log('Token verified successfully with verifyToken');
+          return response.data;
+        }
+      }
+      
+      throw new Error('Failed to verify token with backend');
+    } catch (error) {
+      console.error('Token verification error:', error);
+      throw error;
+    }
+  };
+
+  /**
+   * Stores authentication data both in AsyncStorage and Redux
+   */
+  const saveAuthData = async (token, userData) => {
+    try {
+      // 1. Save to AsyncStorage for persistence
+      await AsyncStorage.setItem('api_token', token);
+      await AsyncStorage.setItem('user_id', userData.id.toString());
+      await AsyncStorage.setItem('social_login', 'google');
+      
+      // 2. Setup axios default authorization header for future requests
+      axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+      
+      // 3. Save to Redux for app state
+      dispatch(SET_TOKEN(token));
+      dispatch(SET_loginData(userData));
+      
+      console.log('Auth data saved successfully');
+    } catch (error) {
+      console.error('Error saving auth data:', error);
+      throw new Error('Failed to save authentication data');
+    }
+  };
+
+  /**
+   * Handles Google Sign-In errors with appropriate user feedback
+   */
+  const handleGoogleSignInError = (error) => {
+    let message = 'Failed to login with Google';
+    
+    console.error('Google Sign-In Error Details:', {
+      code: error.code,
+      message: error.message,
+      fullError: error
+    });
+    
+    if (error.code === statusCodes.SIGN_IN_CANCELLED) {
+      console.log('User cancelled Google Sign-In');
+      return; // Don't show error alert for user cancellation
+    } else if (error.code === statusCodes.IN_PROGRESS) {
+      message = 'Google Sign-In is already in progress';
+    } else if (error.code === statusCodes.PLAY_SERVICES_NOT_AVAILABLE) {
+      message = 'Google Play Services are not available on this device';
+    } else if (error.code === statusCodes.DEVELOPER_ERROR) {
+      // More specific message for DEVELOPER_ERROR
+      message = 'Google Sign-In configuration error. Please check:\n1. SHA-1 fingerprint in Firebase Console\n2. WebClientID is correct\n3. Package name matches Firebase console';
+      
+      // Additional debug info for developer
+      if (__DEV__) {
+        console.log('Debug info for DEVELOPER_ERROR:');
+        console.log('- Package name should be: com.ezpick');
+        console.log('- SHA-1 should be added to Firebase: 5E:8F:16:06:2E:A3:CD:2C:4A:0D:54:78:76:BA:A6:F3:8C:AB:F6:25');
+        console.log('- Check if OAuth client ID is created in Google Cloud Console');
+      }
+    } else if (error.message && error.message.includes('token')) {
+      message = 'Authentication failed. Please try again or use email login.';
+    } else if (error.response) {
+      // Backend API error
+      message = error.response.data?.message || 'Server error during authentication';
+      
+      // If backend returns that the email is not registered, offer manual login
+      if (error.response.status === 404 && error.response.data?.email) {
+        setGoogleEmail(error.response.data.email);
+        message = 'Account not found. Please enter your password to login.';
+      }
+    }
+    
+    console.error('Google Sign-In Error:', message, error);
+    Alert.alert('Authentication Error', message);
   };
 
   const renderQRScanner = () => {
@@ -347,8 +549,10 @@ const Login = ({navigation}) => {
 
             {/* Formik Form */}
             <Formik
-              initialValues={{username: '', password: ''}}
-              onSubmit={handleLogin}>
+              initialValues={{username: googleEmail || '', password: ''}}
+              enableReinitialize={true}
+              onSubmit={handleLogin}
+              innerRef={formikRef}>
               {({
                 values,
                 handleChange,
@@ -369,6 +573,7 @@ const Login = ({navigation}) => {
                     keyboardType="email-address"
                     secureTextEntry={false}
                     multiline={false}
+                    editable={!googleEmail} // Disable when email is set from Google
                   />
 
                   <InputField
@@ -412,29 +617,8 @@ const Login = ({navigation}) => {
                     <SocialButton
                       icon={<GoogleIcon />}
                       title="Continue with Google"
-                      onPress={async () => {
-                        try {
-                          await GoogleSignin.hasPlayServices();
-                          const userInfo = await GoogleSignin.signIn();
-                          console.log('Google user info:', userInfo);
-                          navigation.navigate('TabNavigator');
-                        } catch (error) {
-                          if (error.code === statusCodes.SIGN_IN_CANCELLED) {
-                            console.log('User cancelled Google sign-in');
-                          } else if (error.code === statusCodes.IN_PROGRESS) {
-                            console.log('Google sign-in in progress');
-                          } else if (
-                            error.code === statusCodes.PLAY_SERVICES_NOT_AVAILABLE
-                          ) {
-                            Alert.alert(
-                              'Error',
-                              'Google Play Services not available',
-                            );
-                          } else {
-                            console.error('Google Sign-In Error:', error);
-                          }
-                        }
-                      }}
+                      onPress={handleGoogleSignIn}
+                      disabled={isLoading}
                     />
                     <SocialButton
                       icon={<OutlookIcon />}

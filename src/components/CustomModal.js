@@ -21,14 +21,17 @@ const CustomModal = ({
     <Modal transparent visible={visible} animationType="slide" onRequestClose={onClose}>
       <View style={styles.overlay}>
         <View style={styles.modalContainer}>
-          {imageSource && <Image source={imageSource} style={styles.image} />}
-
-          {title && (
-            <Heading
-              title={title}
-              textstyle={[style?.titleText, styles.title]}
-              boxStyle={[style?.title, {alignItems: 'flex-start'}]}
-            />
+          {imageSource && (
+            <View style={styles.imageTitleContainer}>
+              <Image source={imageSource} style={styles.image} />
+              {title && (
+                <Heading
+                  title={title}
+                  textstyle={[style?.titleText, styles.title]}
+                  boxStyle={[style?.title, {alignItems: 'flex-start'}]}
+                />
+              )}
+            </View>
           )}
 
           {description && (

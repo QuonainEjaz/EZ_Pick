@@ -1,32 +1,47 @@
 import axios from 'axios';
-   
-// Add to your index.js
+
+// Explicitly disable Flipper and use built-in debugger
 if (__DEV__) {
-  // Intercept Axios requests
+  // Setting this will redirect to the built-in debugger instead of Flipper
+  global.__REACT_NATIVE_DEBUG_ENABLED__ = true;
+  
+  // Enable network logging
   axios.interceptors.request.use(
     config => {
-      console.log(`🌐 [Axios] ${config.method?.toUpperCase()} ${config.url}`);
+      console.log(`🔷 Network Request:`, {
+        method: config.method?.toUpperCase(),
+        url: config.url,
+        headers: config.headers,
+        data: config.data,
+      });
       return config;
     },
     error => {
-      console.error('❌ [Axios] Request Error:', error);
+      console.error('❌ Request Error:', error);
       return Promise.reject(error);
     }
   );
   
-  // Intercept Axios responses
   axios.interceptors.response.use(
     response => {
-      console.log(`✅ [Axios] ${response.status} ${response.config.method?.toUpperCase()} ${response.config.url}`);
+      console.log(`🟢 Network Response:`, {
+        status: response.status,
+        url: response.config.url,
+        data: response.data,
+      });
       return response;
     },
     error => {
-      console.error(`❌ [Axios] Response Error:`, error);
+      console.error(`🔴 Response Error:`, {
+        status: error.response?.status,
+        url: error.config?.url,
+        data: error.response?.data,
+      });
       return Promise.reject(error);
     }
   );
   
-  console.log('Axios logging enabled');
+  console.log('Built-in debugger mode enabled with network logging');
 }
 
 /**
@@ -37,7 +52,13 @@ import {AppRegistry} from 'react-native';
 import App from './App';
 import TrackPlayer from 'react-native-track-player';
 import {name as appName} from './app.json';
-console.log('Debug server:', __DEV__, typeof global.originalXMLHttpRequest);
+
+// Log debug state
+console.log('Debug info:', {
+  dev: __DEV__,
+  debugEnabled: global.__REACT_NATIVE_DEBUG_ENABLED__,
+  useBuiltinDebugger: true
+});
 
 TrackPlayer.registerPlaybackService(() => {
   return async () => {

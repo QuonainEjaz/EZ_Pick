@@ -32,19 +32,97 @@ const StudentCard = ({data}) => {
     outOfRangeModalVisible,
     inRangeModalVisible,
     requestAcceptedModalVisible,
+    pickupRequestModalVisible,
+    requestTimerActive,
+    requestTimer,
+    showRequestAgain,
+    headerCountdown,
+    headerCountdownActive,
     statusConfig,
     convertTo12HourFormat,
     handlePickupRequest,
+    handlePickupRequestConfirmed,
     handleConfirmPickup,
     handleOpenLocationSettings,
     handleReadyToPickup,
+    handleRequestAgain,
     openMapDirections,
+    formatCountdownTime,
     setOutOfRangeModalVisible,
     setInRangeModalVisible,
     setRequestAcceptedModalVisible,
+    setPickupRequestModalVisible,
   } = useStudentCard(student, token);
 
-  // ------------------------- MODAL RENDERING -------------------------
+  // Render header timer or request again button
+  const renderHeaderTimer = () => {
+    if (status === 'request_sent') {
+      if (showRequestAgain) {
+        return (
+          <CustomButton
+            title="Request again"
+            onPress={handleRequestAgain}
+            touchStyle={styles.requestAgainButton}
+            textStyle={styles.requestAgainButtonText}
+          />
+        );
+      }
+      if (headerCountdownActive) {
+        const time = formatCountdownTime(headerCountdown);
+        return (
+          <View style={styles.timerContainer}>
+            <View style={styles.timeUnit}>
+              <Text style={styles.timerText}>{time.seconds}</Text>
+              <Text style={styles.unitLabel}>Secs</Text>
+            </View>
+          </View>
+        );
+      }
+    }
+
+    // Default timer display
+    return (
+      <View style={styles.timerContainer}>
+        {status !== 'request_accepted' && status !== 'request_sent' && (
+          <>
+            <View style={styles.timeUnit}>
+              <Text style={styles.timerText}>
+                {time.hours.toString().padStart(2, '0')}
+              </Text>
+              <Text style={styles.unitLabel}>Hrs</Text>
+            </View>
+            <Text style={styles.timerText}>:</Text>
+          </>
+        )}
+        {requestTimerActive ? (
+          <View style={styles.timeUnit}>
+            <Text style={styles.timerText}>
+              {requestTimer.toString().padStart(2, '0')}
+            </Text>
+            <Text style={styles.unitLabel}>Secs</Text>
+          </View>
+        ) : (
+          <>
+            <View style={styles.timeUnit}>
+              <Text style={styles.timerText}>
+                {time.minutes.toString().padStart(2, '0')}
+              </Text>
+              <Text style={styles.unitLabel}>Mins</Text>
+            </View>
+            <Text style={styles.timerText}>:</Text>
+            <View style={styles.timeUnit}>
+              <Text style={styles.timerText}>
+                {time.seconds.toString().padStart(2, '0')}
+              </Text>
+              <Text style={styles.unitLabel}>Secs</Text>
+            </View>
+          </>
+        )}
+      </View>
+    );
+  };
+
+  // Render modals
   const renderModals = () => (
     <>
       {outOfRangeModalVisible && (
@@ -90,13 +168,33 @@ const StudentCard = ({data}) => {
           }}
         />
       )}
+      {pickupRequestModalVisible && (
+        <CustomModal
+          visible={pickupRequestModalVisible}
+          onClose={() => setPickupRequestModalVisible(false)}
+          title={student?.name}
+          description="Your request for pick up your child has been accepted. Please wait patiently. If they're late, feel free to submit another request."
+          imageSource={{
+            uri:
+              student?.profileUrl ||
+              'https://res.cloudinary.com/dgv3dpaa8/image/upload/v1740655653/Profile_Image_5_at2qw9.png',
+          }}
+          primaryButtonText="Ok, Got it"
+          primaryButtonAction={handlePickupRequestConfirmed}
+          style={{
+            title: {marginBottom: 5},
+            description: {marginBottom: 20},
+            titleText: {fontWeight: '700', fontSize: 18, color: '#212529'},
+            descriptionText: {fontSize: 16, lineHeight: 22, color: '#6c757d'},
+          }}
+        />
+      )}
     </>
   );
 
-  // ------------------------- RENDERING THE COMPONENT -------------------------
   return (
     <View style={{...styles.card, ...statusConfig.cardStyle}}>
-      {/* Header section with status text and timer */}
+      {/* Header section with status text and timer/button */}
       <View
         style={[
           styles.header,
@@ -104,40 +202,11 @@ const StudentCard = ({data}) => {
           status === 'pickup_successful' && styles.successHeader,
         ]}>
         <Heading
-          title={statusConfig.text}
+          title={requestTimerActive ? 'REQUEST SENDING...' : statusConfig.text}
           textstyle={[styles.headerText, statusConfig.textStyle]}
           boxStyle={[styles.headerBox]}
         />
-        {status === 'pickup_successful' ? (
-          <Success />
-        ) : (
-          <View style={styles.timerContainer}>
-            {status !== 'request_accepted' && status !== 'request_sent' && (
-              <>
-                <View style={styles.timeUnit}>
-                  <Text style={styles.timerText}>
-                    {time.hours.toString().padStart(2, '0')}
-                  </Text>
-                  <Text style={styles.unitLabel}>Hrs</Text>
-                </View>
-                <Text style={styles.timerText}>:</Text>
-              </>
-            )}
-            <View style={styles.timeUnit}>
-              <Text style={styles.timerText}>
-                {time.minutes.toString().padStart(2, '0')}
-              </Text>
-              <Text style={styles.unitLabel}>Mins</Text>
-            </View>
-            <Text style={styles.timerText}>:</Text>
-            <View style={styles.timeUnit}>
-              <Text style={styles.timerText}>
-                {time.seconds.toString().padStart(2, '0')}
-              </Text>
-              <Text style={styles.unitLabel}>Secs</Text>
-            </View>
-          </View>
-        )}
+        {status === 'pickup_successful' ? <Success /> : renderHeaderTimer()}
       </View>
 
       {/* Info section with student image, details, and export button */}
@@ -187,7 +256,7 @@ const StudentCard = ({data}) => {
           ...styles.buttonText,
           ...statusConfig.buttonTextStyle,
         }}
-        disabled={status === 'pickup_successful'}
+        disabled={status === 'pickup_successful' || requestTimerActive}
       />
 
       {/* Render modals based on various flows */}
@@ -311,6 +380,21 @@ const styles = StyleSheet.create({
   },
   exportContainer: {
     padding: 2,
+  },
+  requestAgainButton: {
+    backgroundColor: '#F8AC16',
+    paddingHorizontal: 15,
+    paddingVertical: 8,
+    borderRadius: 8,
+    height: 40,
+    justifyContent: 'center',
+    width: width * 0.3, // Match the width of the timer container
+  },
+  requestAgainButtonText: {
+    color: '#FFFFFF',
+    fontWeight: '600',
+    fontSize: 14,
+    textAlign: 'center',
   },
 });
 

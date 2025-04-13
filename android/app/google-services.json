@@ -1,13 +1,13 @@
 {
   "project_info": {
-    "project_number": "825436324258",
-    "project_id": "ezpick-e952d",
-    "storage_bucket": "ezpick-e952d.firebasestorage.app"
+    "project_number": "23633578757",
+    "project_id": "ezpick-1000416",
+    "storage_bucket": "ezpick-456510.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:825436324258:android:caace3796f1cdd1d5272fb",
+        "mobilesdk_app_id": "1:601738057136:android:9000000000000000000000",
         "android_client_info": {
           "package_name": "com.ezpick"
         }

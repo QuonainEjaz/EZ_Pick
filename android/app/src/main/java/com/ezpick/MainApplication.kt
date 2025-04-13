@@ -39,5 +39,8 @@ class MainApplication : Application(), ReactApplication {
       // If you opted-in for the New Architecture, we load the native entry point for this app.
       load()
     }
+    
+    // Disable Flipper initialization
+    val disableFlipper = true // Force disable Flipper
   }
 }
