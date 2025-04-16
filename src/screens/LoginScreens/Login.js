@@ -10,6 +10,7 @@ import {
   Linking,
   LogBox,
   TouchableOpacity,
+  NativeModules,
 } from 'react-native';
 import {useSelector, useDispatch} from 'react-redux';
 import {SET_loginData, SET_TOKEN} from '../../store/App/action';
@@ -36,33 +37,19 @@ import {
 import FirebaseApp from '@react-native-firebase/app';
 import {Camera, useCameraDevice, useCameraPermission, useCameraFormat} from 'react-native-vision-camera';
 import {CommonActions} from '@react-navigation/native';
-// import {check, request, PERMISSIONS, RESULTS} from 'react-native-permissions';
-// import {PublicClientApplication} from 'react-native-msal';
-// const msalConfig = {
-//   auth: {
-//     clientId: '3d5a0688-c3b9-4486-9f3f-c45cfaad5ba8', // Your Microsoft client ID
-//     authority: 'https://login.microsoftonline.com/consumers',
-//     redirectUri: 'msauth.whetstonez.ios.EZPick://auth',
-//   },
-//   cache: {
-//     cacheLocation: 'localStorage', // optional, adjust as needed
-//     storeAuthStateInCookie: false,
-//   },
-// };
-
-// const msalInstance = new PublicClientApplication(msalConfig);
-
 
 const validationSchema = Yup.object().shape({
   username: Yup.string()
-    .email('Invalid email address')
-    .matches(/^\S*$/, 'Username cannot contain spaces')
+    .test('is-email-or-username', 'Enter a valid email or username without spaces', function (value) {
+      const isEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value || '');
+      const hasNoSpaces = /^\S*$/.test(value || '');
+      return (isEmail || hasNoSpaces) && !!value;
+    })
     .required('Username is required'),
   password: Yup.string()
     .min(8, 'Password must be at least 8 characters long')
     .required('Password is required'),
 });
-
 
 // Ignore specific warnings that might be related to permissions
 LogBox.ignoreLogs([
@@ -114,23 +101,84 @@ const Login = ({navigation}) => {
   useEffect(() => {
     // Initialize Google Sign-In with proper configuration
     GoogleSignin.configure({
-      webClientId: '601738057136-78c84si77t9vi2dbudmmqt69ifkcrtsm.apps.googleusercontent.com',
+      webClientId: '536508971922-6lbjv2cahct85163u834dpp6rucv4cii.apps.googleusercontent.com',
       offlineAccess: true,
       scopes: ['profile', 'email'],
-      forceCodeForRefreshToken: true, // Add this for better token refresh
     });
     
     // Add debug logging for development
     if (__DEV__) {
-      console.log('Google Sign-In configured with webClientId:', 
-        '601738057136-78c84si77t9vi2dbudmmqt69ifkcrtsm.apps.googleusercontent.com');
+      console.log('Google Sign-In configured with:', {
+        webClientId: '536508971922-6lbjv2cahct85163u834dpp6rucv4cii.apps.googleusercontent.com',
+        packageName: 'com.ezpick',
+        sha1: 'EF:16:48:5C:79:9E:63:9B:8C:91:A8:7C:AF:43:A0:E9:2B:27:62:5E',
+        projectId: 'ezpick-v2',
+        projectNumber: '536508971922'
+      });
       
-      // Check if Play Services are available to help with debugging
-      GoogleSignin.hasPlayServices({ showPlayServicesUpdateDialog: true })
-        .then(() => console.log('Google Play Services available'))
-        .catch(error => console.error('Google Play Services error:', error));
+      // Verify Google Sign-In configuration
+      verifyGoogleSignInSetup();
     }
   }, []);
+
+  // Helper function to verify Google Sign-In setup
+  const verifyGoogleSignInSetup = async () => {
+    try {
+      // 1. Check Play Services
+      const playServicesAvailable = await GoogleSignin.hasPlayServices({ 
+        showPlayServicesUpdateDialog: true 
+      });
+      console.log('Play Services check:', playServicesAvailable ? 'Available' : 'Not available');
+
+      // 2. Check if already signed in
+      const isSignedIn = await GoogleSignin.isSignedIn();
+      console.log('Is user signed in:', isSignedIn);
+
+      if (isSignedIn) {
+        const currentUser = await GoogleSignin.getCurrentUser();
+        console.log('Current user:', currentUser ? currentUser.user.email : 'No user data');
+        // Sign out to ensure clean state
+        await GoogleSignin.signOut();
+        console.log('Signed out existing user for clean state');
+      }
+
+      // 3. Get Play Services status
+      const status = await GoogleSignin.getPlayServicesStatus();
+      console.log('Play Services status:', status);
+
+      // 4. Verify configuration
+      console.log('Configuration verification:', {
+        hasPlayServices: playServicesAvailable,
+        isSignedIn: isSignedIn,
+        playServicesStatus: status
+      });
+
+    } catch (error) {
+      console.error('Google Sign-In verification failed:', error);
+    }
+  };
+
+  // Helper function to log SHA-1 fingerprint for debugging
+  const logSHA1Fingerprint = async () => {
+    if (Platform.OS === 'android' && __DEV__) {
+      try {
+        // This is a common pattern to get the SHA-1 from the Android keystore
+        // Note: This is for debugging only and may not work in all environments
+        const {getSHA1Fingerprint} = NativeModules;
+        if (getSHA1Fingerprint) {
+          const sha1 = await getSHA1Fingerprint();
+          console.log('SHA-1 Fingerprint for Firebase:', sha1);
+          console.log('Add this SHA-1 to your Firebase project in the Android app settings');
+        } else {
+          console.log('SHA-1 fingerprint helper not available');
+          console.log('To get your SHA-1, run this command in your project directory:');
+          console.log('cd android && ./gradlew signingReport');
+        }
+      } catch (error) {
+        console.error('Error getting SHA-1:', error);
+      }
+    }
+  };
 
   useEffect(() => {
     let retryTimer;
@@ -271,22 +319,17 @@ const Login = ({navigation}) => {
         console.log('No previous Google session to clear');
       }
       
-      // Log current Google Sign-In configuration
-      console.log('Google Sign-In config:', {
-        webClientId: '601738057136-78c84si77t9vi2dbudmmqt69ifkcrtsm.apps.googleusercontent.com',
-        offlineAccess: true,
-        scopes: ['profile', 'email']
-      });
-      
       // 3. Trigger Google Sign-In
       console.log('Starting Google Sign-In...');
       const userInfo = await GoogleSignin.signIn();
-      console.log('Google Sign-In successful, user info:', userInfo);
+      console.log('Google Sign-In successful, user info:', {
+        email: userInfo.user.email,
+        id: userInfo.user.id,
+        name: userInfo.user.name
+      });
       
       // 4. Get the authentication token
       const tokens = await GoogleSignin.getTokens();
-      console.log('Google tokens retrieved:', tokens);
-      
       if (!tokens.idToken) {
         throw new Error('Failed to get ID token from Google Sign-In');
       }
@@ -400,24 +443,35 @@ const Login = ({navigation}) => {
       message = 'Google Sign-In is already in progress';
     } else if (error.code === statusCodes.PLAY_SERVICES_NOT_AVAILABLE) {
       message = 'Google Play Services are not available on this device';
-    } else if (error.code === statusCodes.DEVELOPER_ERROR) {
-      // More specific message for DEVELOPER_ERROR
-      message = 'Google Sign-In configuration error. Please check:\n1. SHA-1 fingerprint in Firebase Console\n2. WebClientID is correct\n3. Package name matches Firebase console';
+    } else if (error.code === '12500') {
+      message = 'Google Sign-In configuration error. This usually means:\n\n' +
+                '1. OAuth client ID is not properly configured\n' +
+                '2. SHA-1 fingerprint might not be registered correctly\n' +
+                '3. Google Cloud Console configuration needs to be updated';
       
-      // Additional debug info for developer
+      // Additional debug info for non-recoverable error
       if (__DEV__) {
-        console.log('Debug info for DEVELOPER_ERROR:');
-        console.log('- Package name should be: com.ezpick');
-        console.log('- SHA-1 should be added to Firebase: 5E:8F:16:06:2E:A3:CD:2C:4A:0D:54:78:76:BA:A6:F3:8C:AB:F6:25');
-        console.log('- Check if OAuth client ID is created in Google Cloud Console');
+        console.log('Debug info for NON_RECOVERABLE_ERROR:');
+        console.log('1. Verify in Google Cloud Console:');
+        console.log('   - Project ID: ezpick-v2');
+        console.log('   - OAuth client type: Android');
+        console.log('   - Package name: com.ezpick');
+        console.log('   - SHA-1: EF:16:48:5C:79:9E:63:9B:8C:91:A8:7C:AF:43:A0:E9:2B:27:62:5E');
+        console.log('2. Check Firebase Console:');
+        console.log('   - SHA-1 is added to the Android app');
+        console.log('   - google-services.json is up to date');
+        console.log('3. Verify Google Play Services:');
+        console.log('   - App is up to date');
+        console.log('   - Device has valid Google Account');
       }
+    } else if (error.code === statusCodes.DEVELOPER_ERROR) {
+      message = 'Google Sign-In configuration error. Please check:\n1. SHA-1 fingerprint in Firebase Console\n2. WebClientID is correct\n3. Package name matches Firebase console';
+    } else if (error.code === 7) { // NETWORK_ERROR
+      message = 'Network error during Google Sign-In. Please check your internet connection and try again.';
     } else if (error.message && error.message.includes('token')) {
       message = 'Authentication failed. Please try again or use email login.';
     } else if (error.response) {
-      // Backend API error
       message = error.response.data?.message || 'Server error during authentication';
-      
-      // If backend returns that the email is not registered, offer manual login
       if (error.response.status === 404 && error.response.data?.email) {
         setGoogleEmail(error.response.data.email);
         message = 'Account not found. Please enter your password to login.';
@@ -427,7 +481,7 @@ const Login = ({navigation}) => {
     console.error('Google Sign-In Error:', message, error);
     Alert.alert('Authentication Error', message);
   };
-
+  
   const renderQRScanner = () => {
     if (!showScanner) return null;
     
@@ -549,18 +603,22 @@ const Login = ({navigation}) => {
 
             {/* Formik Form */}
             <Formik
-              initialValues={{username: googleEmail || '', password: ''}}
-              enableReinitialize={true}
-              onSubmit={handleLogin}
-              innerRef={formikRef}>
-              {({
-                values,
-                handleChange,
-                handleBlur,
-                handleSubmit,
-                errors,
-                touched,
-              }) => (
+               initialValues={{username: googleEmail || '', password: ''}}
+               enableReinitialize={true}
+               onSubmit={handleLogin}
+               validationSchema={validationSchema}
+               validateOnBlur={true}
+               validateOnChange={true}
+               innerRef={formikRef}>
+               {({
+                 values,
+                 handleChange,
+                 handleBlur,
+                 handleSubmit,
+                 errors,
+                 touched,
+                 isSubmitting,
+               }) => (
                 <>
                   <InputField
                     label="Username"
@@ -575,6 +633,9 @@ const Login = ({navigation}) => {
                     multiline={false}
                     editable={!googleEmail} // Disable when email is set from Google
                   />
+                  {touched.username && errors.username && (
+                    <Text style={styles.errorText}>{errors.username}</Text>
+                  )}
 
                   <InputField
                     label="Password"
@@ -588,7 +649,14 @@ const Login = ({navigation}) => {
                     secureTextEntry={true}
                     multiline={false}
                   />
-
+                  {touched.password && errors.password && (
+                    <Text style={styles.errorText}>{errors.password}</Text>
+                  )}
+                  {errors.general && (
+                    <View style={styles.generalErrorContainer}>
+                      <Text style={styles.generalErrorText}>{errors.general}</Text>
+                    </View>
+                  )}
                   <CustomLink
                     label="Forget Password?"
                     onPress={() => {
@@ -623,6 +691,8 @@ const Login = ({navigation}) => {
                     <SocialButton
                       icon={<OutlookIcon />}
                       title="Continue with Outlook"
+                      onPress={() => Alert.alert('Outlook Login', 'This feature is currently unavailable.')}
+                      disabled={isLoading}
                     />
                     <SocialButton
                       icon={<QRIcon />}
@@ -672,6 +742,17 @@ const styles = StyleSheet.create({
     fontSize: 12,
     marginTop: -15,
     marginBottom: 15,
+  },
+  generalErrorContainer: {
+    backgroundColor: '#f8d7da',
+    padding: 12,
+    borderRadius: 4,
+    marginVertical: 10,
+  },
+  generalErrorText: {
+    color: '#721c24',
+    fontSize: 14,
+    textAlign: 'center',
   },
   linkStyle: {
     alignSelf: 'flex-end',
