@@ -163,26 +163,30 @@ const Login = () => {
   const signInWithGoogle = async () => {
     try {
       setIsLoading(true);
+      
       // Basic Google Sign-In
       const userInfo = await GoogleSignin.signIn();
+      
       if (!userInfo?.user?.email) {
         throw new Error('Failed to get user email');
       }
+
       // Check if the email is registered using parents/loginByEmail endpoint
       try {
-        const response = await axios.post(
+        const emailCheckResponse = await axios.post(
           'https://api.ezpick.co/parents/loginByEmail',
           {
             email: userInfo.user.email,
+            password: 'dummyPassword123!' // Dummy password for email check
           }
         );
+
         // If success is false, show registration needed message
-        if (response.data && response.data.success === false) {
-          showAlert('Not Registered', 'Looks like you haven\'t registered this User yet...');
+        if (emailCheckResponse.data && emailCheckResponse.data.success === false) {
+          showAlert('Not Registered', 'Looks like you haven\'t registered this user yet...');
           return;
         }
-        dispatch(SET_TOKEN(response.data.token));
-        dispatch(SET_loginData(response.data.data));
+
         // If success is true, navigate to TabNavigator
         navigation.dispatch(
           CommonActions.reset({
@@ -206,6 +210,28 @@ const Login = () => {
       showAlert('Error', 'Failed to sign in with Google');
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  // Helper function to log SHA-1 fingerprint for debugging
+  const logSHA1Fingerprint = async () => {
+    if (Platform.OS === 'android' && __DEV__) {
+      try {
+        // This is a common pattern to get the SHA-1 from the Android keystore
+        // Note: This is for debugging only and may not work in all environments
+        const {getSHA1Fingerprint} = NativeModules;
+        if (getSHA1Fingerprint) {
+          const sha1 = await getSHA1Fingerprint();
+          console.log('SHA-1 Fingerprint for Firebase:', sha1);
+          console.log('Add this SHA-1 to your Firebase project in the Android app settings');
+        } else {
+          console.log('SHA-1 fingerprint helper not available');
+          console.log('To get your SHA-1, run this command in your project directory:');
+          console.log('cd android && ./gradlew signingReport');
+        }
+      } catch (error) {
+        console.error('Error getting SHA-1:', error);
+      }
     }
   };
 
