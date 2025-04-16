@@ -3,7 +3,6 @@ import {
   View,
   TouchableOpacity,
   FlatList,
-  Alert,
   Image,
   Modal,
   StyleSheet,
@@ -14,6 +13,7 @@ import {setSmartLogin, setStudents} from '../../store/App/action';
 import Heading from '../../components/Heading';
 import SubHeading from '../../components/SubHeading';
 import CustomToggleSwitch from '../../components/CustomToggleSwitch';
+import CustomAlert from '../../components/CustomAlert';
 import LogoutConfirmation from './LogoutConfirmation';
 import ArrowRight from '../../assets/Icons/svg/ArrowRight';
 import {ProfileScreenIcons} from '../../assets/Icons/svg/ProfileScreenIcons';
@@ -26,6 +26,12 @@ const Profile = ({navigation}) => {
   const students = useSelector(state => state.students.students);
   const [toggleSwitchValue, setToggleSwitchValue] = useState(smartLoginEnabled);
   const [isModalVisible, setIsModalVisible] = useState(false);
+  const [alertConfig, setAlertConfig] = useState({
+    visible: false,
+    title: '',
+    message: '',
+    type: 'info',
+  });
   const loginData = useSelector(state => state.students.loginData);
   const userRole = loginData?.role;
   
@@ -72,23 +78,44 @@ const Profile = ({navigation}) => {
       if (!available) {
         setToggleSwitchValue(false);
         dispatch(setSmartLogin(false));
-        return Alert.alert('Biometric authentication not available');
+        setAlertConfig({
+          visible: true,
+          title: 'Not Available',
+          message: 'Biometric authentication is not available on this device.',
+          type: 'error',
+        });
+        return;
       }
+
       const {success} = await ReactNativeBiometrics.simplePrompt({
         promptMessage: 'Login using fingerprint or face recognition',
       });
 
       if (success) {
         dispatch(setSmartLogin(true));
-        Alert.alert('Smart Login Enabled Successfully');
+        setAlertConfig({
+          visible: true,
+          title: 'Success',
+          message: 'Smart Login has been enabled successfully.',
+          type: 'success',
+        });
       } else {
         setToggleSwitchValue(false);
         dispatch(setSmartLogin(false));
       }
     } catch (error) {
-      Alert.alert('Error', error.message);
+      setAlertConfig({
+        visible: true,
+        title: 'Error',
+        message: error.message || 'Failed to enable Smart Login.',
+        type: 'error',
+      });
     }
   }, [dispatch, setToggleSwitchValue]);
+
+  const handleAlertClose = () => {
+    setAlertConfig(prev => ({...prev, visible: false}));
+  };
 
   const onToggleSwitch = useCallback(value => {
     setToggleSwitchValue(value);
@@ -215,30 +242,28 @@ const Profile = ({navigation}) => {
   }, [isGuard]);
 
   return (
-    <View style={containerStyle}>
-      <FlatList
-        data={combinedData}
-        renderItem={renderItem}
-        keyExtractor={(_, index) => index.toString()}
-        ListEmptyComponent={
-          <SubHeading text="No children found" style={styles.emptyText} />
-        }
-        contentContainerStyle={contentStyle}
-        showsVerticalScrollIndicator={false}
+    <>
+      <View style={containerStyle}>
+        <FlatList
+          data={combinedData}
+          renderItem={renderItem}
+          keyExtractor={(item, index) => index.toString()}
+          showsVerticalScrollIndicator={false}
+        />
+        <LogoutConfirmation
+          visible={isModalVisible}
+          onConfirm={handleLogout}
+          onCancel={() => setIsModalVisible(false)}
+        />
+      </View>
+      <CustomAlert
+        visible={alertConfig.visible}
+        title={alertConfig.title}
+        message={alertConfig.message}
+        type={alertConfig.type}
+        onPress={handleAlertClose}
       />
-      <Modal
-        transparent
-        visible={isModalVisible}
-        animationType="fade"
-        onRequestClose={() => setIsModalVisible(false)}>
-        <View style={styles.modalOverlay}>
-          <LogoutConfirmation
-            onLogout={handleLogout}
-            onCancel={() => setIsModalVisible(false)}
-          />
-        </View>
-      </Modal>
-    </View>
+    </>
   );
 };
 

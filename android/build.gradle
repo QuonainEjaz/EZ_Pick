@@ -15,11 +15,10 @@ buildscript {
         mavenLocal()
         maven { url 'https://jitpack.io' }
         google()
-        jcenter()
         mavenCentral()
     }
     dependencies {
-        classpath 'com.google.gms:google-services:4.3.10'
+        classpath 'com.google.gms:google-services:4.4.1'
         classpath 'com.android.tools.build:gradle:8.3.1' // AGP 8.3.1
         // classpath 'com.android.tools.build:gradle:7.5.0' // Use AGP 7.5.0
         // classpath 'com.android.tools.build:gradle:7.3.1' // Downgrade AGP
@@ -47,7 +46,6 @@ allprojects {
         // }
         maven { url 'https://jitpack.io' }
         google()
-        jcenter()
         mavenCentral()
     }
 }

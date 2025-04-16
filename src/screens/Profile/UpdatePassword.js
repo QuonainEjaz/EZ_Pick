@@ -1,5 +1,5 @@
 import React, {useState} from 'react';
-import {View, StyleSheet, Text, Alert} from 'react-native';
+import {View, StyleSheet, Text} from 'react-native';
 import axios from 'axios'; // Import Axios
 import {Formik} from 'formik';
 import * as Yup from 'yup';
@@ -25,31 +25,53 @@ const passwordValidationSchema = Yup.object().shape({
 });
 
 const UpdatePassword = () => {
-  const [modalVisible, setModalVisible] = useState(false);
+  const [alertConfig, setAlertConfig] = useState({
+    visible: false,
+    title: '',
+    message: '',
+    type: 'success',
+  });
+  
   const baseUrl = useSelector(state => state.students.baseUrl);
   const id = useSelector(state => state.students.parent?.id);
 
   const handleUpdatePassword = async (values, resetForm) => {
     try {
       const response = await axios.patch(`${baseUrl}/parents/update-password`, {
-        id: id || 1000001, // Use dynamic ID if available, fallback to default
+        id: id || 1000001,
         oldPassword: values.currentPassword,
         newPassword: values.newPassword,
       });
 
       if (response.data.success) {
-        setModalVisible(true); // Show success modal
-        resetForm(); // Clear form fields
+        setAlertConfig({
+          visible: true,
+          title: 'Success',
+          message: 'Your password has been updated successfully.',
+          type: 'success',
+        });
+        resetForm();
       } else {
-        Alert.alert(
-          'Error',
-          response.data.message || 'Password update failed.',
-        );
+        setAlertConfig({
+          visible: true,
+          title: 'Error',
+          message: response.data.message || 'Password update failed.',
+          type: 'error',
+        });
       }
     } catch (error) {
       console.error('API Error:', error);
-      Alert.alert('Error', 'Something went wrong. Please try again.');
+      setAlertConfig({
+        visible: true,
+        title: 'Error',
+        message: 'Something went wrong. Please try again.',
+        type: 'error',
+      });
     }
+  };
+
+  const handleAlertClose = () => {
+    setAlertConfig(prev => ({...prev, visible: false}));
   };
 
   return (
@@ -126,22 +148,17 @@ const UpdatePassword = () => {
                 touchStyle={styles.saveButton}
                 textStyle={styles.saveButtonText}
               />
-
-              {/* Success Modal */}
-              <CustomAlert
-                visible={modalVisible}
-                onClose={() => setModalVisible(false)}
-                label="Password Updated!"
-                message="Your password has been updated successfully."
-                buttonText="Ok, Got it"
-                image="noImage"
-                svg={<Approved size={60} />}
-                style={{}} // Provide an empty style object
-              />
             </>
           )}
         </Formik>
       </View>
+      <CustomAlert
+        visible={alertConfig.visible}
+        title={alertConfig.title}
+        message={alertConfig.message}
+        type={alertConfig.type}
+        onPress={handleAlertClose}
+      />
     </View>
   );
 };

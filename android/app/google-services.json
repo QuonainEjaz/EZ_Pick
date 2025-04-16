@@ -20,6 +20,18 @@
             "package_name": "com.ezpick",
             "certificate_hash": "ef16485c799e639b8c91a87caf43a0e92b27625e"
           }
+        },
+        {
+          "client_id": "536508971922-j5a3ga18f5n2bhgngbkvf1uv4meata7r.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.ezpick",
+            "certificate_hash": "5e8f16062ea3cd2c4a0d547876baa6f38cabf625"
+          }
+        },
+        {
+          "client_id": "536508971922-oepjtpjcc51rg87kvgl5v58s5n0tp32j.apps.googleusercontent.com",
+          "client_type": 3
         }
       ],
       "api_key": [
@@ -29,7 +41,12 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "536508971922-oepjtpjcc51rg87kvgl5v58s5n0tp32j.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         }
       }
     }

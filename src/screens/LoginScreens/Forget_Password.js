@@ -19,7 +19,12 @@ const validationSchema = Yup.object({
 
 const Forget_Password = ({navigation}) => {
   const {width, height} = Dimensions.get('window');
-  const [modalVisible, setModalVisible] = useState(false);
+  const [alertConfig, setAlertConfig] = useState({
+    visible: false,
+    title: '',
+    message: '',
+    type: 'success',
+  });
   const baseUrl = useSelector(state => state.students.baseUrl);
 
   const handleSubmit = async (values, actions) => {
@@ -40,19 +45,38 @@ const Forget_Password = ({navigation}) => {
       const data = await response.json();
 
       if (data.success) {
-        setModalVisible(true); 
+        setAlertConfig({
+          visible: true,
+          title: 'Email Sent Successfully!',
+          message: 'We have sent you a link to reset your password.',
+          type: 'success',
+        });
       } else {
-        actions.setFieldError('username', 'Failed to send reset link');
+        setAlertConfig({
+          visible: true,
+          title: 'Error',
+          message: 'Failed to send reset link. Please try again.',
+          type: 'error',
+        });
       }
     } 
     catch (error) {
-      actions.setFieldError(
-        'username',
-        'Something went wrong, try again later',
-      );
+      setAlertConfig({
+        visible: true,
+        title: 'Error',
+        message: 'Something went wrong. Please try again later.',
+        type: 'error',
+      });
     } 
     finally {
       actions.setSubmitting(false);
+    }
+  };
+
+  const handleAlertClose = () => {
+    setAlertConfig(prev => ({...prev, visible: false}));
+    if (alertConfig.type === 'success') {
+      navigation.navigate('Login');
     }
   };
 
@@ -122,13 +146,12 @@ const Forget_Password = ({navigation}) => {
         </Formik>
       </View>
 
-      {/* Modal for Success Message */}
       <CustomAlert
-        visible={modalVisible}
-        onClose={() => setModalVisible(false)}
-        label={'Email Sent Successfully!'}
-        message={'We have sent you a link to reset your password.'}
-        buttonText={'Ok, Got it'}
+        visible={alertConfig.visible}
+        title={alertConfig.title}
+        message={alertConfig.message}
+        type={alertConfig.type}
+        onPress={handleAlertClose}
       />
     </View>
   );

@@ -1,4 +1,4 @@
-import React, {useState, useMemo, useEffect, useRef} from 'react';
+import React, {useState, useMemo, useEffect, useRef, useCallback} from 'react';
 import {
   View,
   Text,
@@ -37,6 +37,8 @@ import {
 import FirebaseApp from '@react-native-firebase/app';
 import {Camera, useCameraDevice, useCameraPermission, useCameraFormat} from 'react-native-vision-camera';
 import {CommonActions} from '@react-navigation/native';
+import CustomAlert from '../../components/CustomAlert';
+import {useNavigation} from '@react-navigation/native';
 
 const validationSchema = Yup.object().shape({
   username: Yup.string()
@@ -57,7 +59,7 @@ LogBox.ignoreLogs([
   'Permission status:',
 ]);
 
-const Login = ({navigation}) => {
+const Login = () => {
   const {width, height} = Dimensions.get('window');
   const [isLoading, setIsLoading] = useState(false);
   const [showScanner, setShowScanner] = useState(false);
@@ -74,6 +76,15 @@ const Login = ({navigation}) => {
   );
   const [googleEmail, setGoogleEmail] = useState(null);
   const formikRef = React.useRef(null);
+  const [alertConfig, setAlertConfig] = useState({
+    visible: false,
+    title: '',
+    message: '',
+    type: 'info',
+    onPress: () => {},
+  });
+  
+  const navigation = useNavigation();
   
   // Update username field when googleEmail changes
   useEffect(() => {
@@ -99,62 +110,171 @@ const Login = ({navigation}) => {
   }, [navigation, smartLoginEnabled]);
 
   useEffect(() => {
-    // Initialize Google Sign-In with proper configuration
-    GoogleSignin.configure({
-      webClientId: '536508971922-6lbjv2cahct85163u834dpp6rucv4cii.apps.googleusercontent.com',
-      offlineAccess: true,
-      scopes: ['profile', 'email'],
-    });
-    
-    // Add debug logging for development
-    if (__DEV__) {
-      console.log('Google Sign-In configured with:', {
-        webClientId: '536508971922-6lbjv2cahct85163u834dpp6rucv4cii.apps.googleusercontent.com',
-        packageName: 'com.ezpick',
-        sha1: 'EF:16:48:5C:79:9E:63:9B:8C:91:A8:7C:AF:43:A0:E9:2B:27:62:5E',
-        projectId: 'ezpick-v2',
-        projectNumber: '536508971922'
-      });
-      
-      // Verify Google Sign-In configuration
-      verifyGoogleSignInSetup();
-    }
+    const configureGoogleSignIn = async () => {
+      try {
+        // First, try to sign out to ensure clean state
+        try {
+          await GoogleSignin.signOut();
+        } catch (signOutError) {
+          console.log('No previous sign-in to clear');
+        }
+
+        // Configure Google Sign-In with minimal configuration
+        const config = {
+          webClientId: '536508971922-oepjtpjcc51rg87kvgl5v58s5n0tp32j.apps.googleusercontent.com', // Web client ID
+          androidClientId: '536508971922-j5a3ga18f5n2bhgngbkvf1uv4meata7r.apps.googleusercontent.com', // Android client ID matching your debug SHA-1
+          offlineAccess: false,
+          scopes: ['profile', 'email']
+        };
+
+        await GoogleSignin.configure(config);
+        
+        // Log configuration for debugging
+        console.log('Google Sign-In Configuration:', {
+          ...config,
+          packageName: 'com.ezpick',
+          sha1: '5e8f16062ea3cd2c4a0d547876baa6f38cabf625' // Your debug keystore SHA-1
+        });
+
+        // Check Play Services
+        const isPlayServicesAvailable = await GoogleSignin.hasPlayServices({
+          showPlayServicesUpdateDialog: true,
+        });
+        console.log('Play Services available:', isPlayServicesAvailable);
+        
+        const isSignedIn = await GoogleSignin.isSignedIn();
+        console.log('Already signed in:', isSignedIn);
+        
+        if (isSignedIn) {
+          await GoogleSignin.signOut();
+        }
+      } catch (error) {
+        console.error('Google Sign-In configuration error:', error);
+        Alert.alert(
+          'Configuration Error',
+          'Failed to configure Google Sign-In. Please try again later.'
+        );
+      }
+    };
+
+    configureGoogleSignIn();
   }, []);
 
-  // Helper function to verify Google Sign-In setup
-  const verifyGoogleSignInSetup = async () => {
+  const signInWithGoogle = async () => {
     try {
-      // 1. Check Play Services
-      const playServicesAvailable = await GoogleSignin.hasPlayServices({ 
-        showPlayServicesUpdateDialog: true 
+      setIsLoading(true);
+      
+      // First check Play Services
+      const playServicesAvailable = await GoogleSignin.hasPlayServices({
+        showPlayServicesUpdateDialog: true,
       });
-      console.log('Play Services check:', playServicesAvailable ? 'Available' : 'Not available');
-
-      // 2. Check if already signed in
+      
+      if (!playServicesAvailable) {
+        throw new Error('Google Play Services not available');
+      }
+      
+      // Ensure we're signed out before attempting to sign in
       const isSignedIn = await GoogleSignin.isSignedIn();
-      console.log('Is user signed in:', isSignedIn);
-
       if (isSignedIn) {
-        const currentUser = await GoogleSignin.getCurrentUser();
-        console.log('Current user:', currentUser ? currentUser.user.email : 'No user data');
-        // Sign out to ensure clean state
         await GoogleSignin.signOut();
-        console.log('Signed out existing user for clean state');
+        // Add a small delay after signing out
+        await new Promise(resolve => setTimeout(resolve, 1000));
+      }
+      
+      console.log('Attempting Google Sign-In...');
+      
+      // Try to get current user first
+      try {
+        const currentUser = await GoogleSignin.getCurrentUser();
+        console.log('Current user before sign-in:', currentUser);
+      } catch (err) {
+        console.log('No current user');
+      }
+      
+      const userInfo = await GoogleSignin.signIn();
+      console.log('Google Sign-In successful:', userInfo);
+      
+      if (!userInfo?.user?.id) {
+        throw new Error('Failed to get user information');
       }
 
-      // 3. Get Play Services status
-      const status = await GoogleSignin.getPlayServicesStatus();
-      console.log('Play Services status:', status);
+      // Get tokens
+      const tokens = await GoogleSignin.getTokens();
+      console.log('Got tokens:', tokens);
 
-      // 4. Verify configuration
-      console.log('Configuration verification:', {
-        hasPlayServices: playServicesAvailable,
-        isSignedIn: isSignedIn,
-        playServicesStatus: status
-      });
+      if (!tokens?.accessToken) {
+        throw new Error('Failed to get access token');
+      }
 
+      // Create user data object
+      const userData = {
+        id: userInfo.user.id,
+        email: userInfo.user.email,
+        name: userInfo.user.name,
+        photo: userInfo.user.photo,
+        accessToken: tokens.accessToken
+      };
+
+      // Store in AsyncStorage
+      await AsyncStorage.multiSet([
+        ['api_token', tokens.accessToken],
+        ['user_id', userInfo.user.id],
+        ['user', JSON.stringify(userData)],
+        ['isLoggedIn', 'true']
+      ]);
+
+      // Setup axios default authorization header
+      axios.defaults.headers.common['Authorization'] = `Bearer ${tokens.accessToken}`;
+
+      // Dispatch to Redux
+      dispatch(SET_TOKEN(tokens.accessToken));
+      dispatch(SET_loginData(userData));
+
+      // Wait for state updates
+      await new Promise(resolve => setTimeout(resolve, 300));
+
+      // Verify data is stored
+      const [[, storedToken], [, storedUserId]] = await AsyncStorage.multiGet(['api_token', 'user_id']);
+
+      if (storedToken && storedUserId) {
+        // Navigate to TabNavigator
+        navigation.dispatch(
+          CommonActions.reset({
+            index: 0,
+            routes: [{ 
+              name: 'TabNavigator',
+              state: {
+                routes: [{ name: 'Home' }],
+                index: 0
+              }
+            }],
+          })
+        );
+      } else {
+        showAlert('Error', 'Failed to store user data');
+      }
     } catch (error) {
-      console.error('Google Sign-In verification failed:', error);
+      console.error('Google Sign-In Error:', error);
+      
+      if (error.code === statusCodes.SIGN_IN_CANCELLED) {
+        Alert.alert('Sign In Cancelled', 'You cancelled the sign-in process');
+      } else if (error.code === statusCodes.IN_PROGRESS) {
+        Alert.alert('Sign In In Progress', 'Another sign-in process is already in progress');
+      } else if (error.code === statusCodes.PLAY_SERVICES_NOT_AVAILABLE) {
+        Alert.alert('Error', 'Google Play Services is not available or outdated');
+      } else if (error.code === statusCodes.DEVELOPER_ERROR) {
+        Alert.alert(
+          'Configuration Error',
+          'There is a problem with the Google Sign-In configuration. Please make sure you have set up Google Sign-In correctly in the Google Cloud Console.'
+        );
+      } else {
+        Alert.alert(
+          'Sign In Error',
+          'There was an error signing in with Google. Please try again later.'
+        );
+      }
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -237,8 +357,16 @@ const Login = ({navigation}) => {
         },
       );
       
-      if (response.status === 200) {
+      if (response.status === 200 && response.data && response.data.token) {
         console.log('Login Success');
+        
+        // Save token to AsyncStorage first
+        await AsyncStorage.setItem('api_token', response.data.token);
+        await AsyncStorage.setItem('user_id', response.data.data.id.toString());
+        
+        // Setup axios default authorization header
+        axios.defaults.headers.common['Authorization'] = `Bearer ${response.data.token}`;
+        
         // Dispatch both actions before navigation
         dispatch(SET_TOKEN(response.data.token));
         dispatch(SET_loginData(response.data.data));
@@ -246,21 +374,27 @@ const Login = ({navigation}) => {
         // Wait for state updates to complete
         await new Promise(resolve => setTimeout(resolve, 300));
         
-        // Navigate to TabNavigator to allow data fetching in HomeScreen
-        navigation.dispatch(
-          CommonActions.reset({
-            index: 0,
-            routes: [{ 
-              name: 'TabNavigator',
-              state: {
-                routes: [{ name: 'Home' }],
-                index: 0
-              }
-            }],
-          })
-        );
+        // Verify token is stored before navigating
+        const storedToken = await AsyncStorage.getItem('api_token');
+        if (storedToken) {
+          // Navigate to TabNavigator to allow data fetching in HomeScreen
+          navigation.dispatch(
+            CommonActions.reset({
+              index: 0,
+              routes: [{ 
+                name: 'TabNavigator',
+                state: {
+                  routes: [{ name: 'Home' }],
+                  index: 0
+                }
+              }],
+            })
+          );
+        } else {
+          showAlert('Error', 'Failed to store authentication token');
+        }
       } else {
-        Alert.alert('Error', 'Invalid credentials or something went wrong');
+        showAlert('Error', 'Invalid credentials or something went wrong');
       }
     } catch (error) {
       const errorMessage =
@@ -268,220 +402,36 @@ const Login = ({navigation}) => {
         error.message ||
         'Network issue, please try again.';
       console.error('Login Error:', error);
-      Alert.alert('Error', errorMessage);
+      showAlert('Error', errorMessage);
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const showAlert = (title, message, type = 'error', onPress = () => setAlertConfig(prev => ({...prev, visible: false}))) => {
+    setAlertConfig({
+      visible: true,
+      title,
+      message,
+      type,
+      onPress,
+    });
   };
 
   const handleScanQR = async () => {
     try {
-      if (!hasPermission) {
-        const granted = await requestPermission();
-        if (!granted) {
-          Alert.alert(
-            'Camera Permission',
-            'Please grant camera permission to scan QR codes',
-            [
-              {text: 'Cancel', style: 'cancel'},
-              {text: 'Open Settings', onPress: () => Linking.openSettings()},
-            ],
-          );
-          return;
-        }
+      const granted = await requestPermission();
+      if (!granted) {
+        showAlert('Error', 'Failed to request camera permission');
+        return;
       }
       setShowScanner(true);
-    } catch (err) {
-      console.error('Error requesting camera permission:', err);
-      Alert.alert('Error', 'Failed to request camera permission');
-    }
-  };
-
-  /**
-   * Handles the Google Sign-In process with token verification
-   */
-  const handleGoogleSignIn = async () => {
-    try {
-      setIsLoading(true);
-      
-      // 1. Check if Play Services are available
-      await GoogleSignin.hasPlayServices({
-        showPlayServicesUpdateDialog: true,
-      });
-      console.log('Google Play Services available');
-      
-      // 2. Sign out any existing Google user first
-      try {
-        await GoogleSignin.signOut();
-        console.log('Previous Google Sign-In session cleared');
-      } catch (error) {
-        // It's OK if there was no previous session
-        console.log('No previous Google session to clear');
-      }
-      
-      // 3. Trigger Google Sign-In
-      console.log('Starting Google Sign-In...');
-      const userInfo = await GoogleSignin.signIn();
-      console.log('Google Sign-In successful, user info:', {
-        email: userInfo.user.email,
-        id: userInfo.user.id,
-        name: userInfo.user.name
-      });
-      
-      // 4. Get the authentication token
-      const tokens = await GoogleSignin.getTokens();
-      if (!tokens.idToken) {
-        throw new Error('Failed to get ID token from Google Sign-In');
-      }
-      console.log('Google ID token acquired');
-      
-      // 5. Verify token with backend
-      const authResponse = await verifyGoogleToken(tokens.idToken, userInfo.user.email);
-      
-      // 6. Store auth data and navigate to home
-      await saveAuthData(authResponse.token, authResponse.data);
-      
-      console.log('Authentication successful, navigating to home');
-      navigation.dispatch(
-        CommonActions.reset({
-          index: 0,
-          routes: [{ 
-            name: 'TabNavigator',
-            state: {
-              routes: [{ name: 'Home' }],
-              index: 0
-            }
-          }],
-        })
-      );
     } catch (error) {
-      handleGoogleSignInError(error);
-    } finally {
-      setIsLoading(false);
+      console.error('Camera permission error:', error);
+      showAlert('Error', 'Failed to request camera permission');
     }
   };
 
-  /**
-   * Sends the Google ID token to the backend for verification
-   */
-  const verifyGoogleToken = async (idToken, email) => {
-    try {
-      console.log('Verifying token with backend...');
-      
-      // Try the loginByGoogle endpoint
-      try {
-        const response = await axios.post('https://api.ezpick.co/parents/loginByGoogle', {
-          token: idToken,
-          email: email
-        });
-        
-        if (response.status === 200 && response.data) {
-          console.log('Token verified successfully with loginByGoogle');
-          return response.data;
-        }
-      } catch (googleLoginError) {
-        console.log('loginByGoogle endpoint failed, trying verifyToken');
-        // If the first endpoint fails, try the verifyToken endpoint
-        const response = await axios.post('https://api.ezpick.co/parents/verifyToken', {
-          token: idToken,
-          provider: 'google'
-        });
-        
-        if (response.status === 200 && response.data) {
-          console.log('Token verified successfully with verifyToken');
-          return response.data;
-        }
-      }
-      
-      throw new Error('Failed to verify token with backend');
-    } catch (error) {
-      console.error('Token verification error:', error);
-      throw error;
-    }
-  };
-
-  /**
-   * Stores authentication data both in AsyncStorage and Redux
-   */
-  const saveAuthData = async (token, userData) => {
-    try {
-      // 1. Save to AsyncStorage for persistence
-      await AsyncStorage.setItem('api_token', token);
-      await AsyncStorage.setItem('user_id', userData.id.toString());
-      await AsyncStorage.setItem('social_login', 'google');
-      
-      // 2. Setup axios default authorization header for future requests
-      axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-      
-      // 3. Save to Redux for app state
-      dispatch(SET_TOKEN(token));
-      dispatch(SET_loginData(userData));
-      
-      console.log('Auth data saved successfully');
-    } catch (error) {
-      console.error('Error saving auth data:', error);
-      throw new Error('Failed to save authentication data');
-    }
-  };
-
-  /**
-   * Handles Google Sign-In errors with appropriate user feedback
-   */
-  const handleGoogleSignInError = (error) => {
-    let message = 'Failed to login with Google';
-    
-    console.error('Google Sign-In Error Details:', {
-      code: error.code,
-      message: error.message,
-      fullError: error
-    });
-    
-    if (error.code === statusCodes.SIGN_IN_CANCELLED) {
-      console.log('User cancelled Google Sign-In');
-      return; // Don't show error alert for user cancellation
-    } else if (error.code === statusCodes.IN_PROGRESS) {
-      message = 'Google Sign-In is already in progress';
-    } else if (error.code === statusCodes.PLAY_SERVICES_NOT_AVAILABLE) {
-      message = 'Google Play Services are not available on this device';
-    } else if (error.code === '12500') {
-      message = 'Google Sign-In configuration error. This usually means:\n\n' +
-                '1. OAuth client ID is not properly configured\n' +
-                '2. SHA-1 fingerprint might not be registered correctly\n' +
-                '3. Google Cloud Console configuration needs to be updated';
-      
-      // Additional debug info for non-recoverable error
-      if (__DEV__) {
-        console.log('Debug info for NON_RECOVERABLE_ERROR:');
-        console.log('1. Verify in Google Cloud Console:');
-        console.log('   - Project ID: ezpick-v2');
-        console.log('   - OAuth client type: Android');
-        console.log('   - Package name: com.ezpick');
-        console.log('   - SHA-1: EF:16:48:5C:79:9E:63:9B:8C:91:A8:7C:AF:43:A0:E9:2B:27:62:5E');
-        console.log('2. Check Firebase Console:');
-        console.log('   - SHA-1 is added to the Android app');
-        console.log('   - google-services.json is up to date');
-        console.log('3. Verify Google Play Services:');
-        console.log('   - App is up to date');
-        console.log('   - Device has valid Google Account');
-      }
-    } else if (error.code === statusCodes.DEVELOPER_ERROR) {
-      message = 'Google Sign-In configuration error. Please check:\n1. SHA-1 fingerprint in Firebase Console\n2. WebClientID is correct\n3. Package name matches Firebase console';
-    } else if (error.code === 7) { // NETWORK_ERROR
-      message = 'Network error during Google Sign-In. Please check your internet connection and try again.';
-    } else if (error.message && error.message.includes('token')) {
-      message = 'Authentication failed. Please try again or use email login.';
-    } else if (error.response) {
-      message = error.response.data?.message || 'Server error during authentication';
-      if (error.response.status === 404 && error.response.data?.email) {
-        setGoogleEmail(error.response.data.email);
-        message = 'Account not found. Please enter your password to login.';
-      }
-    }
-    
-    console.error('Google Sign-In Error:', message, error);
-    Alert.alert('Authentication Error', message);
-  };
-  
   const renderQRScanner = () => {
     if (!showScanner) return null;
     
@@ -551,7 +501,7 @@ const Login = ({navigation}) => {
                   setShowScanner(false);
                   handleLogin({ username, password });
                 } else {
-                  Alert.alert('Invalid QR Code', 'The QR code format is invalid. Expected format: username:password');
+                  showAlert('Invalid QR Code', 'The QR code format is invalid. Expected format: username:password');
                 }
               }
             },
@@ -580,134 +530,143 @@ const Login = ({navigation}) => {
   );
 
   return (
-    <View style={styles.container}>
-      {showScanner ? (
-        renderQRScanner()
-      ) : (
-        <>
-          <CustomToggleButton
-            onToggle={language => console.log('Selected Language:', language)}
-            customStyle={{width: width * 0.4, alignSelf: 'flex-end'}}
-          />
-          <View style={[styles.viewContainer, {width: width * 0.9}]}>
-            <Heading
-              boxStyle={styles.heading}
-              textstyle={styles.headingText}
-              title="Welcome to EZpick"
+    <>
+      <View style={styles.container}>
+        {showScanner ? (
+          renderQRScanner()
+        ) : (
+          <>
+            <CustomToggleButton
+              onToggle={language => console.log('Selected Language:', language)}
+              customStyle={{width: width * 0.4, alignSelf: 'flex-end'}}
             />
-            <SubHeading
-              text="Lorem ipsum dolor sit amet consectetur. Elit malesuada massa sit sagittis."
-              boxStyle={styles.heading}
-              style={styles.subHeading}
-            />
+            <View style={[styles.viewContainer, {width: width * 0.9}]}>
+              <Heading
+                boxStyle={styles.heading}
+                textstyle={styles.headingText}
+                title="Welcome to EZpick"
+              />
+              <SubHeading
+                text="Lorem ipsum dolor sit amet consectetur. Elit malesuada massa sit sagittis."
+                boxStyle={styles.heading}
+                style={styles.subHeading}
+              />
 
-            {/* Formik Form */}
-            <Formik
-               initialValues={{username: googleEmail || '', password: ''}}
-               enableReinitialize={true}
-               onSubmit={handleLogin}
-               validationSchema={validationSchema}
-               validateOnBlur={true}
-               validateOnChange={true}
-               innerRef={formikRef}>
-               {({
-                 values,
-                 handleChange,
-                 handleBlur,
-                 handleSubmit,
-                 errors,
-                 touched,
-                 isSubmitting,
-               }) => (
-                <>
-                  <InputField
-                    label="Username"
-                    placeholder="Enter your username"
-                    placeholderColor="#6C757D"
-                    value={values.username}
-                    onChangeText={handleChange('username')}
-                    onBlur={handleBlur('username')}
-                    style={inputFieldStyle}
-                    keyboardType="email-address"
-                    secureTextEntry={false}
-                    multiline={false}
-                    editable={!googleEmail} // Disable when email is set from Google
-                  />
-                  {touched.username && errors.username && (
-                    <Text style={styles.errorText}>{errors.username}</Text>
-                  )}
+              {/* Formik Form */}
+              <Formik
+                 initialValues={{username: googleEmail || '', password: ''}}
+                 enableReinitialize={true}
+                 onSubmit={handleLogin}
+                 validationSchema={validationSchema}
+                 validateOnBlur={true}
+                 validateOnChange={true}
+                 innerRef={formikRef}>
+                 {({
+                   values,
+                   handleChange,
+                   handleBlur,
+                   handleSubmit,
+                   errors,
+                   touched,
+                   isSubmitting,
+                 }) => (
+                  <>
+                    <InputField
+                      label="Username"
+                      placeholder="Enter your username"
+                      placeholderColor="#6C757D"
+                      value={values.username}
+                      onChangeText={handleChange('username')}
+                      onBlur={handleBlur('username')}
+                      style={inputFieldStyle}
+                      keyboardType="email-address"
+                      secureTextEntry={false}
+                      multiline={false}
+                      editable={!googleEmail} // Disable when email is set from Google
+                    />
+                    {touched.username && errors.username && (
+                      <Text style={styles.errorText}>{errors.username}</Text>
+                    )}
 
-                  <InputField
-                    label="Password"
-                    placeholder=""
-                    placeholderColor="#6C757D"
-                    value={values.password}
-                    onChangeText={handleChange('password')}
-                    onBlur={handleBlur('password')}
-                    style={inputFieldStyle}
-                    keyboardType="password"
-                    secureTextEntry={true}
-                    multiline={false}
-                  />
-                  {touched.password && errors.password && (
-                    <Text style={styles.errorText}>{errors.password}</Text>
-                  )}
-                  {errors.general && (
-                    <View style={styles.generalErrorContainer}>
-                      <Text style={styles.generalErrorText}>{errors.general}</Text>
+                    <InputField
+                      label="Password"
+                      placeholder=""
+                      placeholderColor="#6C757D"
+                      value={values.password}
+                      onChangeText={handleChange('password')}
+                      onBlur={handleBlur('password')}
+                      style={inputFieldStyle}
+                      keyboardType="password"
+                      secureTextEntry={true}
+                      multiline={false}
+                    />
+                    {touched.password && errors.password && (
+                      <Text style={styles.errorText}>{errors.password}</Text>
+                    )}
+                    {errors.general && (
+                      <View style={styles.generalErrorContainer}>
+                        <Text style={styles.generalErrorText}>{errors.general}</Text>
+                      </View>
+                    )}
+                    <CustomLink
+                      label="Forget Password?"
+                      onPress={() => {
+                        navigation.navigate('Forget_Password');
+                      }}
+                      style={styles.linkStyle}
+                    />
+                    <CustomButton
+                      title={'Login'}
+                      onPress={handleSubmit}
+                      touchStyle={{width: width * 0.9, height: height * 0.065}}
+                      disabled={isLoading}
+                    />
+                    <SubHeading
+                      text="Or Login with"
+                      style={styles.orText}
+                      boxStyle={styles.orBox}
+                    />
+                    {/* Social Buttons Below Login */}
+                    <View style={styles.socialButtonsContainer}>
+                      <SocialButton
+                        icon={<AppleIcon />}
+                        title="Continue with Apple"
+                        onPress={() => console.log('Apple Pressed')}
+                      />
+                      <SocialButton
+                        icon={<GoogleIcon />}
+                        title="Continue with Google"
+                        onPress={signInWithGoogle}
+                        disabled={isLoading}
+                      />
+                      <SocialButton
+                        icon={<OutlookIcon />}
+                        title="Continue with Outlook"
+                        onPress={() => showAlert('Outlook Login', 'This feature is currently unavailable.')}
+                        disabled={isLoading}
+                      />
+                      <SocialButton
+                        icon={<QRIcon />}
+                        title="Scan QR code"
+                        onPress={handleScanQR}
+                        containerStyle={{marginTop: 30, backgroundColor: '#F8F8F9'}}
+                      />
                     </View>
-                  )}
-                  <CustomLink
-                    label="Forget Password?"
-                    onPress={() => {
-                      navigation.navigate('Forget_Password');
-                    }}
-                    style={styles.linkStyle}
-                  />
-                  <CustomButton
-                    title={'Login'}
-                    onPress={handleSubmit}
-                    touchStyle={{width: width * 0.9, height: height * 0.065}}
-                    disabled={isLoading}
-                  />
-                  <SubHeading
-                    text="Or Login with"
-                    style={styles.orText}
-                    boxStyle={styles.orBox}
-                  />
-                  {/* Social Buttons Below Login */}
-                  <View style={styles.socialButtonsContainer}>
-                    <SocialButton
-                      icon={<AppleIcon />}
-                      title="Continue with Apple"
-                      onPress={() => console.log('Apple Pressed')}
-                    />
-                    <SocialButton
-                      icon={<GoogleIcon />}
-                      title="Continue with Google"
-                      onPress={handleGoogleSignIn}
-                      disabled={isLoading}
-                    />
-                    <SocialButton
-                      icon={<OutlookIcon />}
-                      title="Continue with Outlook"
-                      onPress={() => Alert.alert('Outlook Login', 'This feature is currently unavailable.')}
-                      disabled={isLoading}
-                    />
-                    <SocialButton
-                      icon={<QRIcon />}
-                      title="Scan QR code"
-                      onPress={handleScanQR}
-                      containerStyle={{marginTop: 30, backgroundColor: '#F8F8F9'}}
-                    />
-                  </View>
-                </>
-              )}
-            </Formik>
-          </View>
-        </>
-      )}
-    </View>
+                  </>
+                )}
+              </Formik>
+            </View>
+          </>
+        )}
+      </View>
+      <CustomAlert
+        visible={alertConfig.visible}
+        title={alertConfig.title}
+        message={alertConfig.message}
+        type={alertConfig.type}
+        onPress={alertConfig.onPress}
+      />
+    </>
   );
 };
 

@@ -3,6 +3,7 @@ import {Modal, View, Image, StyleSheet} from 'react-native';
 import CustomButton from './CustomButton';
 import Heading from './Heading';
 import SubHeading from './SubHeading';
+import Icon from 'react-native-vector-icons/Ionicons';
 
 const CustomAlert = ({
   visible,
@@ -12,29 +13,112 @@ const CustomAlert = ({
   buttonText,
   image,
   svg = null,
-  style = {}
+  style = {},
+  title,
+  type = 'success',
+  onPress,
 }) => {
+  const getIconConfig = () => {
+    switch (type) {
+      case 'success':
+        return {
+          name: 'checkmark-circle',
+          color: '#4CAF50',
+          defaultButtonText: 'Ok, Got it',
+        };
+      case 'error':
+        return {
+          name: 'close-circle',
+          color: '#F44336',
+          defaultButtonText: 'Close',
+        };
+      case 'warning':
+        return {
+          name: 'warning',
+          color: '#FFC107',
+          defaultButtonText: 'I Understand',
+        };
+      case 'info':
+        return {
+          name: 'information-circle',
+          color: '#2196F3',
+          defaultButtonText: 'Ok',
+        };
+      default:
+        return {
+          name: 'checkmark-circle',
+          color: '#F8AC16',
+          defaultButtonText: 'Ok, Got it',
+        };
+    }
+  };
+
+  const { name: iconName, color: iconColor, defaultButtonText } = getIconConfig();
+  const finalButtonText = buttonText || defaultButtonText;
+  const finalTitle = title || label;
+  const handlePress = onPress || onClose;
+
+  const isEnhancedAlert = title !== undefined || type !== 'success';
+
+  const renderIcon = () => {
+    try {
+      return (
+        <View style={[styles.iconContainer, { backgroundColor: `${iconColor}15` }]}>
+          <Icon
+            name={iconName}
+            size={50}
+            color={iconColor}
+          />
+        </View>
+      );
+    } catch (error) {
+      console.warn('Error rendering icon:', error);
+      return null;
+    }
+  };
+
   return (
     <Modal
       animationType="fade"
       transparent={true}
       visible={visible}
-      onRequestClose={onClose}>
+      onRequestClose={handlePress}>
       <View style={styles.overlay}>
         <View style={[styles.modalContainer, style?.alert]}>
-          {svg}
-          {image == 'noImage' ? null : (
-            <Image
-              source={require('../assets/pics/EmailPic.png')}
-              style={styles.image}
-            />
+          {isEnhancedAlert ? (
+            renderIcon()
+          ) : (
+            <>
+              {svg}
+              {image !== 'noImage' && (
+                <Image
+                  source={require('../assets/pics/EmailPic.png')}
+                  style={styles.image}
+                />
+              )}
+            </>
           )}
-          <Heading title={label} textstyle={styles.title} />
-          <SubHeading text={message} style={styles.message} />
+          <Heading 
+            title={finalTitle} 
+            textstyle={[
+              styles.title,
+              isEnhancedAlert && styles.enhancedTitle
+            ]} 
+          />
+          <SubHeading 
+            text={message} 
+            style={[
+              styles.message,
+              isEnhancedAlert && styles.enhancedMessage
+            ]} 
+          />
           <CustomButton
-            title={buttonText}
-            onPress={onClose}
-            touchStyle={[styles.button, style?.button]}
+            title={finalButtonText}
+            onPress={handlePress}
+            touchStyle={[
+              styles.button,
+              style?.button
+            ]}
             textStyle={styles.buttonText}
           />
         </View>
@@ -64,6 +148,14 @@ const styles = StyleSheet.create({
     height: 70,
     marginBottom: 20,
   },
+  iconContainer: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 20,
+  },
   title: {
     fontFamily: 'Outfit',
     fontSize: 16,
@@ -71,20 +163,29 @@ const styles = StyleSheet.create({
     color: '#3C3B43',
     marginBottom: 5,
   },
+  enhancedTitle: {
+    fontSize: 20,
+    marginBottom: 10,
+    color: '#333',
+  },
   message: {
     fontSize: 14,
     color: '#6C757D',
     textAlign: 'center',
     marginBottom: 20,
   },
+  enhancedMessage: {
+    fontSize: 16,
+    lineHeight: 22,
+  },
   button: {
-    backgroundColor: '#F8AC16',
     paddingVertical: 18,
     paddingHorizontal: 20,
-    borderRadius: 5,
+    borderRadius: 25,
     alignItems: 'center',
     width: '100%',
     marginBottom: 10,
+    elevation: 2,
   },
   buttonText: {
     color: '#FFFFFF',
